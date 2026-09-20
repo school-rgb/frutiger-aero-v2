@@ -691,7 +691,8 @@ body.app-fullscreen-mode #zoneFrame {
             <span>Fruits</span>
         </div>
     </div>
-<script>
+
+    <script>
 const container = document.getElementById('container');
 const zoneViewer = document.getElementById('zoneViewer');
 let zoneFrame = document.getElementById('zoneFrame');
@@ -779,17 +780,32 @@ window.addEventListener('load', async () => {
     const progressFill = document.getElementById('progress-fill');
     if (progressFill) progressFill.style.width = '100%';
     
-    // Load zones first so query parameters can find the game if opened via direct link/shortcut
-    await listZones();
-
-    // Check if URL has a game ID parameter to auto-open it
     const urlParams = new URLSearchParams(window.location.search);
     const gameId = urlParams.get('id');
+
     if (gameId) {
-        const foundZone = zones.find(z => z.id + '' === gameId);
+        // Try GN Math first
+        currentLibrary = 'gn-math';
+        await listZones();
+        let foundZone = zones.find(z => z.id + '' === gameId);
+
+        if (!foundZone) {
+            // If not found in GN Math, automatically check Fruits library
+            currentLibrary = 'fruits';
+            document.getElementById('navGnMath').classList.remove('active');
+            document.getElementById('navFruits').classList.add('active');
+            document.getElementById('libraryHeading').textContent = 'Fruits Library';
+            await listZones();
+            foundZone = zones.find(z => z.id + '' === gameId);
+        }
+
         if (foundZone) {
+            // Enter immersive standalone mode: hide header, nav, controls, and show full-screen game only
+            document.body.classList.add('app-fullscreen-mode');
             openZone(foundZone);
         }
+    } else {
+        await listZones();
     }
 
     setTimeout(() => {
@@ -1136,7 +1152,6 @@ function openZone(file) {
         document.getElementById('zoneAuthor').href = file.authorLink;
     }
     
-    // Display the zone viewer properly (Removed the rogue hidden = true line)
     zoneViewer.style.display = "flex";
     
     try {
@@ -1180,6 +1195,7 @@ function closeZone() {
         activePlayTimer = null;
         activeZoneId = null;
     }
+    document.body.classList.remove('app-fullscreen-mode');
     zoneViewer.style.display = "none";
     if (zoneFrame && zoneViewer.contains(zoneFrame)) {
         zoneViewer.removeChild(zoneFrame);
