@@ -691,8 +691,7 @@ body.app-fullscreen-mode #zoneFrame {
             <span>Fruits</span>
         </div>
     </div>
-
-    <script>
+<script>
 const container = document.getElementById('container');
 const zoneViewer = document.getElementById('zoneViewer');
 let zoneFrame = document.getElementById('zoneFrame');
@@ -776,10 +775,23 @@ document.addEventListener('DOMContentLoaded', () => {
     simulateAssetLoading();
 });
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
     const progressFill = document.getElementById('progress-fill');
     if (progressFill) progressFill.style.width = '100%';
     
+    // Load zones first so query parameters can find the game if opened via direct link/shortcut
+    await listZones();
+
+    // Check if URL has a game ID parameter to auto-open it
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get('id');
+    if (gameId) {
+        const foundZone = zones.find(z => z.id + '' === gameId);
+        if (foundZone) {
+            openZone(foundZone);
+        }
+    }
+
     setTimeout(() => {
         const splash = document.getElementById('appSplash');
         if (splash) {
@@ -1057,14 +1069,13 @@ function openZone(file) {
     let activeHtmlURL = (currentLibrary === 'fruits') ? fruitsHtmlURL : htmlURL;
 
     // Ensure iframe exists
-    if (zoneFrame.contentDocument === null) {
+    if (!zoneFrame || zoneFrame.contentDocument === null) {
         zoneFrame = document.createElement("iframe");
         zoneFrame.id = "zoneFrame";
         zoneViewer.appendChild(zoneFrame);
     }
 
     if (file.url.startsWith("http")) {
-        // Load external URL directly inside the iframe viewer instead of a new tab
         zoneFrame.src = file.url;
     } else {
         const url = file.url.replace("{COVER_URL}", activeCoverURL).replace("{HTML_URL}", activeHtmlURL);
@@ -1124,13 +1135,15 @@ function openZone(file) {
     if (file.authorLink) {
         document.getElementById('zoneAuthor').href = file.authorLink;
     }
-    zoneViewer.style.display = "block";
+    
+    // Display the zone viewer properly (Removed the rogue hidden = true line)
+    zoneViewer.style.display = "flex";
+    
     try {
         const historyUrl = new URL(window.location);
         historyUrl.searchParams.set('id', file.id);
         history.pushState(null, '', historyUrl.toString());
     } catch(error){}
-    zoneViewer.hidden = true;
 }
 
 function aboutBlank() {
@@ -1167,9 +1180,10 @@ function closeZone() {
         activePlayTimer = null;
         activeZoneId = null;
     }
-    zoneViewer.hidden = false;
     zoneViewer.style.display = "none";
-    zoneViewer.removeChild(zoneFrame);
+    if (zoneFrame && zoneViewer.contains(zoneFrame)) {
+        zoneViewer.removeChild(zoneFrame);
+    }
     try {
         const url = new URL(window.location);
         url.searchParams.delete('id');
@@ -1201,8 +1215,6 @@ function fullscreenZone() {
         zoneFrame.msRequestFullscreen();
     }
 }
-
-listZones();
 
 HTMLCanvasElement.prototype.toDataURL = function (...args) {
     return "";
