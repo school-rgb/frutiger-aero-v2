@@ -1,634 +1,1145 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Fruitiger Game Hub (Monochrome Edition)</title>
-<meta name="theme-color" content="#000000">
-<style>
-/* -------------------------------------------------------------
-   CUSTOM OTF FONT CONFIGURATION
-   Replace 'YOUR_FONT_FILE.otf' below with your OTF file URL or path.
-------------------------------------------------------------- */
-@font-face {
-  font-family: 'CustomOTFFont';
-  src: url('APPFONT/bitshow.regular.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+    <head>
+        <base href="https://cdn.jsdelivr.net/gh/freebuisness/gn-math-DONTDMCA@main/">
+
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <script>
+        window.addEventListener('beforeunload', function (event) {
+            event.preventDefault();
+            event.returnValue = '';
+            return 'Are you sure you want to leave? Any unsaved changes will be lost.';
+        });
+    </script>
+    <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-WX5VS54ZDW"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+        gtag('config', 'G-WX5VS54ZDW');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>frutiger</title>
+    <meta name="title" content="frutiger">
+    <meta name="description" content="Play unbl*cked games like Crazy Cattle 3D and DriveMad on frutiger. Fast, free, no downloads—perfect for school or home.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gn-math.github.io/">
+    <meta property="og:title" content="frutiger">
+    <meta property="og:description" content="Play unbl*cked games like Crazy Cattle 3D and DriveMad on frutiger. Fast, free, no downloads—perfect for school or home.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://gn-math.github.io/">
+    <meta name="twitter:title" content="frutiger">
+    <meta name="twitter:description" content="Play unbl*cked games like Crazy Cattle 3D and DriveMad on frutiger. Fast, free, no downloads—perfect for school or home.">
+    <style>
+        :root {
+    --primary: #fc2651;
+    --primary-hover: #e91e47;
+    --primary-light: rgba(252, 38, 81, 0.1);
+    --primary-lighter: rgba(252, 38, 81, 0.05);
+    --accent: #8b5cf6;
+    --accent-light: rgba(139, 92, 246, 0.1);
+    --success: #10b981;
+    --warning: #f59e0b;
+    --text: #1a1a1a;
+    --text-muted: #6b7280;
+    --text-light: #9ca3af;
+    --bg: #ffffff;
+    --bg-secondary: #f8fafc;
+    --surface: #ffffff;
+    --surface-hover: #f1f5f9;
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    --glass: rgba(255, 255, 255, 0.8);
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-glow: 0 0 20px rgba(252, 38, 81, 0.3);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --gradient-primary: linear-gradient(135deg, #fc2651 0%, #e91e47 100%);
+    --gradient-accent: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    --gradient-surface: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
 }
 
-:root {
-  --bg-main: #000000;
-  --bg-sidebar: #080808;
-  --bg-card: #0f0f0f;
-  --bg-hover: #171717;
-  --border-line: #222222;
-  --text-white: #ffffff;
-  --text-gray: #8e8e93;
-  --text-dark-gray: #48484a;
+.dark-mode {
+    --primary: #fc2651;
+    --primary-hover: #ff4d75;
+    --primary-light: rgba(252, 38, 81, 0.15);
+    --primary-lighter: rgba(252, 38, 81, 0.08);
+    --accent: #a855f7;
+    --accent-light: rgba(168, 85, 247, 0.15);
+    --success: #34d399;
+    --warning: #fbbf24;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-light: #64748b;
+    --bg: #000000;
+    --bg-secondary: #000000;
+    --surface: #121212;
+    --surface-hover: #1e1e1e;
+    --border: #222222;
+    --border-light: #333333;
+    --glass: rgba(18, 18, 18, 0.8);
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.6);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.7), 0 8px 10px -6px rgb(0 0 0 / 0.7);
+    --shadow-glow: 0 0 20px rgba(252, 38, 81, 0.4);
+    --gradient-primary: linear-gradient(135deg, #000000 0%, #000000 100%);
+    --gradient-accent: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+    --gradient-surface: linear-gradient(135deg, #161616 0%, #161616 100%);
 }
 
-/* Universal selector forces the OTF font onto every element */
-*, *::before, *::after, input, button, textarea, select { 
-  margin: 0; 
-  padding: 0; 
-  box-sizing: border-box; 
-  -webkit-tap-highlight-color: transparent;
-  font-family: 'CustomOTFFont', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+* {
+    box-sizing: border-box;
 }
 
-html, body { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-main); color: var(--text-white); }
-
-.app-container { display: flex; width: 100vw; height: 100vh; height: 100dvh; }
-
-/* --- Sidebar --- */
-.sidebar {
-  width: 220px;
-  background-color: var(--bg-sidebar);
-  border-right: 1px solid var(--border-line);
-  display: flex;
-  flex-direction: column;
-  padding: 20px 14px;
-  flex-shrink: 0;
-  z-index: 10;
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 8px 20px 8px;
-  border-bottom: 1px solid var(--border-line);
-  margin-bottom: 20px;
-  cursor: pointer;
+/* Custom Inverted Loading Screen */
+#appSplash {
+    position: fixed;
+    inset: 0;
+    background-color: #000000;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s ease;
+    font-family: 'Courier New', Courier, monospace;
 }
 
-.brand-logo {
-  width: 32px;
-  height: 32px;
-  background: #ffffff;
-  color: #000000;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 1.1rem;
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0px); }
 }
 
-.brand-title { font-size: 1.1rem; font-weight: 800; letter-spacing: 1.5px; color: #fff; }
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
 
-.nav-menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.pixelated-inverted {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    filter: invert(100%);
+}
+
+.mc-bar-container {
+    border: 2px solid #555555;
+    background-color: #222222;
+    padding: 2px;
+    box-sizing: border-box;
+    width: 75%;
+    max-width: 400px;
+    height: 16px;
+    margin-top: 2rem;
+}
+
+.mc-bar-fill {
+    height: 100%;
+    background-color: #ffffff;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+header {
+    background: #000000;
+    color: white;
+    position: relative;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+    padding-top: 3.5rem; /* Space for the fixed logo banner */
+}
+
+.header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Logo banner is now fixed to follow the user down everywhere */
+.logo-banner {
+    background: #1c1c1e;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e5e5ea;
+    border: 1px solid #3a3a3c;
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.logo-banner img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.search-container {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+#searchBar {
+    flex: 1;
+    padding: 0.875rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #1c1c1e;
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+#searchBar:focus {
+    border-color: #555;
+}
+
+#searchBar::placeholder {
+    color: #8e8e93;
+}
+
+#sortOptions, #filterOptions {
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #1c1c1e;
+    color: #8e8e93;
+    font-size: 15px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 6rem 1.5rem;
+}
+
+.library-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 1.25rem 0;
+    color: #ffffff;
+}
+
+#container,
+#featuredZones {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.75rem;
+}
+
+.zone-item {
+    background: #161618;
+    border: 1px solid #26262a;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    aspect-ratio: 3 / 4;
+    padding: 0.5rem;
+    justify-content: flex-end;
+    background-size: cover;
+    background-position: center;
+}
+
+.zone-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.95) 100%);
+    z-index: 1;
+}
+
+.zone-item:hover {
+    transform: translateY(-4px);
+    border-color: #555;
+}
+
+.zone-icon-box {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #222;
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.zone-icon-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.zone-poster-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.zone-item .zone-name {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    line-height: 1.1;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.zone-item .zone-team {
+    color: #9ca3af;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.zone-item .zone-time {
+    color: #d1d5db;
+    font-size: 9.5px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 2px;
+}
+
+#zoneViewer {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+}
+
+.zone-header {
+    background: #111;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+}
+
+.zone-title {
+    flex: 1;
+    min-width: 0;
+}
+
+#zoneName {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+#zoneAuthor {
+    font-size: 12px;
+    color: #8e8e93;
+    text-decoration: none;
+}
+
+.zone-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.zone-controls button {
+    background: #26262a;
+    border: none;
+    color: white;
+    padding: 0.5rem 0.8rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.zone-controls button:hover {
+    background: #3a3a3c;
+}
+
+#zoneFrame {
+    flex-grow: 1;
+    border: none;
+    width: 100%;
+    height: 100%;
+}
+
+#popupOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 1rem;
+}
+
+.popup {
+    background: #1c1c1e;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #3a3a3c;
+}
+
+.popup-header {
+    background: #2c2c2e;
+    color: white;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#popupTitle {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+#popupClose {
+    background: transparent;
+    border: 0;
+    color: #8e8e93;
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+#popupBody {
+    padding: 1.25rem;
+    color: var(--text);
+}
+
+#popupBody input[type="text"],
+#popupBody input[type="file"] {
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    border: 1px solid #3a3a3c;
+    border-radius: var(--radius-sm);
+    background: #111;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+}
+
+.info-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #8e8e93;
+    display: inline-flex;
+    vertical-align: middle;
+}
+
+.info-button:hover {
+    color: white;
+}
+
+.bottom-nav-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 55px;
+    background: #000000;
+    border-top: 1px solid #222;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 101;
+}
+
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  color: var(--text-gray);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.nav-item:hover, .nav-item.active { background: var(--bg-hover); color: #fff; }
-.nav-item.active { border-left: 3px solid #ffffff; }
-
-/* --- Main Section --- */
-.main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-
-.header {
-  height: 60px;
-  padding: 0 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border-line);
-  background: #000000;
+    color: #8e8e93;
+    font-size: 11px;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
 }
 
-.search-input {
-  width: 320px;
-  padding: 9px 16px;
-  background-color: #0d0d0d;
-  border: 1px solid var(--border-line);
-  border-radius: 20px;
-  color: #fff;
-  font-size: 0.88rem;
-  outline: none;
-}
-.search-input:focus { border-color: #ffffff; }
-
-.content-area { flex: 1; padding: 20px 30px; overflow-y: auto; }
-
-.section-label {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-gray);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 16px;
+.nav-item.active {
+    color: #ffffff;
 }
 
-/* --- List Items with Rectangular Image Frames --- */
-.game-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.nav-item svg {
+    width: 20px;
+    height: 20px;
 }
-
-.list-item {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
-  border: 1px solid transparent;
-}
-
-.list-item:hover {
-  background: var(--bg-hover);
-  border-color: var(--border-line);
-}
-
-.list-thumb-wrapper {
-  width: 120px;
-  height: 68px;
-  border-radius: 6px;
-  overflow: hidden;
-  background-color: #121212;
-  flex-shrink: 0;
-  border: 1px solid var(--border-line);
-}
-
-.list-thumb {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.list-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.list-title {
-  font-size: 0.98rem;
-  font-weight: 700;
-  color: #ffffff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 3px;
-}
-
-.list-desc {
-  font-size: 0.82rem;
-  color: var(--text-gray);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.add-btn-item {
-  border: 1px dashed var(--border-line);
-  margin-top: 10px;
-  justify-content: center;
-}
-.add-btn-item:hover { border-color: #fff; background: var(--bg-hover); }
-
-/* --- GAME MENU --- */
-#detailView {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background-color: #000000;
-  z-index: 500;
-  flex-direction: column;
-}
-
-.close-btn {
-  position: absolute;
-  top: 24px;
-  right: 28px;
-  width: 40px;
-  height: 40px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid var(--border-line);
-  border-radius: 50%;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
-}
-.close-btn:hover { background: #ffffff; color: #000000; transform: scale(1.05); }
-
-.detail-top-half {
-  height: 75vh;
-  width: 100%;
-  position: relative;
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: flex-end;
-  border-bottom: 1px solid var(--border-line);
-}
-
-.detail-fade-overlay {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(0deg, #000000 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
-}
-
-.detail-title-bottom-left {
-  position: relative;
-  z-index: 5;
-  padding: 0 0 35px 45px;
-  font-size: 3.8rem;
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: -1.5px;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.9);
-}
-
-.detail-bottom-half {
-  height: 25vh;
-  width: 100%;
-  background: #000000;
-  padding: 0 45px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.action-buttons-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.steam-play-btn {
-  background: #ffffff;
-  color: #000000;
-  border: none;
-  padding: 18px 60px;
-  border-radius: 8px;
-  font-size: 1.2rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: transform 0.15s, background-color 0.15s, box-shadow 0.15s;
-}
-.steam-play-btn:hover { transform: translateY(-2px); background-color: #e4e4e7; box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2); }
-
-.steam-install-btn {
-  background: #121212;
-  color: #ffffff;
-  border: 1px solid var(--border-line);
-  padding: 18px 42px;
-  border-radius: 8px;
-  font-size: 1.05rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.steam-install-btn:hover { background: #1c1c1e; border-color: #444444; transform: translateY(-2px); }
-
-/* Game Player Frame */
-#gamePlayerView {
-  display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: #000; z-index: 1000; flex-direction: column;
-}
-.player-header { height: 48px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border-line); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-.player-title { font-weight: 700; font-size: 0.9rem; color: #fff; }
-.action-btn { background: #171717; color: #fff; border: 1px solid var(--border-line); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
-.action-btn:hover { background: #ffffff; color: #000000; }
-.player-iframe-container { flex: 1; width: 100%; height: calc(100% - 48px); }
-.player-iframe-container iframe { width: 100%; height: 100%; border: 0; }
-
-/* Add Modal */
-.add-modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); justify-content: center; align-items: center; }
-.add-modal-content { background: var(--bg-card); padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid var(--border-line); }
-.form-group { margin-bottom: 14px; }
-.form-input { width: 100%; padding: 10px 14px; background: #080808; border: 1px solid var(--border-line); border-radius: 6px; color: #fff; outline: none; font-size: 0.9rem; }
-.form-input:focus { border-color: #ffffff; }
-.btn-submit { width: 100%; padding: 12px; background: #ffffff; color: #000000; border: none; border-radius: 6px; font-weight: 800; cursor: pointer; }
-
-@media (max-width: 768px) {
-  .sidebar { width: 60px; padding: 15px 8px; }
-  .brand-title, .nav-text { display: none; }
-  .detail-top-half { height: 65vh; }
-  .detail-bottom-half { height: 35vh; padding: 0 20px; }
-  .detail-title-bottom-left { font-size: 2.4rem; padding: 0 0 20px 20px; }
-}
-</style>
+    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
 </head>
-<body>
+<body class="dark-mode">
 
-<div class="app-container">
-  <aside class="sidebar">
-    <div class="brand" onclick="returnHome()">
-      <div class="brand-logo">G</div>
-      <div class="brand-title">FRUITIGER</div>
+    <!-- Custom Inverted Loading Splash Screen -->
+    <div id="appSplash">
+        <div class="mb-4 flex flex-col items-center justify-center">
+            <img id="floating-image" 
+                 class="w-24 h-24 object-contain animate-float pixelated-inverted" 
+                 src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM.png?raw=true" 
+                 alt="Custom Inverted Loading Graphic" 
+                 onerror="this.src='https://placehold.co/200x200/111111/ffffff?text=Image+Load+Error';" />
+        </div>
+        <div class="mc-bar-container">
+            <div id="progress-fill" class="mc-bar-fill"></div>
+        </div>
     </div>
-    <nav class="nav-menu">
-      <div class="nav-item active"><span class="nav-text">Library</span></div>
-      <div class="nav-item" onclick="openAddModal()"><span class="nav-text">Add Game</span></div>
-    </nav>
-  </aside>
 
-  <div class="main-wrapper">
-    <header class="header">
-      <input type="text" id="searchInput" class="search-input" placeholder="Search games..." oninput="filterGames()">
+    <!-- Fixed Logo Banner that follows all the way down -->
+    <div class="logo-banner">
+        <img src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM.png?raw=true" alt="Logo"> frutiger
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="search-container">
+                <input type="text" id="searchBar" placeholder="Search games by name, tag, or genre..." oninput="filterZones()">
+                <select id="sortOptions" onchange="sortZones()">
+                    <option value="name">Name</option>
+                    <option value="id">ID (Date)</option>
+                    <option value="popular">Popular</option>
+                    <option value="trendingDay">Trending (Day)</option>
+                    <option value="trendingWeek">Trending (Week)</option>
+                    <option value="trendingMonth">Trending (Month)</option>
+                </select>
+                <select id="filterOptions" onchange="filterZones2()">
+                    <option value="none">(SELECT TAG)</option>
+                </select>
+            </div>
+        </div>
     </header>
-
-    <main class="content-area">
-      <div class="section-label">Title</div>
-      <div class="game-list" id="gameList">
-        <!-- Dynamic Games Stack Here -->
-      </div>
-      <div class="list-item add-btn-item" onclick="openAddModal()">
-        <span style="font-size: 1.2rem; font-weight: 800;">+</span>
-        <span class="list-title">Add Custom Game</span>
-      </div>
+	<main>
+        <h2 id="libraryHeading" class="library-heading">GN Math </h2>
+        <details id="featuredZonesWrapper" open style="display:none;">
+            <summary id="allZonesSummary" style="font-size: 1.2rem; font-weight: bold; cursor: pointer;">Featured Zones</summary>
+            <div id="featuredZones" class="zone-container"></div>
+        </details>
+        <div id="container">Loading...</div>
     </main>
-  </div>
-</div>
 
-<!-- GAME DETAIL VIEW -->
-<div id="detailView">
-  <div class="detail-top-half" id="detailBanner">
-    <div class="detail-fade-overlay"></div>
-    <button class="close-btn" onclick="closeDetailView()">✕</button>
-    <div class="detail-title-bottom-left" id="detailTitle">Game Title</div>
-  </div>
-
-  <div class="detail-bottom-half">
-    <div class="action-buttons-container">
-      <button class="steam-play-btn" onclick="launchGameFromDetails()">
-        ▶ PLAY
-      </button>
-      <button class="steam-install-btn" onclick="installCurrentGame()">
-        ⬇ INSTALL
-      </button>
+     <div id="zoneViewer">
+        <div class="zone-header">
+            <div class="zone-title">
+                <h2 id="zoneName">zone</h2>
+                <button class="info-button" onclick="showZoneInfo()" title="Zone Information">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </button>
+                <span id="zoneId" style="display: none;"></span>
+                <a id="zoneAuthor" href="#" target="_blank">by Author</a>
+            </div>
+            <div class="zone-controls">
+                <button onclick="fullscreenZone()">Fullscreen</button>
+                <button onclick="aboutBlank()">New Tab</button>
+                <button onclick="downloadZone()">Install / Add</button>
+                <button onclick="closeZone()">Close</button>
+            </div>
+        </div>
+        <iframe id="zoneFrame"></iframe>
     </div>
-  </div>
-</div>
 
-<!-- Game Player -->
-<div id="gamePlayerView">
-  <div class="player-header">
-    <div class="player-title" id="playerTitle">Playing</div>
-    <div>
-      <button class="action-btn" onclick="openInNewTab()">Open External</button>
-      <button class="action-btn" onclick="returnHome()">Close</button>
+    <div id="popupOverlay">
+        <div class="popup">
+            <div class="popup-header">
+                <h3 id="popupTitle">Title</h3>
+                <button id="popupClose" onclick="closePopup()">×</button>
+            </div>
+            <div id="popupBody">
+                Content will be here
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="player-iframe-container">
-    <iframe id="gameIframe" allowfullscreen="true"></iframe>
-  </div>
-</div>
 
-<!-- Add Modal -->
-<div id="addModal" class="add-modal">
-  <div class="add-modal-content">
-    <h3 style="margin-bottom: 16px; font-weight:800; color:#fff;">Add Custom Game</h3>
-    <div class="form-group"><input type="text" id="inputName" class="form-input" placeholder="Game Title"></div>
-    <div class="form-group"><input type="text" id="inputImg" class="form-input" placeholder="Banner / Image URL"></div>
-    <div class="form-group"><input type="text" id="inputUrl" class="form-input" placeholder="Game Web URL"></div>
-    <div class="form-group"><input type="text" id="inputDesc" class="form-input" placeholder="Sub-label / Description"></div>
-    <button class="btn-submit" onclick="confirmAddGame()">Save Game</button>
-  </div>
-</div>
+    <div class="bottom-nav-bar">
+        <div class="nav-item active" id="navGnMath" onclick="switchLibraryType('gn-math')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M6 6h10"></path></svg>
+            <span>GN Math</span>
+        </div>
+    </div>
 
-<script>
-function cleanWebUrl(url) {
-  if (!url) return '';
-  if (url.includes('raw.githubusercontent.com')) {
-    return url.replace('raw.githubusercontent.com', 'raw.githack.com');
-  }
-  return url;
-}
-
-const BASE_CDN_NETWORK = "https://raw.githack.com/rzwn2bm626/frutiger-assets-v4/main/";
-const GAMES_FOLDER_NETWORK = "gmes/";
-const FALLBACK_IMG = "https://img.icons8.com/?size=100&id=gp2EGUQ15At9&format=png&color=999999";
-
-const HIDDEN_GAMES = [
-  "Geometry Dash Lite (REMAKE)",
-  "Plants vs. Zombies 2 Gardenless",
-  "Geometry Dash Lite",
-  "Subway Surfers New Orleans",
-  "Subway Surfers San Francisco",
-  "Cross Yr Oad",
-
+    <script>
+const container = document.getElementById('container');
+const zoneViewer = document.getElementById('zoneViewer');
+let zoneFrame = document.getElementById('zoneFrame');
+const searchBar = document.getElementById('searchBar');
+const sortOptions = document.getElementById('sortOptions');
+const filterOptions = document.getElementById('filterOptions');
+const zonesurls = [
+    "https://cdn.jsdelivr.net/gh/freebuisness/assets@main/zones.json",
+    "https://cdn.jsdelivr.net/gh/freebuisness/assets@latest/zones.json",
+    "https://cdn.jsdelivr.net/gh/freebuisness/assets@master/zones.json",
+    "https://cdn.jsdelivr.net/gh/freebuisness/assets/zones.json"
 ];
+let zonesURL = zonesurls[Math.floor(Math.random() * zonesurls.length)];
+const coverURL = "https://cdn.jsdelivr.net/gh/freebuisness/covers@main";
+const htmlURL = "https://cdn.jsdelivr.net/gh/freebuisness/html@main";
+let zones = [];
+let popularityData = {};
+const featuredContainer = document.getElementById('featuredZones');
 
-let DATA = { games: [] };
-let activeGameName = '', activeGameUrl = '', activeGameImg = '', activeGameDesc = '';
-let currentGameUrl = '', currentGameCode = '';
+let playTimes = {}; 
+let activePlayTimer = null;
+let activeZoneId = null;
 
-function safeArray(arr) { return Array.isArray(arr) ? arr : []; }
-
-function dedupeGames(games) {
-  const seen = new Set();
-  return games.filter(g => {
-    if (!g || !g.url) return false;
-    if (seen.has(g.url)) return false;
-    seen.add(g.url);
-    return true;
-  });
-}
-
-async function loadNetworkGames() {
-  try {
-    const cacheBuster = '?t=' + new Date().getTime();
-    const r = await fetch("https://raw.githubusercontent.com/rzwn2bm626/frutiger-assets-v4/main/gmes.json" + cacheBuster, { cache: 'no-store' });
-    if (!r.ok) { loadFromCacheFallback(); return; }
-    const d = await r.json();
-    let rawArray = safeArray(d);
-        
-    const freshData = dedupeGames(rawArray.map(g => {
-      if (!g || typeof g !== "object") return null;
-      let file = g.file_name || g.link || g.url || g.file || g.path || g.html;
-      let title = g.title || g.name || g.game || "Untitled Game";
-      if (!file) return null;
-      
-      file = String(file).replace(/^\/+/, "");
-      let rawGameUrl = file.startsWith("http") ? file : (BASE_CDN_NETWORK + (file.startsWith(GAMES_FOLDER_NETWORK) ? file : GAMES_FOLDER_NETWORK + file));
-      let thumb = g.thumb || g.image || g.img || g.thumbnail || FALLBACK_IMG;
-      if (thumb !== FALLBACK_IMG && !thumb.startsWith("http")) thumb = BASE_CDN_NETWORK + thumb.replace(/^\/+/, "");
-      
-      return { 
-        name: title,
-        description: g.description || g.desc || "Fruitiger Library Game",
-        img: thumb,
-        url: cleanWebUrl(rawGameUrl)
-      };
-    }).filter(Boolean));
-
-    const filteredData = freshData.filter(game => {
-      const gameTitle = game.name.trim().toLowerCase();
-      return !HIDDEN_GAMES.some(hiddenName => gameTitle === hiddenName.trim().toLowerCase());
-    });
-
-    localStorage.setItem('my_games_cache', JSON.stringify(filteredData));
-    DATA.games = filteredData;
-    renderGames();
-  } catch (e) {
-    loadFromCacheFallback();
-  }
-}
-
-function loadFromCacheFallback() {
-  const cachedData = localStorage.getItem('my_games_cache');
-  if (cachedData) {
-    try {
-      DATA.games = JSON.parse(cachedData).filter(game => {
-        const gameTitle = game.name.trim().toLowerCase();
-        return !HIDDEN_GAMES.some(hiddenName => gameTitle === hiddenName.trim().toLowerCase());
-      });
-    } catch(err) { DATA.games = []; }
-  }
-  renderGames();
-}
-
-function renderGames() {
-  const list = document.getElementById('gameList');
-  list.innerHTML = '';
-
-  DATA.games.forEach(game => {
-    const item = document.createElement('div');
-    item.className = 'list-item remote-item';
-    item.setAttribute('data-name', game.name.toLowerCase());
-    item.onclick = () => openDetailView(game.name, game.url, game.img, game.description);
-    
-    item.innerHTML = `
-      <div class="list-thumb-wrapper">
-        <img class="list-thumb" src="${game.img}" alt="${game.name}" onerror="this.src='${FALLBACK_IMG}'">
-      </div>
-      <div class="list-info">
-        <div class="list-title">${game.name}</div>
-        <div class="list-desc">${game.description}</div>
-      </div>`;
-    list.appendChild(item);
-  });
-}
-
-function filterGames() {
-  const query = document.getElementById('searchInput').value.toLowerCase().trim();
-  document.querySelectorAll('.remote-item').forEach(item => {
-    const name = item.getAttribute('data-name') || '';
-    item.style.display = name.includes(query) ? 'flex' : 'none';
-  });
-}
-
-async function openDetailView(name, url, img, desc) {
-  activeGameName = name;
-  activeGameUrl = cleanWebUrl(url);
-  activeGameImg = img || FALLBACK_IMG;
-  activeGameDesc = desc || 'Fruitiger Library Game';
-
-  document.getElementById('detailTitle').innerText = activeGameName;
-  document.getElementById('detailBanner').style.backgroundImage = `url('${activeGameImg}')`;
-  document.getElementById('detailView').style.display = 'flex';
-
-  currentGameCode = '';
-  try {
-    const response = await fetch(activeGameUrl);
-    if (response.ok) currentGameCode = await response.text();
-  } catch (err) {}
-}
-
-function closeDetailView() { document.getElementById('detailView').style.display = 'none'; }
-
-function launchGameFromDetails() {
-  closeDetailView();
-  currentGameUrl = activeGameUrl;
-  const playerView = document.getElementById('gamePlayerView');
-  playerView.style.display = 'flex';
-  document.getElementById('playerTitle').innerText = activeGameName;
-  const iframe = document.getElementById('gameIframe');
-
-  if (currentGameCode) {
-    const blob = new Blob([currentGameCode], { type: 'text/html' });
-    iframe.src = URL.createObjectURL(blob);
-  } else {
-    iframe.src = activeGameUrl;
-  }
-}
-
-async function installCurrentGame() {
-  if (!activeGameName || !activeGameUrl) return;
-
-  let codeToSend = currentGameCode;
-  if (!codeToSend) {
-    try {
-      const res = await fetch(activeGameUrl);
-      if (res.ok) codeToSend = await res.text();
-    } catch (err) {}
-  }
-
-  window.parent.postMessage({
+function sendInstallSignal(appName, appIconUrl, appPageUrl) {
+  const payload = {
     type: 'INSTALL_APP',
     app: {
-      name: activeGameName,
-      icon: activeGameImg,
-      url: cleanWebUrl(activeGameUrl),
-      code: codeToSend,
-      description: activeGameDesc,
+      name: appName,
+      icon: appIconUrl,
+      url: appPageUrl,
       isFromAppStore: true
     }
-  }, '*');
-}
+  };
 
-function openInNewTab() {
-  if (!currentGameUrl) return;
-  if (currentGameCode) {
-    const blob = new Blob([currentGameCode], { type: 'text/html' });
-    window.open(URL.createObjectURL(blob), '_blank');
-  } else {
-    window.open(currentGameUrl, '_blank');
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage(payload, '*');
+  } else if (window.opener) {
+    window.opener.postMessage(payload, '*');
   }
 }
 
-function returnHome() {
-  document.getElementById('gamePlayerView').style.display = 'none';
-  document.getElementById('detailView').style.display = 'none';
-  document.getElementById('gameIframe').src = '';
+document.addEventListener('DOMContentLoaded', () => {
+    const progressFill = document.getElementById('progress-fill');
+    let currentProgress = 0;
+
+    function simulateAssetLoading() {
+        if (currentProgress < 100) {
+            let jump = Math.random() * 7 + 1; 
+            if (Math.random() > 0.85) {
+                jump = 0; 
+            }
+            currentProgress += jump;
+            if (currentProgress >= 100) {
+                currentProgress = 100;
+            }
+            progressFill.style.width = `${currentProgress}%`;
+            
+            let delay = Math.random() * 120 + 20; 
+            if (jump === 0) delay = Math.random() * 600 + 200;
+
+            setTimeout(simulateAssetLoading, delay);
+        }
+    }
+    simulateAssetLoading();
+});
+
+window.addEventListener('load', () => {
+    const progressFill = document.getElementById('progress-fill');
+    if (progressFill) progressFill.style.width = '100%';
+    
+    setTimeout(() => {
+        const splash = document.getElementById('appSplash');
+        if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.remove(), 500);
+        }
+    }, 400);
+});
+
+function toTitleCase(str) {
+  return str.replace(
+    /\w\S*/g,
+    text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+  );
 }
 
-function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
-
-function confirmAddGame() {
-  const name = document.getElementById('inputName').value;
-  const imgUrl = document.getElementById('inputImg').value;
-  const url = cleanWebUrl(document.getElementById('inputUrl').value);
-  const desc = document.getElementById('inputDesc').value || 'Custom Game';
-
-  if (!name || !url) return alert("Please enter both a title and a game URL.");
-
-  DATA.games.push({ name, url, img: imgUrl || FALLBACK_IMG, description: desc });
-  renderGames();
-  document.getElementById('addModal').style.display = 'none';
+function switchLibraryType(type) {
+    document.querySelectorAll('.bottom-nav-bar .nav-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('navGnMath').classList.add('active');
+    document.getElementById('libraryHeading').textContent = 'GN Math Library';
+    sortZones();
 }
 
-window.addEventListener('DOMContentLoaded', loadNetworkGames);
+async function listZones() {
+    try {
+      let sharesponse;
+      let shajson;
+      let sha;
+        try {
+          sharesponse = await fetch("https://api.github.com/repos/freebuisness/assets/commits?t="+Date.now());
+        } catch (error) {}
+        if (sharesponse && sharesponse.status === 200) {
+          try {
+            shajson = await sharesponse.json();
+            sha = shajson[0]['sha'];
+            if (sha) {
+                zonesURL = `https://cdn.jsdelivr.net/gh/freebuisness/assets@${sha}/zones.json`;
+            }
+          } catch (error) {
+            try {
+                let secondarysharesponse = await fetch("https://raw.githubusercontent.com/freebuisness/xml/refs/heads/main/sha.txt?t="+Date.now());
+                if (secondarysharesponse && secondarysharesponse.status === 200) {
+                    sha = (await secondarysharesponse.text()).trim();
+                    if (sha) {
+                        zonesURL = `https://cdn.jsdelivr.net/gh/freebuisness/assets@${sha}/zones.json`;
+                    }
+                }
+            } catch(error) {}
+          }
+        }
+        const response = await fetch(zonesURL+"?t="+Date.now());
+        const json = await response.json();
+        zones = json;
+        zones[0].featured = true;
+        await Promise.all([fetchPopularity("year"), fetchPopularity("month"), fetchPopularity("week"), fetchPopularity("day")]);
+        sortZones();
+        try {
+        const search = new URLSearchParams(window.location.search);
+        const id = search.get('id');
+        const embed = window.location.hash.includes("embed");
+        if (id) {
+            const zone = zones.find(zone => zone.id + '' == id + '');
+            if (zone) {
+                if (embed) {
+                    if (zone.url.startsWith("http")) {
+                        window.open(zone.url, "_blank");
+                    } else {
+                        const url = zone.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+                        fetch(url+"?t="+Date.now()).then(response => response.text()).then(html => {
+                            html = html.replace(/<script>\s*\(function\(ykJYJgqRQvLQ[\s\S]*?<\/script>/g, '');
+                            document.documentElement.innerHTML = html;
+                        }).catch(error => alert("Failed to load zone: " + error));
+                    }
+                } else {
+                    openZone(zone);
+                }
+            }
+        }
+        } catch(error){}
+        let alltags = [];
+        for (const obj of json) {
+            if (Array.isArray(obj.special)) {
+                alltags.push(...obj.special);
+            }
+        }
+
+        alltags = [...new Set(alltags)];
+        let filteroption = document.getElementById("filterOptions");
+        if (filteroption && filteroption.children.length > 1) {
+            while (filteroption.children.length > 1) {
+                filteroption.removeChild(filteroption.lastElementChild);
+            }
+        }
+        for (const tag of alltags) {
+            const opt = document.createElement("option");
+            opt.value = tag;
+            opt.textContent = toTitleCase(tag);
+            filteroption.appendChild(opt);
+        }
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = `Error loading zones: ${error}`;
+    }
+}
+
+async function fetchPopularity(duration) {
+    try {
+        if (!popularityData[duration]) {
+            popularityData[duration] = {};
+        }
+        const response = await fetch(
+            "https://data.jsdelivr.com/v1/stats/packages/gh/freebuisness/html@main/files?period=" + duration
+        );
+        const data = await response.json();
+        data.forEach(file => {
+            const idMatch = file.name.match(/\/(\d+)\.html$/);
+            if (idMatch) {
+                const id = parseInt(idMatch[1]);
+                popularityData[duration][id] = file.hits?.total ?? 0;
+            }
+        });
+    } catch (error) {
+        if (!popularityData[duration]) {
+            popularityData[duration] = {};
+        }
+        popularityData[duration][0] = 0;
+    }
+}
+
+function sortZones() {
+    let workingZones = [...zones];
+    const sortBy = sortOptions.value;
+    if (sortBy === 'name') {
+        workingZones.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'id') {
+        workingZones.sort((a, b) => a.id - b.id);
+    } else if (sortBy === 'popular') {
+        workingZones.sort((a, b) => ((popularityData['year']?.[b.id]) ?? 0) - ((popularityData['year']?.[a.id]) ?? 0));
+    } else if (sortBy === 'trendingMonth') {
+        workingZones.sort((a, b) => ((popularityData['month']?.[b.id]) ?? 0) - ((popularityData['month']?.[a.id]) ?? 0));
+    } else if (sortBy === 'trendingWeek') {
+        workingZones.sort((a, b) => ((popularityData['week']?.[b.id]) ?? 0) - ((popularityData['week']?.[a.id]) ?? 0));
+    } else if (sortBy === 'trendingDay') {
+        workingZones.sort((a, b) => ((popularityData['day']?.[b.id]) ?? 0) - ((popularityData['day']?.[a.id]) ?? 0));
+    }
+    workingZones.sort((a, b) => (a.id === -1 ? -1 : b.id === -1 ? 1 : 0));
+    displayZones(workingZones);
+}
+
+function formatPlayTime(seconds) {
+    const d = Math.floor(seconds / (3600 * 24));
+    const h = Math.floor((seconds % (3600 * 24)) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(d)}d:${pad(h)}h:${pad(m)}m:${pad(s)}s`;
+}
+
+function displayZones(zonesList) {
+    container.innerHTML = "";
+    zonesList.forEach((file) => {
+        const zoneItem = document.createElement("div");
+        zoneItem.className = "zone-item";
+        
+        const coverImgUrl = file.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+        zoneItem.style.backgroundImage = `url('${coverImgUrl}')`;
+        zoneItem.onclick = () => openZone(file);
+
+        const iconBox = document.createElement("div");
+        iconBox.className = "zone-icon-box";
+        const img = document.createElement("img");
+        img.dataset.src = coverImgUrl;
+        img.alt = file.name;
+        img.loading = "lazy";
+        img.className = "lazy-zone-img";
+        iconBox.appendChild(img);
+        zoneItem.appendChild(iconBox);
+
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "zone-poster-content";
+
+        const nameEl = document.createElement("h3");
+        nameEl.className = "zone-name";
+        nameEl.textContent = file.name;
+        contentDiv.appendChild(nameEl);
+
+        const teamEl = document.createElement("p");
+        teamEl.className = "zone-team";
+        teamEl.textContent = file.author ? file.author : "TEAM CHERRY";
+        contentDiv.appendChild(teamEl);
+
+        const timeEl = document.createElement("div");
+        timeEl.className = "zone-time";
+        timeEl.id = `playtime-label-${file.id}`;
+        
+        const currentSeconds = playTimes[file.id] || 0;
+        timeEl.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Played: ${formatPlayTime(currentSeconds)}
+        `;
+        contentDiv.appendChild(timeEl);
+
+        zoneItem.appendChild(contentDiv);
+        container.appendChild(zoneItem);   
+    });
+    if (container.innerHTML === "") {
+        container.innerHTML = "No zones found.";
+    }
+
+    const lazyImages = document.querySelectorAll('img.lazy-zone-img');
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.classList.remove("lazy-zone-img");
+                observer.unobserve(img);
+            }
+        });
+    }, {
+        rootMargin: "100px", 
+        threshold: 0.1
+    });
+
+    lazyImages.forEach(img => {
+        imageObserver.observe(img);
+    });
+}
+
+function filterZones2() {
+    const query = filterOptions.value;
+    if (query === "none") {
+        displayZones(zones);
+    } else {
+        const filteredZones = zones.filter(zone => zone.special?.includes(query));
+        displayZones(filteredZones);
+    }
+}
+
+function filterZones() {
+    const query = searchBar.value.toLowerCase();
+    const filteredZones = zones.filter(zone => zone.name.toLowerCase().includes(query));
+    displayZones(filteredZones);
+}
+
+function openZone(file) {
+    if (file.url.startsWith("http")) {
+        window.open(file.url, "_blank");
+    } else {
+        if (activePlayTimer) clearInterval(activePlayTimer);
+        activeZoneId = file.id;
+        if (!playTimes[activeZoneId]) playTimes[activeZoneId] = 0;
+
+        activePlayTimer = setInterval(() => {
+            playTimes[activeZoneId]++;
+            const label = document.getElementById(`playtime-label-${activeZoneId}`);
+            if (label) {
+                label.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Played: ${formatPlayTime(playTimes[activeZoneId])}
+                `;
+            }
+        }, 1000);
+
+        const url = file.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+        fetch(url+"?t="+Date.now()).then(response => response.text()).then(html => {
+            html = html.replace(/<script>\s*\(function\(ykJYJgqRQvLQ[\s\S]*?<\/script>/g, '');
+
+            if (zoneFrame.contentDocument === null) {
+                zoneFrame = document.createElement("iframe");
+                zoneFrame.id = "zoneFrame";
+                zoneViewer.appendChild(zoneFrame);
+            }
+            zoneFrame.contentDocument.open();
+            zoneFrame.contentDocument.write(html);
+            zoneFrame.contentDocument.close();
+            document.getElementById('zoneName').textContent = file.name;
+            document.getElementById('zoneId').textContent = file.id;
+            document.getElementById('zoneAuthor').textContent = "by " + (file.author || "Unknown");
+            if (file.authorLink) {
+                document.getElementById('zoneAuthor').href = file.authorLink;
+            }
+            zoneViewer.style.display = "block";
+            try {
+                const url = new URL(window.location);
+                url.searchParams.set('id', file.id);
+                history.pushState(null, '', url.toString());
+            } catch(error){}
+            zoneViewer.hidden = true;
+        }).catch(error => alert("Failed to load zone: " + error));
+    }
+}
+
+function aboutBlank() {
+    const newWindow = window.open("about:blank", "_blank");
+    let zone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent).url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+    fetch(zone+"?t="+Date.now()).then(response => response.text()).then(text => {
+        text = text.replace(/<script>\s*\(function\(ykJYJgqRQvLQ[\s\S]*?<\/script>/g, '');
+        if (newWindow) {
+            newWindow.document.open();
+            newWindow.document.write(text);
+            newWindow.document.close();
+        }
+    })
+}
+
+function closeZone() {
+    if (activePlayTimer) {
+        clearInterval(activePlayTimer);
+        activePlayTimer = null;
+        activeZoneId = null;
+    }
+    zoneViewer.hidden = false;
+    zoneViewer.style.display = "none";
+    zoneViewer.removeChild(zoneFrame);
+    try {
+    const url = new URL(window.location);
+    url.searchParams.delete('id');
+    history.pushState(null, '', url.toString());
+    } catch(error){}
+}
+
+function downloadZone() {
+    let zone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent);
+    if (!zone) return;
+
+    const iconUrl = zone.cover ? zone.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL) : '';
+    const pageUrl = window.location.origin + window.location.pathname + "?id=" + zone.id;
+
+    sendInstallSignal(zone.name, iconUrl, pageUrl);
+}
+
+function fullscreenZone() {
+    if (zoneFrame.requestFullscreen) {
+        zoneFrame.requestFullscreen();
+    } else if (zoneFrame.mozRequestFullScreen) {
+        zoneFrame.mozRequestFullScreen();
+    } else if (zoneFrame.webkitRequestFullscreen) {
+        zoneFrame.webkitRequestFullscreen();
+    } else if (zoneFrame.msRequestFullscreen) {
+        zoneFrame.msRequestFullscreen();
+    }
+}
+
+let _allStatsCache = null;
+
+async function getAllStats() {
+  if (_allStatsCache) {
+    return _allStatsCache;
+  }
+  const BASE_URL = "https://data.jsdelivr.com/v1/stats/packages/gh/freebuisness/html@main/files";
+  const PERIOD = "year";
+  const PAGE_BATCH = 5;
+
+  let page = 1;
+  let done = false;
+  const combinedMap = Object.create(null);
+
+  while (!done) {
+    const pages = Array.from({ length: PAGE_BATCH }, (_, i) => page + i);
+    const responses = await Promise.all(
+      pages.map(p =>
+        fetch(`${BASE_URL}?period=${PERIOD}&page=${p}&limit=100`)
+          .then(r => (r.ok ? r.json() : []))
+      )
+    );
+
+    for (const data of responses) {
+      if (!Array.isArray(data) || data.length === 0) {
+        done = true;
+        break;
+      }
+      for (const item of data) {
+        if (!item?.name) continue;
+        const match = item.name.match(/^\/(\d+)([.-])/);
+        if (!match) continue;
+        const id = match[1];
+        if (!combinedMap[id]) {
+          combinedMap[id] = { hits: 0, bandwidth: 0 };
+        }
+        combinedMap[id].hits += item.hits?.total ?? 0;
+        combinedMap[id].bandwidth += item.bandwidth?.total ?? 0;
+      }
+    }
+    page += PAGE_BATCH;
+  }
+  _allStatsCache = combinedMap;
+  return combinedMap;
+}
+
+async function getStats(id) {
+  id = String(id);
+  const allStats = await getAllStats();
+  return allStats[id]?.hits ?? 0;
+}
+
+function showZoneInfo() {
+    let id = Number(document.getElementById('zoneId').textContent);
+    document.getElementById('popupTitle').textContent = "Info";
+    const popupBody = document.getElementById('popupBody');
+    popupBody.innerHTML = `<p>Loading...</p>`
+    popupBody.contentEditable = false;
+    document.getElementById('popupOverlay').style.display = "flex";
+    fetch(`https://api.github.com/repos/freebuisness/html/commits?path=${id}.html`).then(res => res.json()).then(async json => {
+        let stats = await getStats(id);
+        let idjson = zones.filter(a=>a.id===id)[0];
+        document.getElementById('popupTitle').textContent = `${idjson.name} Info`;
+        const date = new Date(json.at(-1).commit.author.date);
+        let formatteddate = new Intl.DateTimeFormat("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true
+        }).format(date);
+        popupBody.innerHTML = `
+        <p>
+        <b>Id</b>: ${id}<br>
+        <b>Name</b>: ${idjson.name}<br>
+        ${idjson.author?`<b>Game Author</b>: ${idjson.author}<br>`:""}
+        ${idjson.authorLink?`<b>Game Author Link</b>: <a style="color:#FFCC00;" href=${idjson.authorLink}>${idjson.authorLink}</a><br>`:""}
+        ${idjson.special?`<b>Tags</b>: ${idjson.special}<br>`:""}
+        <b>Date Added</b>: ${formatteddate}<br>
+        <b>Times Played (Globally)</b>: ${Number(stats).toLocaleString("en-US")}
+        </p>`;
+    })
+}
+
+function closePopup() {
+    document.getElementById('popupOverlay').style.display = "none";
+}
+
+listZones();
+
+HTMLCanvasElement.prototype.toDataURL = function (...args) {
+    return "";
+};
 </script>
 </body>
 </html>
