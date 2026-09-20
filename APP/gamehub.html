@@ -37,6 +37,13 @@
     <meta name="twitter:title" content="frutiger">
     <meta name="twitter:description" content="Play unbl*cked games like Crazy Cattle 3D and DriveMad on frutiger. Fast, free, no downloads—perfect for school or home.">
     <style>
+        @font-face {
+            font-family: 'CustomFont';
+            src: url('YOUR_FONT_FILE.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         :root {
     --primary: #fc2651;
     --primary-hover: #e91e47;
@@ -106,7 +113,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    font-family: 'CustomFont', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
     line-height: 1.6;
     margin: 0;
     padding: 0;
@@ -118,7 +125,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Inverted Loading Screen */
 #appSplash {
     position: fixed;
     inset: 0;
@@ -130,6 +136,28 @@ body {
     justify-content: center;
     transition: opacity 0.5s ease;
     font-family: 'Courier New', Courier, monospace;
+}
+
+#librarySplash {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(6px);
+    z-index: 9998;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.smooth-rounded-logo {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    border-radius: 24px;
+    filter: invert(100%);
 }
 
 @keyframes float {
@@ -536,7 +564,6 @@ main {
     height: 20px;
 }
 
-/* FULL-SCREEN ISOLATION MODE WHEN TRIGGERED AS AN APP / PWA INSTALL SIGNAL */
 body.app-fullscreen-mode header,
 body.app-fullscreen-mode main,
 body.app-fullscreen-mode .logo-banner,
@@ -553,7 +580,7 @@ body.app-fullscreen-mode #zoneViewer {
 }
 
 body.app-fullscreen-mode .zone-header {
-    display: none !important; /* Hides header so only the game fills the screen completely */
+    display: none !important;
 }
 
 body.app-fullscreen-mode #zoneFrame {
@@ -567,7 +594,6 @@ body.app-fullscreen-mode #zoneFrame {
 </head>
 <body class="dark-mode">
 
-    <!-- Custom Inverted Loading Splash Screen -->
     <div id="appSplash">
         <div class="mb-4 flex flex-col items-center justify-center">
             <img id="floating-image" 
@@ -581,7 +607,13 @@ body.app-fullscreen-mode #zoneFrame {
         </div>
     </div>
 
-    <!-- Fixed Logo Banner that follows all the way down -->
+    <div id="librarySplash">
+        <img class="smooth-rounded-logo animate-float" 
+             src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM.png?raw=true" 
+             alt="Library Switching Loader" 
+             onerror="this.src='https://placehold.co/200x200/111111/ffffff?text=Loading...';" />
+    </div>
+
     <div class="logo-banner">
         <img src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM.png?raw=true" alt="Logo"> frutigames
     </div>
@@ -654,6 +686,10 @@ body.app-fullscreen-mode #zoneFrame {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M6 6h10"></path></svg>
             <span>GN Math</span>
         </div>
+        <div class="nav-item" id="navFruits" onclick="switchLibraryType('fruits')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            <span>Fruits</span>
+        </div>
     </div>
 
     <script>
@@ -663,6 +699,9 @@ let zoneFrame = document.getElementById('zoneFrame');
 const searchBar = document.getElementById('searchBar');
 const sortOptions = document.getElementById('sortOptions');
 const filterOptions = document.getElementById('filterOptions');
+
+let currentLibrary = 'gn-math';
+
 const zonesurls = [
     "https://cdn.jsdelivr.net/gh/freebuisness/assets@main/zones.json",
     "https://cdn.jsdelivr.net/gh/freebuisness/assets@latest/zones.json",
@@ -670,13 +709,27 @@ const zonesurls = [
     "https://cdn.jsdelivr.net/gh/freebuisness/assets/zones.json"
 ];
 let zonesURL = zonesurls[Math.floor(Math.random() * zonesurls.length)];
+
+let fruitsZonesURL = "https://cdn.jsdelivr.net/gh/school-rgb/fruti-games-@main/game.json";
 const coverURL = "https://cdn.jsdelivr.net/gh/freebuisness/covers@main";
 const htmlURL = "https://cdn.jsdelivr.net/gh/freebuisness/html@main";
+const fruitsCoverURL = "https://cdn.jsdelivr.net/gh/school-rgb/COVER@main";
+const fruitsHtmlURL = "https://cdn.jsdelivr.net/gh/school-rgb/html@main";
+
 let zones = [];
 let popularityData = {};
 const featuredContainer = document.getElementById('featuredZones');
 
-let playTimes = {}; 
+let playTimes = {};
+try {
+    const savedTimes = localStorage.getItem('frutiger_playTimes');
+    if (savedTimes) {
+        playTimes = JSON.parse(savedTimes);
+    }
+} catch (e) {
+    playTimes = {};
+}
+
 let activePlayTimer = null;
 let activeZoneId = null;
 
@@ -743,71 +796,73 @@ function toTitleCase(str) {
   );
 }
 
-function switchLibraryType(type) {
+async function switchLibraryType(type) {
+    if (currentLibrary === type) return;
+    
+    const libSplash = document.getElementById('librarySplash');
+    libSplash.style.display = 'flex';
+    setTimeout(() => { libSplash.style.opacity = '1'; }, 10);
+
+    currentLibrary = type;
     document.querySelectorAll('.bottom-nav-bar .nav-item').forEach(el => el.classList.remove('active'));
-    document.getElementById('navGnMath').classList.add('active');
-    document.getElementById('libraryHeading').textContent = 'GN Math Library';
-    sortZones();
+    
+    if (type === 'gn-math') {
+        document.getElementById('navGnMath').classList.add('active');
+        document.getElementById('libraryHeading').textContent = 'GN Math Library';
+    } else if (type === 'fruits') {
+        document.getElementById('navFruits').classList.add('active');
+        document.getElementById('libraryHeading').textContent = 'Fruits Library';
+    }
+    
+    await listZones();
+
+    setTimeout(() => {
+        libSplash.style.opacity = '0';
+        setTimeout(() => {
+            libSplash.style.display = 'none';
+        }, 300);
+    }, 400);
 }
 
 async function listZones() {
     try {
-      let sharesponse;
-      let shajson;
-      let sha;
-        try {
-          sharesponse = await fetch("https://api.github.com/repos/freebuisness/assets/commits?t="+Date.now());
-        } catch (error) {}
-        if (sharesponse && sharesponse.status === 200) {
-          try {
-            shajson = await sharesponse.json();
-            sha = shajson[0]['sha'];
-            if (sha) {
-                zonesURL = `https://cdn.jsdelivr.net/gh/freebuisness/assets@${sha}/zones.json`;
-            }
-          } catch (error) {
+        container.innerHTML = "Loading...";
+        let targetURL = (currentLibrary === 'fruits') ? fruitsZonesURL : zonesURL;
+        
+        if (currentLibrary === 'gn-math') {
             try {
-                let secondarysharesponse = await fetch("https://raw.githubusercontent.com/freebuisness/xml/refs/heads/main/sha.txt?t="+Date.now());
-                if (secondarysharesponse && secondarysharesponse.status === 200) {
-                    sha = (await secondarysharesponse.text()).trim();
-                    if (sha) {
-                        zonesURL = `https://cdn.jsdelivr.net/gh/freebuisness/assets@${sha}/zones.json`;
-                    }
+              let sharesponse = await fetch("https://api.github.com/repos/freebuisness/assets/commits?t="+Date.now());
+              if (sharesponse && sharesponse.status === 200) {
+                let shajson = await sharesponse.json();
+                let sha = shajson[0]['sha'];
+                if (sha) {
+                    targetURL = `https://cdn.jsdelivr.net/gh/freebuisness/assets@${sha}/zones.json`;
                 }
-            } catch(error) {}
-          }
+              }
+            } catch (error) {}
+        } else if (currentLibrary === 'fruits') {
+            try {
+              let sharesponse = await fetch("https://api.github.com/repos/school-rgb/fruti-games-/commits?t="+Date.now());
+              if (sharesponse && sharesponse.status === 200) {
+                let shajson = await sharesponse.json();
+                let sha = shajson[0]['sha'];
+                if (sha) {
+                    targetURL = `https://cdn.jsdelivr.net/gh/school-rgb/fruti-games-@${sha}/game.json`;
+                }
+              }
+            } catch (error) {}
         }
-        const response = await fetch(zonesURL+"?t="+Date.now());
+
+        const response = await fetch(targetURL + "?t=" + Date.now());
         const json = await response.json();
         zones = json;
-        zones[0].featured = true;
-        await Promise.all([fetchPopularity("year"), fetchPopularity("month"), fetchPopularity("week"), fetchPopularity("day")]);
-        sortZones();
-        try {
-        const search = new URLSearchParams(window.location.search);
-        const id = search.get('id');
-        const embed = window.location.hash.includes("embed");
-        if (id) {
-            const zone = zones.find(zone => zone.id + '' == id + '');
-            if (zone) {
-                if (embed) {
-                    if (zone.url.startsWith("http")) {
-                        window.open(zone.url, "_blank");
-                    } else {
-                        const url = zone.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
-                        fetch(url+"?t="+Date.now()).then(response => response.text()).then(html => {
-                            html = html.replace(/<script>\s*\(function\(ykJYJgqRQvLQ[\s\S]*?<\/script>/g, '');
-                            document.documentElement.innerHTML = html;
-                        }).catch(error => alert("Failed to load zone: " + error));
-                    }
-                } else {
-                    // Automatically trigger clean full-screen game mode when loaded directly with an ID (e.g. via app signal/PWA)
-                    document.body.classList.add('app-fullscreen-mode');
-                    openZone(zone);
-                }
-            }
+        if (zones.length > 0 && zones[0]) zones[0].featured = true;
+
+        if (currentLibrary === 'gn-math') {
+            await Promise.all([fetchPopularity("year"), fetchPopularity("month"), fetchPopularity("week"), fetchPopularity("day")]);
         }
-        } catch(error){}
+        sortZones();
+        
         let alltags = [];
         for (const obj of json) {
             if (Array.isArray(obj.special)) {
@@ -893,7 +948,10 @@ function displayZones(zonesList) {
         const zoneItem = document.createElement("div");
         zoneItem.className = "zone-item";
         
-        const coverImgUrl = file.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+        let activeCoverURL = (currentLibrary === 'fruits') ? fruitsCoverURL : coverURL;
+        let activeHtmlURL = (currentLibrary === 'fruits') ? fruitsHtmlURL : htmlURL;
+
+        const coverImgUrl = file.cover ? file.cover.replace("{COVER_URL}", activeCoverURL).replace("{HTML_URL}", activeHtmlURL) : '';
         zoneItem.style.backgroundImage = `url('${coverImgUrl}')`;
         zoneItem.onclick = () => openZone(file);
 
@@ -917,7 +975,7 @@ function displayZones(zonesList) {
 
         const teamEl = document.createElement("p");
         teamEl.className = "zone-team";
-        teamEl.textContent = file.author ? file.author : "TEAM CHERRY";
+        teamEl.textContent = file.author ? file.author : "FRUTI TEAM";
         contentDiv.appendChild(teamEl);
 
         const timeEl = document.createElement("div");
@@ -975,69 +1033,137 @@ function filterZones() {
 }
 
 function openZone(file) {
-    if (file.url.startsWith("http")) {
-        window.open(file.url, "_blank");
-    } else {
-        if (activePlayTimer) clearInterval(activePlayTimer);
-        activeZoneId = file.id;
-        if (!playTimes[activeZoneId]) playTimes[activeZoneId] = 0;
+    if (activePlayTimer) clearInterval(activePlayTimer);
+    activeZoneId = file.id;
+    if (!playTimes[activeZoneId]) playTimes[activeZoneId] = 0;
 
-        activePlayTimer = setInterval(() => {
-            playTimes[activeZoneId]++;
-            const label = document.getElementById(`playtime-label-${activeZoneId}`);
-            if (label) {
-                label.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    Played: ${formatPlayTime(playTimes[activeZoneId])}
-                `;
-            }
-        }, 1000);
+    activePlayTimer = setInterval(() => {
+        playTimes[activeZoneId]++;
+        
+        try {
+            localStorage.setItem('frutiger_playTimes', JSON.stringify(playTimes));
+        } catch (e) {}
 
-        const url = file.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
-        fetch(url+"?t="+Date.now()).then(response => response.text()).then(html => {
-            html = html.replace(/<script>\s*\(function\(ykJYJgqRQvLQ[\s\S]*?<\/script>/g, '');
+        const label = document.getElementById(`playtime-label-${activeZoneId}`);
+        if (label) {
+            label.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Played: ${formatPlayTime(playTimes[activeZoneId])}
+            `;
+        }
+    }, 1000);
 
-            if (zoneFrame.contentDocument === null) {
-                zoneFrame = document.createElement("iframe");
-                zoneFrame.id = "zoneFrame";
-                zoneViewer.appendChild(zoneFrame);
-            }
-            zoneFrame.contentDocument.open();
-            zoneFrame.contentDocument.write(html);
-            zoneFrame.contentDocument.close();
-            document.getElementById('zoneName').textContent = file.name;
-            document.getElementById('zoneId').textContent = file.id;
-            document.getElementById('zoneAuthor').textContent = "by " + (file.author || "Unknown");
-            if (file.authorLink) {
-                document.getElementById('zoneAuthor').href = file.authorLink;
-            }
-            zoneViewer.style.display = "block";
-            try {
-                const url = new URL(window.location);
-                url.searchParams.set('id', file.id);
-                history.pushState(null, '', url.toString());
-            } catch(error){}
-            zoneViewer.hidden = true;
-        }).catch(error => alert("Failed to load zone: " + error));
+    let activeCoverURL = (currentLibrary === 'fruits') ? fruitsCoverURL : coverURL;
+    let activeHtmlURL = (currentLibrary === 'fruits') ? fruitsHtmlURL : htmlURL;
+
+    // Ensure iframe exists
+    if (zoneFrame.contentDocument === null) {
+        zoneFrame = document.createElement("iframe");
+        zoneFrame.id = "zoneFrame";
+        zoneViewer.appendChild(zoneFrame);
     }
+
+    if (file.url.startsWith("http")) {
+        // Load external URL directly inside the iframe viewer instead of a new tab
+        zoneFrame.src = file.url;
+    } else {
+        const url = file.url.replace("{COVER_URL}", activeCoverURL).replace("{HTML_URL}", activeHtmlURL);
+        
+        fetch(url + "?t=" + Date.now())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("File not found (404)");
+                }
+                return response.text();
+            })
+            .then(html => {
+                html = html.replace(/<script>\s*\(function\(ykJYJgqRQvLQ[\s\S]*?<\/script>/g, '');
+                zoneFrame.contentDocument.open();
+                zoneFrame.contentDocument.write(html);
+                zoneFrame.contentDocument.close();
+            })
+            .catch(error => {
+                const fallbackHtml = `
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <style>
+                            body {
+                                background: #000000;
+                                color: #ffffff;
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                height: 100vh;
+                                margin: 0;
+                                text-align: center;
+                                padding: 20px;
+                            }
+                            h1 { color: #fc2651; font-size: 24px; margin-bottom: 10px; }
+                            p { color: #8e8e93; font-size: 15px; max-width: 400px; line-height: 1.5; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Game File Missing</h1>
+                        <p>The game link or HTML file for "<strong>${file.name}</strong>" could not be found. Please check your JSON link or upload the file to your repository.</p>
+                    </body>
+                    </html>
+                `;
+                zoneFrame.contentDocument.open();
+                zoneFrame.contentDocument.write(fallbackHtml);
+                zoneFrame.contentDocument.close();
+            });
+    }
+
+    document.getElementById('zoneName').textContent = file.name;
+    document.getElementById('zoneId').textContent = file.id;
+    document.getElementById('zoneAuthor').textContent = "by " + (file.author || "Unknown");
+    if (file.authorLink) {
+        document.getElementById('zoneAuthor').href = file.authorLink;
+    }
+    zoneViewer.style.display = "block";
+    try {
+        const historyUrl = new URL(window.location);
+        historyUrl.searchParams.set('id', file.id);
+        history.pushState(null, '', historyUrl.toString());
+    } catch(error){}
+    zoneViewer.hidden = true;
 }
 
 function aboutBlank() {
     const newWindow = window.open("about:blank", "_blank");
-    let zone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent).url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
-    fetch(zone+"?t="+Date.now()).then(response => response.text()).then(text => {
-        text = text.replace(/<script>\s*\(function\(ykJYJgqRQvLQ[\s\S]*?<\/script>/g, '');
+    let activeCoverURL = (currentLibrary === 'fruits') ? fruitsCoverURL : coverURL;
+    let activeHtmlURL = (currentLibrary === 'fruits') ? fruitsHtmlURL : htmlURL;
+
+    let targetZone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent);
+    if (!targetZone) return;
+
+    if (targetZone.url.startsWith("http")) {
         if (newWindow) {
-            newWindow.document.open();
-            newWindow.document.write(text);
-            newWindow.document.close();
+            newWindow.location.href = targetZone.url;
         }
-    })
+    } else {
+        let zone = targetZone.url.replace("{COVER_URL}", activeCoverURL).replace("{HTML_URL}", activeHtmlURL);
+        fetch(zone+"?t="+Date.now()).then(response => response.text()).then(text => {
+            text = text.replace(/<script>\s*\(function\(ykJYJgqRQvLQ[\s\S]*?<\/script>/g, '');
+            if (newWindow) {
+                newWindow.document.open();
+                newWindow.document.write(text);
+                newWindow.document.close();
+            }
+        });
+    }
 }
 
 function closeZone() {
     if (activePlayTimer) {
         clearInterval(activePlayTimer);
+        try {
+            localStorage.setItem('frutiger_playTimes', JSON.stringify(playTimes));
+        } catch (e) {}
         activePlayTimer = null;
         activeZoneId = null;
     }
@@ -1045,9 +1171,9 @@ function closeZone() {
     zoneViewer.style.display = "none";
     zoneViewer.removeChild(zoneFrame);
     try {
-    const url = new URL(window.location);
-    url.searchParams.delete('id');
-    history.pushState(null, '', url.toString());
+        const url = new URL(window.location);
+        url.searchParams.delete('id');
+        history.pushState(null, '', url.toString());
     } catch(error){}
 }
 
@@ -1055,7 +1181,10 @@ function downloadZone() {
     let zone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent);
     if (!zone) return;
 
-    const iconUrl = zone.cover ? zone.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL) : '';
+    let activeCoverURL = (currentLibrary === 'fruits') ? fruitsCoverURL : coverURL;
+    let activeHtmlURL = (currentLibrary === 'fruits') ? fruitsHtmlURL : htmlURL;
+
+    const iconUrl = zone.cover ? zone.cover.replace("{COVER_URL}", activeCoverURL).replace("{HTML_URL}", activeHtmlURL) : '';
     const pageUrl = window.location.origin + window.location.pathname + "?id=" + zone.id;
 
     sendInstallSignal(zone.name, iconUrl, pageUrl);
@@ -1073,95 +1202,6 @@ function fullscreenZone() {
     }
 }
 
-let _allStatsCache = null;
-
-async function getAllStats() {
-  if (_allStatsCache) {
-    return _allStatsCache;
-  }
-  const BASE_URL = "https://data.jsdelivr.com/v1/stats/packages/gh/freebuisness/html@main/files";
-  const PERIOD = "year";
-  const PAGE_BATCH = 5;
-
-  let page = 1;
-  let done = false;
-  const combinedMap = Object.create(null);
-
-  while (!done) {
-    const pages = Array.from({ length: PAGE_BATCH }, (_, i) => page + i);
-    const responses = await Promise.all(
-      pages.map(p =>
-        fetch(`${BASE_URL}?period=${PERIOD}&page=${p}&limit=100`)
-          .then(r => (r.ok ? r.json() : []))
-      )
-    );
-
-    for (const data of responses) {
-      if (!Array.isArray(data) || data.length === 0) {
-        done = true;
-        break;
-      }
-      for (const item of data) {
-        if (!item?.name) continue;
-        const match = item.name.match(/^\/(\d+)([.-])/);
-        if (!match) continue;
-        const id = match[1];
-        if (!combinedMap[id]) {
-          combinedMap[id] = { hits: 0, bandwidth: 0 };
-        }
-        combinedMap[id].hits += item.hits?.total ?? 0;
-        combinedMap[id].bandwidth += item.bandwidth?.total ?? 0;
-      }
-    }
-    page += PAGE_BATCH;
-  }
-  _allStatsCache = combinedMap;
-  return combinedMap;
-}
-
-async function getStats(id) {
-  id = String(id);
-  const allStats = await getAllStats();
-  return allStats[id]?.hits ?? 0;
-}
-
-function showZoneInfo() {
-    let id = Number(document.getElementById('zoneId').textContent);
-    document.getElementById('popupTitle').textContent = "Info";
-    const popupBody = document.getElementById('popupBody');
-    popupBody.innerHTML = `<p>Loading...</p>`
-    popupBody.contentEditable = false;
-    document.getElementById('popupOverlay').style.display = "flex";
-    fetch(`https://api.github.com/repos/freebuisness/html/commits?path=${id}.html`).then(res => res.json()).then(async json => {
-        let stats = await getStats(id);
-        let idjson = zones.filter(a=>a.id===id)[0];
-        document.getElementById('popupTitle').textContent = `${idjson.name} Info`;
-        const date = new Date(json.at(-1).commit.author.date);
-        let formatteddate = new Intl.DateTimeFormat("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true
-        }).format(date);
-        popupBody.innerHTML = `
-        <p>
-        <b>Id</b>: ${id}<br>
-        <b>Name</b>: ${idjson.name}<br>
-        ${idjson.author?`<b>Game Author</b>: ${idjson.author}<br>`:""}
-        ${idjson.authorLink?`<b>Game Author Link</b>: <a style="color:#FFCC00;" href=${idjson.authorLink}>${idjson.authorLink}</a><br>`:""}
-        ${idjson.special?`<b>Tags</b>: ${idjson.special}<br>`:""}
-        <b>Date Added</b>: ${formatteddate}<br>
-        <b>Times Played (Globally)</b>: ${Number(stats).toLocaleString("en-US")}
-        </p>`;
-    })
-}
-
-function closePopup() {
-    document.getElementById('popupOverlay').style.display = "none";
-}
-
 listZones();
 
 HTMLCanvasElement.prototype.toDataURL = function (...args) {
@@ -1169,4 +1209,4 @@ HTMLCanvasElement.prototype.toDataURL = function (...args) {
 };
 </script>
 </body>
-</html><!--  -->
+</html>
