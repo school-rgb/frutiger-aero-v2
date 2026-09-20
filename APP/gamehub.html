@@ -39,7 +39,7 @@
     <style>
         @font-face {
             font-family: 'CustomFont';
-            src: url('APPFONT/messi-sans.regular.otf') format('opentype');
+            src: url('YOUR_FONT_FILE.otf') format('opentype');
             font-weight: normal;
             font-style: normal;
         }
@@ -559,6 +559,12 @@ main {
     color: #ffffff;
 }
 
+.nav-item img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
 .nav-item svg {
     width: 20px;
     height: 20px;
@@ -683,11 +689,11 @@ body.app-fullscreen-mode #zoneFrame {
 
     <div class="bottom-nav-bar">
         <div class="nav-item active" id="navGnMath" onclick="switchLibraryType('gn-math')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M6 6h10"></path></svg>
+            <img class="pixelated-inverted" src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-20%204.16.48%20AM.png?raw=true" alt="GN Math Logo">
             <span>GN Math</span>
         </div>
         <div class="nav-item" id="navFruits" onclick="switchLibraryType('fruits')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            <img class="pixelated-inverted" src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM.png?raw=true" alt="Fruits Logo">
             <span>Fruits</span>
         </div>
     </div>
@@ -784,13 +790,11 @@ window.addEventListener('load', async () => {
     const gameId = urlParams.get('id');
 
     if (gameId) {
-        // Try GN Math first
         currentLibrary = 'gn-math';
         await listZones();
         let foundZone = zones.find(z => z.id + '' === gameId);
 
         if (!foundZone) {
-            // If not found in GN Math, automatically check Fruits library
             currentLibrary = 'fruits';
             document.getElementById('navGnMath').classList.remove('active');
             document.getElementById('navFruits').classList.add('active');
@@ -800,7 +804,6 @@ window.addEventListener('load', async () => {
         }
 
         if (foundZone) {
-            // Enter immersive standalone mode: hide header, nav, controls, and show full-screen game only
             document.body.classList.add('app-fullscreen-mode');
             openZone(foundZone);
         }
@@ -1084,7 +1087,6 @@ function openZone(file) {
     let activeCoverURL = (currentLibrary === 'fruits') ? fruitsCoverURL : coverURL;
     let activeHtmlURL = (currentLibrary === 'fruits') ? fruitsHtmlURL : htmlURL;
 
-    // Ensure iframe exists
     if (!zoneFrame || zoneFrame.contentDocument === null) {
         zoneFrame = document.createElement("iframe");
         zoneFrame.id = "zoneFrame";
