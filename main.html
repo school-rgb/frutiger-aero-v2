@@ -58,23 +58,42 @@
       inset: 0;
     }
 
-    #topWidget {
+    #topLeftWidget {
+      position: absolute;
+      left: 24px;
+      top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      color: #ffffff;
+      font-family: 'CustomFont', sans-serif;
+      font-size: 1.6rem;
+      z-index: 1;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    #topLeftWidget img {
+      width: 24px;
+      height: 24px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+
+    #topCenterWidget {
       position: absolute;
       left: 50%;
-      top: 20px;
+      top: 24px;
       transform: translateX(-50%);
       display: flex;
       align-items: center;
-      gap: 30px;
       color: #ffffff;
       font-family: 'CustomFont', sans-serif;
-      font-size: 3rem;
+      font-size: 2.2rem; /* Made smaller than the original 3rem */
       z-index: 1;
       cursor: grab;
       text-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
     
-    #topWidget.dragging { cursor: grabbing; }
+    #topCenterWidget.dragging { cursor: grabbing; }
 
     #rainCanvas {
       position: absolute;
@@ -328,29 +347,6 @@
     }
     .icon-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
 
-    .pin-badge {
-      position: absolute;
-      top: -8px;
-      right: -2px;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--badge-bg);
-      border: 2px solid var(--accent-color);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999 !important;
-      backdrop-filter: blur(4px);
-      transition: transform 0.2s, background 0.2s, border-color 0.2s;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    }
-    
-    .pin-badge:hover { background: #000000; border-color: #000000; transform: scale(1.1); }
-    .pin-badge img { width: 12px; height: 12px; object-fit: contain; filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.5)); }
-    .app-icon:hover .pin-badge { display: flex; }
-    .app-icon.pinned .pin-badge { display: flex; background: var(--accent-color); border-color: var(--bg-color); }
-    
     .search-view { display: none; flex-direction: column; gap: 16px; }
     .search-view.active { display: flex; }
     .search-category-title { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
@@ -478,11 +474,16 @@
 <body>
 
   <div id="desktopWallpaperContainer"></div>
-  <div id="topWidget">
+  
+  <div id="topLeftWidget">
     <span id="topTime"></span>
-    <span id="topDay"></span>
-    <span id="topBattery"></span>
+    <span id="topBattery" style="display:flex; align-items:center; gap: 8px;"></span>
   </div>
+
+  <div id="topCenterWidget">
+    <span id="topDay"></span>
+  </div>
+
   <canvas id="rainCanvas"></canvas>
   <div class="desktop" id="desktop"></div>
   <div class="alttab-overlay" id="altTabOverlay"></div>
@@ -492,7 +493,7 @@
       <h3>Wallpaper & style</h3>
       <div style="display:flex; gap: 8px;">
          <button class="win-btn" onclick="toggleRainEffect()" title="Toggle Rain" id="rainModalBtn">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8 2 4.5 5.5 4.5 9.5c0 1.5.5 2.8 1.3 4C6.5 14.5 9 17 12 22c3-5 5.5-7.5 6.2-8.5.8-1.2 1.3-2.5 1.3-4C19.5 5.5 16 2 12 2zm0 10.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 7.5 12 7.5s2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z"/></svg>
+            <img src="https://img.icons8.com/?size=100&id=12196&format=png&color=FFFFFF" alt="Rain">
          </button>
          <button class="win-btn close" onclick="closeWallpaperModal()">
             <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -599,8 +600,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'osState_v2.2.3';
-    const pinIconUrl = 'https://img.icons8.com/?size=100&id=0BngLkWjYAnC&format=png&color=FFFFFF';
+    const STORAGE_KEY = 'osState_v2.2.9';
 
     const defaultAppsData = [
       { name: 'Notes', icon: 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.25.09%20PM-inverted.png', url: 'APP/Notes.html' },
@@ -614,10 +614,6 @@
       { name: 'Subway Surfers', icon: 'https://macmagazine.com.br/wp-content/uploads/2012/09/17-icone-subway-surfers.png', url: 'APP/Subway Surfers.html' },
       { name: 'crossy road', icon: 'https://tse3.mm.bing.net/th/id/OIP.h2WLBdFHanMVXtPH277EwAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3', url: 'APP/clcrossyroad.html' }
     ];
-
-    const pinBadgeHTML = `<div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-      <img src="${pinIconUrl}" alt="Pin">
-    </div>`;
 
     let highestZIndex = 100;
     let currentPosition = 'bottom';
@@ -645,7 +641,7 @@
     const wallpaperModal = document.getElementById('wallpaperModal');
     const wallpaperContainer = document.getElementById('desktopWallpaperContainer');
     const altTabOverlay = document.getElementById('altTabOverlay');
-    const topWidget = document.getElementById('topWidget');
+    const topCenterWidget = document.getElementById('topCenterWidget');
     const wg = document.getElementById('wallpaperGridContainer');
     const previewArea = document.getElementById('wallpaperPreviewArea');
 
@@ -672,7 +668,7 @@
       el.className = 'app-icon' + (isPinned ? ' pinned' : '');
       if (isFromAppStore) el.setAttribute('data-appstore', 'true');
       el.setAttribute('onclick', `openApp('${name}', '${icon}', '${url}')`);
-      el.innerHTML = `${pinBadgeHTML}<div class="icon-img"><img src="${icon}" alt="${name}"></div><span>${name}</span>`;
+      el.innerHTML = `<div class="icon-img"><img src="${icon}" alt="${name}"></div><span>${name}</span>`;
       
       mainAppGrid.appendChild(el);
       saveState();
@@ -699,10 +695,24 @@
       if (navigator.getBattery) {
         try {
           const battery = await navigator.getBattery();
-          const update = () => { batEl.textContent = Math.round(battery.level * 100) + '% 🔋'; };
+          const update = () => { 
+            let level = Math.round(battery.level * 100);
+            let iconId = '107380'; // Default Full Battery
+            if (battery.charging) {
+              iconId = '10080'; // Charging
+            } else if (level <= 20) {
+              iconId = '51878'; // Low
+            } else if (level <= 50) {
+              iconId = '51876'; // Half
+            } else {
+              iconId = '51873'; // Full
+            }
+            batEl.innerHTML = `${level}% <img src="https://img.icons8.com/?size=100&id=${iconId}&format=png&color=FFFFFF" alt="Battery">`; 
+          };
           update();
           battery.addEventListener('levelchange', update);
-        } catch(e) { batEl.textContent = ''; }
+          battery.addEventListener('chargingchange', update);
+        } catch(e) { batEl.innerHTML = ''; }
       }
     }
     initBattery();
@@ -711,16 +721,16 @@
     let topDragOffsetX = 0;
     let topDragOffsetY = 0;
 
-    topWidget.addEventListener('mousedown', (e) => {
+    topCenterWidget.addEventListener('mousedown', (e) => {
       if (e.button === 2) {
         e.preventDefault();
         e.stopPropagation();
         isDraggingTopWidget = true;
-        topWidget.classList.add('dragging');
-        const rect = topWidget.getBoundingClientRect();
-        topWidget.style.transform = 'none';
-        topWidget.style.left = rect.left + 'px';
-        topWidget.style.top = rect.top + 'px';
+        topCenterWidget.classList.add('dragging');
+        const rect = topCenterWidget.getBoundingClientRect();
+        topCenterWidget.style.transform = 'none';
+        topCenterWidget.style.left = rect.left + 'px';
+        topCenterWidget.style.top = rect.top + 'px';
         topDragOffsetX = e.clientX - rect.left;
         topDragOffsetY = e.clientY - rect.top;
       }
@@ -730,19 +740,19 @@
       if (isDraggingTopWidget) {
         let newX = Math.round((e.clientX - topDragOffsetX) / 4) * 4;
         let newY = Math.round((e.clientY - topDragOffsetY) / 4) * 4;
-        topWidget.style.left = newX + 'px';
-        topWidget.style.top = newY + 'px';
+        topCenterWidget.style.left = newX + 'px';
+        topCenterWidget.style.top = newY + 'px';
       }
     });
 
     window.addEventListener('mouseup', (e) => {
       if (e.button === 2 && isDraggingTopWidget) {
         isDraggingTopWidget = false;
-        topWidget.classList.remove('dragging');
+        topCenterWidget.classList.remove('dragging');
       }
     });
 
-    topWidget.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); });
+    topCenterWidget.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); });
 
     function togglePin(e, appElement) {
       if (e) e.stopPropagation();
@@ -984,7 +994,7 @@
 
     window.addEventListener('contextmenu', e => {
       if (e.target.closest('#launcherMenu') && !e.target.closest('.app-icon')) return;
-      if (e.target.closest('.app-window') || e.target.closest('#topWidget') || e.target.closest('.wallpaper-modal')) return;
+      if (e.target.closest('.app-window') || e.target.closest('#topLeftWidget') || e.target.closest('#topCenterWidget') || e.target.closest('.wallpaper-modal')) return;
       
       const appIconEl = e.target.closest('.app-icon');
       if (appIconEl) {
