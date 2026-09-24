@@ -388,6 +388,7 @@
       padding: 6px 2px;
       text-align: center;
       transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1);
+      position: relative;
     }
 
     .app-icon:hover { transform: translateY(-3px) scale(1.05); }
@@ -411,6 +412,38 @@
       object-fit: cover; 
       border-radius: 12px; 
     }
+
+    /* --- NEW PIN BADGE STYLES --- */
+    .pin-badge {
+      position: absolute;
+      top: -4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      backdrop-filter: blur(4px);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    
+    .pin-badge:hover {
+      background: rgba(0, 0, 0, 0.8);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .app-icon:hover .pin-badge { display: flex; }
+    
+    .app-icon.pinned .pin-badge { 
+      display: flex; 
+      background: rgba(255, 255, 255, 0.2); 
+      border-color: rgba(255, 255, 255, 0.8);
+    }
+    /* ---------------------------- */
 
     .search-view { display: none; flex-direction: column; gap: 16px; }
     .search-view.active { display: flex; }
@@ -593,11 +626,18 @@
   </div>
 
   <div class="context-menu" id="appContextMenu">
+    <!-- Pin App Context Menu Option -->
+    <div class="context-item" id="pinAppCtxBtn">
+      <div class="context-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+      </div>
+      <span class="context-label" id="pinAppCtxLabel">Pin this app</span>
+    </div>
     <div class="context-item" id="deleteAppBtn" style="color: #ff5555;">
       <div class="context-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5555" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
       </div>
-      <span class="context-label">Delete this app</span>
+      <span class="context-label">Uninstall this app</span>
     </div>
   </div>
 
@@ -650,43 +690,74 @@
     <div class="launcher-content-scroll">
       <div class="default-view" id="defaultView">
         <div class="app-grid" id="mainAppGrid">
+          <!-- Apps will be dynamically loaded or pre-rendered with pins -->
           <div class="app-icon" onclick="openApp('Notes', 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.25.09%20PM-inverted.png', 'APP/Notes.html')">
+            <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </div>
             <div class="icon-img"><img src="https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.25.09%20PM-inverted.png" alt="Notes"></div>
             <span>Notes</span>
           </div>
           <div class="app-icon" onclick="openApp('movies', 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.59%20PM-inverted%20(1).png', 'https://school-rgb.github.io/frutimovies/')">
+            <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </div>
             <div class="icon-img"><img src="https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.59%20PM-inverted%20(1).png" alt="netflix"></div>
             <span>movies</span>
           </div>
           <div class="app-icon" onclick="openApp('YouTube', 'https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-21%206.52.10%20PM-inverted%20(1).png?raw=true', 'https://youtube-9f1.pages.dev/')">
+            <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </div>
             <div class="icon-img"><img src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-21%206.52.10%20PM-inverted%20(1).png?raw=true" alt="YouTube"></div>
             <span>YouTube</span>
           </div>
           <div class="app-icon" onclick="openApp('Anime', 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.17%20PM-inverted.png', 'https://school-rgb.github.io/anime-movies-in-html/')">
+            <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </div>
             <div class="icon-img"><img src="https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.17%20PM-inverted.png" alt="Anime"></div>
             <span>anime</span> 
           </div>
           <div class="app-icon" onclick="openApp('timer', 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.51%20PM-inverted.png', 'APP/timer.html')">
+             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </div>
             <div class="icon-img"><img src="https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.51%20PM-inverted.png" alt="timer"></div>
             <span>timer</span>
           </div>
           <div class="app-icon" onclick="openApp('frutiger game', 'https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM-inverted.png?raw=true', 'APP/gamehub.html')">
+             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </div>
             <div class="icon-img"><img src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM-inverted.png?raw=true" alt="frutiger game"></div>
             <span>frutiger game</span>
           </div>
           <div class="app-icon" onclick="openApp('geometry dash', 'https://th.bing.com/th/id/R.67dcf797f79315589cc8b18f502f93f5?rik=A7ss82CSOJPrkg&riu=http%3a%2f%2fvignette2.wikia.nocookie.net%2fgeometry-dash%2fimages%2f9%2f90%2fGeometryDash.png%2frevision%2flatest%3fcb%3d20160224042843&ehk=Hvk2rFdCmF08iQinZYieMsLbvo4NDNdKYic8xB6GqZE%3d&risl=&pid=ImgRaw&r=0', 'APP/Geometry Dash (1).html')">
+             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </div>
             <div class="icon-img"><img src="https://th.bing.com/th/id/R.67dcf797f79315589cc8b18f502f93f5?rik=A7ss82CSOJPrkg&riu=http%3a%2f%2fvignette2.wikia.nocookie.net%2fgeometry-dash%2fimages%2f9%2f90%2fGeometryDash.png%2frevision%2flatest%3fcb%3d20160224042843&ehk=Hvk2rFdCmF08iQinZYieMsLbvo4NDNdKYic8xB6GqZE%3d&risl=&pid=ImgRaw&r=0" alt="Geometry Dash"></div>
             <span>geometry dash</span>
           </div>
           <div class="app-icon" onclick="openApp('Plants vs. Zombies 2 Gardenless', 'https://th.bing.com/th/id/OIP.dqZAfbbyk9LZmU43iotB3wHaHa?w=173&h=183&c=7&r=0&o=7&dpr=1.4&pid=1.7&rm=3', 'APP/Plants vs. Zombies 2 Gardenless.html')">
+             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </div>
             <div class="icon-img"><img src="https://th.bing.com/th/id/OIP.dqZAfbbyk9LZmU43iotB3wHaHa?w=173&h=183&c=7&r=0&o=7&dpr=1.4&pid=1.7&rm=3" alt="PvZ 2"></div>
             <span>Plants vs. Zombies 2 Gardenless</span>
           </div>
           <div class="app-icon" onclick="openApp('Subway Surfers', 'https://macmagazine.com.br/wp-content/uploads/2012/09/17-icone-subway-surfers.png', 'APP/Subway Surfers.html')">
+             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </div>
             <div class="icon-img"><img src="https://macmagazine.com.br/wp-content/uploads/2012/09/17-icone-subway-surfers.png" alt="Subway Surfers"></div>
             <span>Subway Surfers</span>
           </div>
           <div class="app-icon" onclick="openApp('crossy road', 'https://tse3.mm.bing.net/th/id/OIP.h2WLBdFHanMVXtPH277EwAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3', 'APP/clcrossyroad.html')">
+             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </div>
             <div class="icon-img"><img src="https://tse3.mm.bing.net/th/id/OIP.h2WLBdFHanMVXtPH277EwAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="crossy road"></div>
             <span>crossy road</span>
           </div>
@@ -717,6 +788,11 @@
     // Updated Storage Key to reset state while allowing future saving
     const STORAGE_KEY = 'osState_v2.5_reset';
 
+    // SVG Pin icon reused for injections
+    const pinBadgeHTML = `<div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+    </div>`;
+
     // --- LISTEN FOR MESSAGES FROM APP STORE IFRAME ---
     window.addEventListener('message', (event) => {
       if (!event.data) return;
@@ -729,7 +805,7 @@
       }
     });
 
-    function installAppToOS(name, icon, url, isFromAppStore = true) {
+    function installAppToOS(name, icon, url, isFromAppStore = true, isPinned = false) {
       const mainAppGrid = document.getElementById('mainAppGrid');
       if (!mainAppGrid) return;
 
@@ -740,12 +816,12 @@
       }
 
       const el = document.createElement('div');
-      el.className = 'app-icon';
+      el.className = 'app-icon' + (isPinned ? ' pinned' : '');
       if (isFromAppStore) {
         el.setAttribute('data-appstore', 'true');
       }
       el.setAttribute('onclick', `openApp('${name}', '${icon}', '${url}')`);
-      el.innerHTML = `<div class="icon-img"><img src="${icon}" alt="${name}"></div><span>${name}</span>`;
+      el.innerHTML = `${pinBadgeHTML}<div class="icon-img"><img src="${icon}" alt="${name}"></div><span>${name}</span>`;
       
       mainAppGrid.appendChild(el);
 
@@ -837,6 +913,15 @@
       e.stopPropagation();
     });
 
+    // Toggle Pin Function
+    function togglePin(e, appElement) {
+      if(e) {
+        e.stopPropagation(); // Prevents the app from opening when clicking the pin
+      }
+      appElement.classList.toggle('pinned');
+      saveState();
+    }
+
     function saveState() {
       const state = {
         wallpaperSrc: currentWallpaperUrl,
@@ -847,9 +932,10 @@
         rainActive: isRainActive,
         apps: Array.from(document.querySelectorAll('#mainAppGrid .app-icon')).map(app => ({
           name: app.querySelector('span').textContent,
-          icon: app.querySelector('img').src,
+          icon: app.querySelector('.icon-img img').src,
           url: app.getAttribute('onclick').match(/'([^']*)'/g)[2].replace(/'/g, ''),
-          isFromAppStore: app.getAttribute('data-appstore') === 'true'
+          isFromAppStore: app.getAttribute('data-appstore') === 'true',
+          isPinned: app.classList.contains('pinned')
         }))
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -863,12 +949,12 @@
           grid.innerHTML = '';
           state.apps.forEach(app => {
             const el = document.createElement('div');
-            el.className = 'app-icon';
+            el.className = 'app-icon' + (app.isPinned ? ' pinned' : '');
             if (app.isFromAppStore) {
               el.setAttribute('data-appstore', 'true');
             }
             el.setAttribute('onclick', `openApp('${app.name}', '${app.icon}', '${app.url}')`);
-            el.innerHTML = `<div class="icon-img"><img src="${app.icon}" alt="${app.name}"></div><span>${app.name}</span>`;
+            el.innerHTML = `${pinBadgeHTML}<div class="icon-img"><img src="${app.icon}" alt="${app.name}"></div><span>${app.name}</span>`;
             grid.appendChild(el);
           });
         }
@@ -1045,11 +1131,18 @@
 
     // Context Menu Handling
     window.addEventListener('contextmenu', e => {
-      if (e.target.closest('#launcherMenu') || e.target.closest('.app-window') || e.target.closest('#dayDisplay')) return;
+      if (e.target.closest('#launcherMenu') && !e.target.closest('.app-icon')) return;
+      if (e.target.closest('.app-window') || e.target.closest('#dayDisplay')) return;
       
       const appIconEl = e.target.closest('.app-icon');
       if (appIconEl) {
         e.preventDefault();
+        e.stopPropagation();
+
+        // Update the Pin label depending on state
+        const isPinned = appIconEl.classList.contains('pinned');
+        document.getElementById('pinAppCtxLabel').textContent = isPinned ? 'Unpin this app' : 'Pin this app';
+
         appContextMenu.style.display = 'flex';
         appContextMenu.style.left = Math.min(e.pageX, window.innerWidth - 220) + 'px';
         appContextMenu.style.top = Math.min(e.pageY, window.innerHeight - 80) + 'px';
@@ -1074,6 +1167,20 @@
       }
     });
 
+    // Pin app from Right Click context menu
+    document.getElementById('pinAppCtxBtn').onclick = () => {
+      const targetAppName = appContextMenu.getAttribute('data-target-app');
+      if (targetAppName) {
+        const appIcons = document.querySelectorAll('#mainAppGrid .app-icon');
+        appIcons.forEach(app => {
+          if (app.querySelector('span').textContent === targetAppName) {
+            togglePin(null, app); // null event since we aren't clicking directly
+          }
+        });
+        appContextMenu.style.display = 'none';
+      }
+    };
+
     document.getElementById('deleteAppBtn').onclick = () => {
       const targetAppName = appContextMenu.getAttribute('data-target-app');
       if (targetAppName) {
@@ -1084,10 +1191,10 @@
             if (openApps[targetAppName]) {
               closeApp(targetAppName);
             }
+            updateInstalledApps();
+            saveState();
           }
         });
-        saveState();
-        updateInstalledApps();
         appContextMenu.style.display = 'none';
       }
     };
@@ -1095,292 +1202,374 @@
     function toggleAlwaysHideShelf() {
       isAutohideEnabled = !isAutohideEnabled;
       document.getElementById('autohideLabel').textContent = isAutohideEnabled ? "Disable Autohide" : "Autohide Shelf";
-      if(isAutohideEnabled) {
+      if (isAutohideEnabled) {
         shelf.classList.add('autohide');
         shelfTriggerZone.classList.add('active');
       } else {
-        shelf.classList.remove('autohide');
+        shelf.classList.remove('autohide', 'reveal');
         shelfTriggerZone.classList.remove('active');
       }
-      contextMenu.classList.remove('active');
       saveState();
+      contextMenu.classList.remove('active');
     }
 
     function setShelfPosition(pos) {
       shelf.classList.remove('pos-bottom', 'pos-left', 'pos-right');
+      launcher.classList.remove('pos-bottom', 'pos-left', 'pos-right');
       shelfTriggerZone.classList.remove('pos-bottom', 'pos-left', 'pos-right');
-      launcher.classList.remove('pos-bottom', 'pos-left', 'pos-right', 'dragged-active');
-      
-      launcher.style.transform = '';
-      launcher.style.left = '';
-      launcher.style.top = '';
-      launcher.style.right = '';
-      launcher.style.bottom = '';
 
-      currentPosition = pos;
       shelf.classList.add(`pos-${pos}`);
-      shelfTriggerZone.classList.add(`pos-${pos}`);
       launcher.classList.add(`pos-${pos}`);
-
-      contextMenu.classList.remove('active');
+      shelfTriggerZone.classList.add(`pos-${pos}`);
+      currentPosition = pos;
       saveState();
+      contextMenu.classList.remove('active');
     }
 
     shelfTriggerZone.addEventListener('mouseenter', () => {
-      if(isAutohideEnabled || shelf.classList.contains('app-fullscreen-hide')) shelf.classList.add('reveal');
+      if (isAutohideEnabled || shelf.classList.contains('app-fullscreen-hide')) {
+        shelf.classList.add('reveal');
+      }
     });
+
     shelf.addEventListener('mouseleave', () => {
-      if(isAutohideEnabled || shelf.classList.contains('app-fullscreen-hide')) shelf.classList.remove('reveal');
-    });
-    shelf.addEventListener('mouseenter', () => {
-      if(isAutohideEnabled || shelf.classList.contains('app-fullscreen-hide')) shelf.classList.add('reveal');
-    });
-
-    function checkFullscreenApps() {
-      let hasMaximized = false;
-      for (const id in openApps) {
-        if (!openApps[id].window.classList.contains('hidden') && openApps[id].isMaximized) {
-          hasMaximized = true;
-          break;
-        }
+      if (isAutohideEnabled || shelf.classList.contains('app-fullscreen-hide')) {
+        setTimeout(() => shelf.classList.remove('reveal'), 150);
       }
-      if (hasMaximized && !isAutohideEnabled) {
-        shelf.classList.add('app-fullscreen-hide');
-        shelfTriggerZone.classList.add('active');
-      } else if (!isAutohideEnabled) {
-        shelf.classList.remove('app-fullscreen-hide', 'reveal');
-        shelfTriggerZone.classList.remove('active');
-      }
-    }
-
-    function openWallpaperModal() { wallpaperModal.classList.add('active'); contextMenu.classList.remove('active'); }
-    function closeWallpaperModal() { wallpaperModal.classList.remove('active'); }
+    });
 
     function toggleLauncher(e) {
-      if(e) e.stopPropagation();
-      launcher.classList.toggle('active');
-      updateInstalledApps();
+      if (e) e.stopPropagation();
+      if (launcher.classList.contains('active')) {
+        launcher.classList.remove('active', 'dragged-active');
+        launcher.style.transform = '';
+      } else {
+        launcher.classList.add('active');
+        document.getElementById('searchInput').value = '';
+        document.getElementById('defaultView').classList.remove('hidden');
+        document.getElementById('searchView').classList.remove('active');
+      }
+      contextMenu.classList.remove('active');
     }
 
     document.addEventListener('click', e => {
-      if (!e.target.closest('.launcher') && !e.target.closest('#launcherBtn')) {
-        launcher.classList.remove('active');
+      if (launcher.classList.contains('active') && !e.target.closest('.launcher') && !e.target.closest('.launcher-btn')) {
+        launcher.classList.remove('active', 'dragged-active');
+        launcher.style.transform = '';
       }
     });
 
+    // MAKE LAUNCHER DRAGGABLE
     let isDraggingLauncher = false;
-    let launcherOffsetX, launcherOffsetY;
+    let launcherDragOffsetX = 0;
+    let launcherDragOffsetY = 0;
 
     launcherDragHandle.addEventListener('mousedown', (e) => {
       isDraggingLauncher = true;
-      launcher.classList.add('dragging');
-      launcher.classList.add('dragged-active'); 
+      launcher.classList.add('dragging', 'dragged-active');
+      
       const rect = launcher.getBoundingClientRect();
-      launcher.style.transform = 'none'; 
+      launcher.style.transform = 'none';
       launcher.style.left = rect.left + 'px';
       launcher.style.top = rect.top + 'px';
       launcher.style.bottom = 'auto';
       launcher.style.right = 'auto';
 
-      launcherOffsetX = e.clientX - rect.left;
-      launcherOffsetY = e.clientY - rect.top;
-    });
-
-    let currentResizingElement = null;
-    let resizeDir = '';
-    let startW, startH, startX, startY, startLeft, startTop;
-
-    function initResize(e, el, dir) {
+      launcherDragOffsetX = e.clientX - rect.left;
+      launcherDragOffsetY = e.clientY - rect.top;
+      
       e.preventDefault();
-      e.stopPropagation();
-      currentResizingElement = el;
-      resizeDir = dir;
-      el.classList.add('resizing');
-      document.body.classList.add('is-interacting');
-      const rect = el.getBoundingClientRect();
-      startW = rect.width;
-      startH = rect.height;
-      startX = e.clientX;
-      startY = e.clientY;
-      startLeft = rect.left;
-      startTop = rect.top;
-    }
-
-    document.querySelectorAll('.launcher .resize-handle').forEach(handle => {
-      handle.addEventListener('mousedown', e => {
-        initResize(e, launcher, handle.className.replace('resize-handle ', ''));
-      });
     });
 
-    window.addEventListener('mousemove', e => {
+    window.addEventListener('mousemove', (e) => {
       if (isDraggingLauncher) {
-        launcher.style.left = (e.clientX - launcherOffsetX) + 'px';
-        launcher.style.top = (e.clientY - launcherOffsetY) + 'px';
-      }
-
-      if (currentResizingElement) {
-        let dw = e.clientX - startX;
-        let dh = e.clientY - startY;
-
-        if (resizeDir.includes('e')) {
-          currentResizingElement.style.width = Math.max(300, startW + dw) + 'px';
-        }
-        if (resizeDir.includes('s')) {
-          currentResizingElement.style.height = Math.max(300, startH + dh) + 'px';
-        }
-        if (resizeDir.includes('w')) {
-          let newW = Math.max(300, startW - dw);
-          if(newW > 300) {
-            currentResizingElement.style.width = newW + 'px';
-            currentResizingElement.style.left = (startLeft + dw) + 'px';
-          }
-        }
-        if (resizeDir.includes('n')) {
-          let newH = Math.max(300, startH - dh);
-          if(newH > 300) {
-            currentResizingElement.style.height = newH + 'px';
-            currentResizingElement.style.top = (startTop + dh) + 'px';
-          }
-        }
+        launcher.style.left = (e.clientX - launcherDragOffsetX) + 'px';
+        launcher.style.top = (e.clientY - launcherDragOffsetY) + 'px';
       }
     });
 
     window.addEventListener('mouseup', () => {
-      isDraggingLauncher = false;
-      if(launcher) launcher.classList.remove('dragging');
-      if (currentResizingElement) {
-        currentResizingElement.classList.remove('resizing');
-        document.body.classList.remove('is-interacting');
-        currentResizingElement = null;
+      if (isDraggingLauncher) {
+        isDraggingLauncher = false;
+        launcher.classList.remove('dragging');
       }
     });
 
-    function updateInstalledApps() {
-      installedApps = Array.from(document.querySelectorAll('#mainAppGrid .app-icon')).map(app => {
-        return {
-          name: app.querySelector('span').textContent,
-          icon: app.querySelector('img').src,
-          url: app.getAttribute('onclick').match(/'([^']*)'/g)[2].replace(/'/g, ''),
-          isFromAppStore: app.getAttribute('data-appstore') === 'true'
-        };
-      });
-    }
+    // Make launcher resizable
+    function setupLauncherResizing() {
+      const handles = launcher.querySelectorAll('.resize-handle');
+      let isResizing = false;
+      let currentHandle = null;
+      let startX, startY, startWidth, startHeight, startLeft, startTop;
 
-    const searchInput = document.getElementById('searchInput');
-    const defaultView = document.getElementById('defaultView');
-    const searchView = document.getElementById('searchView');
-
-    searchInput.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      if (!q) {
-        defaultView.classList.remove('hidden');
-        searchView.classList.remove('active');
-        return;
-      }
-      
-      defaultView.classList.add('hidden');
-      searchView.classList.add('active');
-      searchView.innerHTML = '';
-
-      const localResults = installedApps.filter(app => app.name.toLowerCase().includes(q));
-      
-      if (localResults.length > 0) {
-        searchView.innerHTML += `<div class="search-category-title">Installed Apps</div>`;
-        localResults.forEach(app => {
-          searchView.innerHTML += `
-            <div class="search-result-item" onclick="openApp('${app.name}', '${app.icon}', '${app.url}'); document.getElementById('launcherMenu').classList.remove('active');">
-              <img src="${app.icon}">
-              <span>${app.name}</span>
-            </div>
-          `;
+      handles.forEach(handle => {
+        handle.addEventListener('mousedown', (e) => {
+          isResizing = true;
+          currentHandle = handle;
+          startX = e.clientX;
+          startY = e.clientY;
+          const rect = launcher.getBoundingClientRect();
+          startWidth = rect.width;
+          startHeight = rect.height;
+          startLeft = rect.left;
+          startTop = rect.top;
+          
+          launcher.style.transform = 'none';
+          launcher.style.left = startLeft + 'px';
+          launcher.style.top = startTop + 'px';
+          launcher.style.bottom = 'auto';
+          launcher.style.right = 'auto';
+          
+          launcher.classList.add('resizing', 'dragged-active');
+          document.body.classList.add('is-interacting');
+          e.preventDefault();
         });
-      }
-
-      searchView.innerHTML += `<div class="search-category-title">Web Search</div>`;
-      searchView.innerHTML += `
-        <div class="search-result-item" onclick="openApp('Google Search', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png', 'https://www.google.com/search?igu=1&q=${encodeURIComponent(q)}'); document.getElementById('launcherMenu').classList.remove('active');">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png">
-          <span>Search web for "${q}"</span>
-        </div>
-      `;
-    });
-
-    function openApp(name, iconSrc, url) {
-      if (openApps[name]) {
-        showAppWindow(name);
-        return;
-      }
-
-      launcher.classList.remove('active');
-
-      const win = document.createElement('div');
-      win.className = 'app-window windowed';
-      win.id = `win-${name.replace(/\s+/g, '-')}`;
-      win.style.zIndex = ++highestZIndex;
-      win.style.left = (window.innerWidth / 2 - 475) + 'px';
-      win.style.top = (window.innerHeight / 2 - 300) + 'px';
-
-      const handles = ['n', 's', 'w', 'e', 'nw', 'ne', 'sw', 'se'];
-      handles.forEach(h => {
-        const hDiv = document.createElement('div');
-        hDiv.className = `resize-handle ${h}`;
-        hDiv.addEventListener('mousedown', e => initResize(e, win, h));
-        win.appendChild(hDiv);
-      });
-
-      const header = document.createElement('div');
-      header.className = 'window-header';
-      
-      const titleDiv = document.createElement('div');
-      titleDiv.className = 'window-title';
-      titleDiv.innerHTML = `<img src="${iconSrc}"> ${name}`;
-
-      const controlsDiv = document.createElement('div');
-      controlsDiv.className = 'window-controls';
-      
-      const minBtn = document.createElement('button'); minBtn.className = 'win-btn'; minBtn.innerHTML = '−';
-      const maxBtn = document.createElement('button'); maxBtn.className = 'win-btn'; maxBtn.innerHTML = '□';
-      const closeBtn = document.createElement('button'); closeBtn.className = 'win-btn close'; closeBtn.innerHTML = '✕';
-
-      minBtn.onclick = (e) => { e.stopPropagation(); hideAppWindow(name); };
-      maxBtn.onclick = (e) => { e.stopPropagation(); toggleMaximize(name); };
-      closeBtn.onclick = (e) => { e.stopPropagation(); closeApp(name); };
-
-      controlsDiv.append(minBtn, maxBtn, closeBtn);
-      header.append(titleDiv, controlsDiv);
-
-      const body = document.createElement('div');
-      body.className = 'window-body';
-      body.innerHTML = `<iframe src="${url}"></iframe>`;
-
-      win.append(header, body);
-      desktop.appendChild(win);
-
-      let isDragging = false, startX, startY, startLeft, startTop;
-      header.addEventListener('mousedown', (e) => {
-        if(e.target.closest('.win-btn') || openApps[name].isMaximized) return;
-        isDragging = true;
-        win.classList.add('dragging');
-        document.body.classList.add('is-interacting');
-        highestZIndex++;
-        win.style.zIndex = highestZIndex;
-        startX = e.clientX; startY = e.clientY;
-        startLeft = parseInt(win.style.left || 0);
-        startTop = parseInt(win.style.top || 0);
       });
 
       window.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-          win.style.left = (startLeft + (e.clientX - startX)) + 'px';
-          win.style.top = (startTop + (e.clientY - startY)) + 'px';
+        if (!isResizing) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        let newWidth = startWidth;
+        let newHeight = startHeight;
+        let newLeft = startLeft;
+        let newTop = startTop;
+
+        const isN = currentHandle.classList.contains('n') || currentHandle.classList.contains('nw') || currentHandle.classList.contains('ne');
+        const isS = currentHandle.classList.contains('s') || currentHandle.classList.contains('sw') || currentHandle.classList.contains('se');
+        const isW = currentHandle.classList.contains('w') || currentHandle.classList.contains('nw') || currentHandle.classList.contains('sw');
+        const isE = currentHandle.classList.contains('e') || currentHandle.classList.contains('ne') || currentHandle.classList.contains('se');
+
+        if (isE) newWidth = startWidth + dx;
+        if (isW) { newWidth = startWidth - dx; newLeft = startLeft + dx; }
+        if (isS) newHeight = startHeight + dy;
+        if (isN) { newHeight = startHeight - dy; newTop = startTop + dy; }
+
+        if (newWidth > 320) {
+          launcher.style.width = `${newWidth}px`;
+          launcher.style.left = `${newLeft}px`;
+        }
+        if (newHeight > 350) {
+          launcher.style.height = `${newHeight}px`;
+          launcher.style.top = `${newTop}px`;
         }
       });
 
       window.addEventListener('mouseup', () => {
-        isDragging = false;
-        win.classList.remove('dragging');
-        document.body.classList.remove('is-interacting');
+        if (isResizing) {
+          isResizing = false;
+          launcher.classList.remove('resizing');
+          document.body.classList.remove('is-interacting');
+        }
       });
+    }
+    setupLauncherResizing();
+
+    const searchInput = document.getElementById('searchInput');
+    const searchView = document.getElementById('searchView');
+    const defaultView = document.getElementById('defaultView');
+
+    function updateInstalledApps() {
+      installedApps = Array.from(document.querySelectorAll('#mainAppGrid .app-icon')).map(el => {
+        return {
+          name: el.querySelector('span').textContent,
+          icon: el.querySelector('.icon-img img').src,
+          url: el.getAttribute('onclick').match(/'([^']*)'/g)[2].replace(/'/g, '')
+        };
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      if (q === '') {
+        defaultView.classList.remove('hidden');
+        searchView.classList.remove('active');
+        return;
+      }
+
+      defaultView.classList.add('hidden');
+      searchView.classList.add('active');
+      searchView.innerHTML = '';
+
+      const localMatches = installedApps.filter(app => app.name.toLowerCase().includes(q));
+      
+      if (localMatches.length > 0) {
+        const cat = document.createElement('div');
+        cat.innerHTML = `<div class="search-category-title">Installed Apps</div>`;
+        localMatches.forEach(app => {
+          const item = document.createElement('div');
+          item.className = 'search-result-item';
+          item.innerHTML = `<img src="${app.icon}" alt="${app.name}"><span>${app.name}</span>`;
+          item.onclick = () => { toggleLauncher(); openApp(app.name, app.icon, app.url); };
+          cat.appendChild(item);
+        });
+        searchView.appendChild(cat);
+      } else {
+        searchView.innerHTML = '<div style="color:#aaa; font-size:12px; text-align:center; margin-top:20px;">No results found.</div>';
+      }
+    });
+
+    function makeWindowDraggable(win, header) {
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      header.addEventListener('mousedown', (e) => {
+        if (win.classList.contains('windowed')) {
+          isDragging = true;
+          win.classList.add('dragging');
+          highestZIndex++;
+          win.style.zIndex = highestZIndex;
+          
+          offsetX = e.clientX - win.getBoundingClientRect().left;
+          offsetY = e.clientY - win.getBoundingClientRect().top;
+          
+          document.body.classList.add('is-interacting');
+        }
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+          win.style.left = (e.clientX - offsetX) + 'px';
+          win.style.top = (e.clientY - offsetY) + 'px';
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          win.classList.remove('dragging');
+          document.body.classList.remove('is-interacting');
+        }
+      });
+    }
+
+    function makeWindowResizable(win) {
+      const handles = win.querySelectorAll('.resize-handle');
+      let isResizing = false;
+      let currentHandle = null;
+      let startX, startY, startWidth, startHeight, startLeft, startTop;
+
+      handles.forEach(handle => {
+        handle.addEventListener('mousedown', (e) => {
+          if (!win.classList.contains('windowed')) return;
+          isResizing = true;
+          currentHandle = handle;
+          startX = e.clientX;
+          startY = e.clientY;
+          const rect = win.getBoundingClientRect();
+          startWidth = rect.width;
+          startHeight = rect.height;
+          startLeft = rect.left;
+          startTop = rect.top;
+          
+          win.classList.add('resizing');
+          document.body.classList.add('is-interacting');
+          highestZIndex++;
+          win.style.zIndex = highestZIndex;
+          e.preventDefault();
+        });
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        let newWidth = startWidth;
+        let newHeight = startHeight;
+        let newLeft = startLeft;
+        let newTop = startTop;
+
+        const isN = currentHandle.classList.contains('n') || currentHandle.classList.contains('nw') || currentHandle.classList.contains('ne');
+        const isS = currentHandle.classList.contains('s') || currentHandle.classList.contains('sw') || currentHandle.classList.contains('se');
+        const isW = currentHandle.classList.contains('w') || currentHandle.classList.contains('nw') || currentHandle.classList.contains('sw');
+        const isE = currentHandle.classList.contains('e') || currentHandle.classList.contains('ne') || currentHandle.classList.contains('se');
+
+        if (isE) newWidth = startWidth + dx;
+        if (isW) { newWidth = startWidth - dx; newLeft = startLeft + dx; }
+        if (isS) newHeight = startHeight + dy;
+        if (isN) { newHeight = startHeight - dy; newTop = startTop + dy; }
+
+        if (newWidth > 300) {
+          win.style.width = `${newWidth}px`;
+          win.style.left = `${newLeft}px`;
+        }
+        if (newHeight > 200) {
+          win.style.height = `${newHeight}px`;
+          win.style.top = `${newTop}px`;
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isResizing) {
+          isResizing = false;
+          win.classList.remove('resizing');
+          document.body.classList.remove('is-interacting');
+        }
+      });
+    }
+
+    function checkFullscreenApps() {
+      const hasFullscreen = Array.from(document.querySelectorAll('.app-window')).some(w => !w.classList.contains('hidden') && !w.classList.contains('windowed'));
+      if (hasFullscreen) {
+        shelf.classList.add('app-fullscreen-hide');
+        shelfTriggerZone.classList.add('active');
+      } else {
+        shelf.classList.remove('app-fullscreen-hide');
+        if (!isAutohideEnabled) shelfTriggerZone.classList.remove('active');
+      }
+    }
+
+    function openApp(name, iconUrl, iframeUrl) {
+      if (launcher.classList.contains('active')) toggleLauncher();
+      
+      if (openApps[name]) {
+        const win = openApps[name].window;
+        win.classList.remove('hidden');
+        highestZIndex++;
+        win.style.zIndex = highestZIndex;
+        checkFullscreenApps();
+        return;
+      }
+
+      const win = document.createElement('div');
+      win.className = 'app-window windowed'; 
+      highestZIndex++;
+      win.style.zIndex = highestZIndex;
+
+      win.innerHTML = `
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle sw"></div>
+        <div class="resize-handle se"></div>
+        <div class="window-header">
+          <div class="window-title">
+            <img src="${iconUrl}" alt="${name}">
+            ${name}
+          </div>
+          <div class="window-controls">
+            <button class="win-btn" onclick="toggleWindowMode('${name}')"><img src="https://img.icons8.com/ios-glyphs/30/maximize-button.png"></button>
+            <button class="win-btn close" onclick="closeApp('${name}')">✕</button>
+          </div>
+        </div>
+        <div class="window-body">
+          <iframe src="${iframeUrl}"></iframe>
+        </div>
+      `;
+
+      win.style.left = (window.innerWidth / 2 - 475) + 'px';
+      win.style.top = (window.innerHeight / 2 - 300) + 'px';
+
+      desktop.appendChild(win);
+      
+      const header = win.querySelector('.window-header');
+      makeWindowDraggable(win, header);
+      makeWindowResizable(win);
 
       win.addEventListener('mousedown', () => {
         highestZIndex++;
@@ -1389,124 +1578,88 @@
 
       const shelfIcon = document.createElement('div');
       shelfIcon.className = 'shelf-app-icon active';
-      shelfIcon.id = `dock-${name.replace(/\s+/g, '-')}`;
-      shelfIcon.innerHTML = `<img src="${iconSrc}">`;
+      shelfIcon.title = name;
+      shelfIcon.innerHTML = `<img src="${iconUrl}" alt="${name}">`;
       shelfIcon.onclick = () => {
-        if (openApps[name].window.classList.contains('hidden')) {
-          showAppWindow(name);
+        if (win.classList.contains('hidden')) {
+          win.classList.remove('hidden');
+          highestZIndex++;
+          win.style.zIndex = highestZIndex;
         } else if (win.style.zIndex == highestZIndex) {
-          hideAppWindow(name);
+          win.classList.add('hidden');
         } else {
           highestZIndex++;
           win.style.zIndex = highestZIndex;
         }
+        checkFullscreenApps();
       };
       shelfCenter.appendChild(shelfIcon);
 
-      openApps[name] = { window: win, dock: shelfIcon, isMaximized: false };
+      openApps[name] = { window: win, shelfIcon: shelfIcon, iconUrl: iconUrl, name: name };
       checkFullscreenApps();
-      updateAltTabKeys();
     }
 
-    function toggleMaximize(name) {
-      const app = openApps[name];
-      if (app.isMaximized) {
-        app.window.classList.add('windowed');
-        app.window.style.width = '950px';
-        app.window.style.height = '600px';
-        app.window.style.left = (window.innerWidth / 2 - 475) + 'px';
-        app.window.style.top = (window.innerHeight / 2 - 300) + 'px';
-        app.isMaximized = false;
-      } else {
-        app.window.classList.remove('windowed');
-        app.window.style.width = '100vw';
-        app.window.style.height = '100vh';
-        app.window.style.left = '0px';
-        app.window.style.top = '0px';
-        app.isMaximized = true;
+    function toggleWindowMode(name) {
+      if (openApps[name]) {
+        const win = openApps[name].window;
+        win.classList.toggle('windowed');
+        checkFullscreenApps();
       }
-      highestZIndex++;
-      app.window.style.zIndex = highestZIndex;
-      checkFullscreenApps();
-    }
-
-    function hideAppWindow(name) {
-      openApps[name].window.classList.add('hidden');
-      openApps[name].dock.classList.remove('active');
-      checkFullscreenApps();
-    }
-
-    function showAppWindow(name) {
-      const app = openApps[name];
-      app.window.classList.remove('hidden');
-      app.dock.classList.add('active');
-      highestZIndex++;
-      app.window.style.zIndex = highestZIndex;
-      checkFullscreenApps();
     }
 
     function closeApp(name) {
-      openApps[name].window.remove();
-      openApps[name].dock.remove();
-      delete openApps[name];
-      checkFullscreenApps();
-      updateAltTabKeys();
+      if (openApps[name]) {
+        openApps[name].window.remove();
+        openApps[name].shelfIcon.remove();
+        delete openApps[name];
+        checkFullscreenApps();
+      }
     }
 
-    function updateAltTabKeys() {
-      altTabAppKeys = Object.keys(openApps);
-    }
+    function openWallpaperModal() { wallpaperModal.classList.add('active'); contextMenu.classList.remove('active'); }
+    function closeWallpaperModal() { wallpaperModal.classList.remove('active'); }
 
-    let isAltTabMode = false;
-    
-    document.addEventListener('keydown', (e) => {
+    // Alt+Tab Logic
+    window.addEventListener('keydown', e => {
       if (e.altKey && e.key === 'Tab') {
         e.preventDefault();
+        altTabAppKeys = Object.keys(openApps).filter(key => !openApps[key].window.classList.contains('hidden'));
         if (altTabAppKeys.length === 0) return;
-        
-        if (!isAltTabMode) {
-          isAltTabMode = true;
+
+        if (!altTabOverlay.classList.contains('active')) {
           altTabOverlay.classList.add('active');
-          renderAltTabGrid();
+          altTabIndex = 0;
+        } else {
+          altTabIndex = (altTabIndex + 1) % altTabAppKeys.length;
         }
-        
-        altTabIndex = (altTabIndex + (e.shiftKey ? -1 : 1) + altTabAppKeys.length) % altTabAppKeys.length;
-        updateAltTabSelection();
+        renderAltTab();
       }
     });
 
-    document.addEventListener('keyup', (e) => {
-      if (e.key === 'Alt' && isAltTabMode) {
-        isAltTabMode = false;
+    window.addEventListener('keyup', e => {
+      if (e.key === 'Alt' && altTabOverlay.classList.contains('active')) {
         altTabOverlay.classList.remove('active');
-        if(altTabAppKeys.length > 0) {
-          const targetApp = altTabAppKeys[altTabIndex];
-          showAppWindow(targetApp);
+        if (altTabAppKeys.length > 0) {
+          const selectedApp = openApps[altTabAppKeys[altTabIndex]];
+          highestZIndex++;
+          selectedApp.window.style.zIndex = highestZIndex;
         }
       }
     });
 
-    function renderAltTabGrid() {
+    function renderAltTab() {
       altTabOverlay.innerHTML = '';
       altTabAppKeys.forEach((key, index) => {
-        const appInfo = installedApps.find(a => a.name === key) || { icon: openApps[key].dock.querySelector('img').src };
+        const app = openApps[key];
         const card = document.createElement('div');
-        card.className = 'alttab-card' + (index === altTabIndex ? ' selected' : '');
-        card.innerHTML = `<img src="${appInfo.icon}"><span>${key}</span>`;
+        card.className = `alttab-card ${index === altTabIndex ? 'selected' : ''}`;
+        card.innerHTML = `<img src="${app.iconUrl}" alt="${app.name}"><span>${app.name}</span>`;
         altTabOverlay.appendChild(card);
       });
     }
 
-    function updateAltTabSelection() {
-      const cards = altTabOverlay.querySelectorAll('.alttab-card');
-      cards.forEach((c, i) => {
-        if(i === altTabIndex) c.classList.add('selected');
-        else c.classList.remove('selected');
-      });
-    }
-
-    loadState();
     fetchGitHubWallpapers();
+    loadState();
   </script>
 </body>
 </html>
