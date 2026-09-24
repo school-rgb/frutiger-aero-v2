@@ -1,13 +1,28 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Tab</title>
+  <title>New Tab OS</title>
   <style>
     @font-face {
       font-family: 'CustomFont';
       src: url('Electroharmonix.otf') format('opentype');
+    }
+
+    :root {
+      --accent-color: #ffffff;
+      --bg-color: #000000;
+      --window-bg: #09090b;
+      --launcher-bg: rgba(12, 12, 12, 0.85);
+      --shelf-bg: rgba(0, 0, 0, 0.65);
+      --text-primary: #ffffff;
+      --text-secondary: #aaaaaa;
+      --modal-bg: rgba(18, 18, 18, 0.85);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --hover-bg: rgba(255, 255, 255, 0.12);
+      --badge-bg: rgba(0, 0, 0, 0.5);
     }
 
     * {
@@ -21,7 +36,8 @@
     body {
       height: 100vh;
       overflow: hidden;
-      background: #000000;
+      background: var(--bg-color);
+      color: var(--text-primary);
     }
 
     #desktopWallpaperContainer {
@@ -48,19 +64,17 @@
       left: 50%;
       top: 20px;
       transform: translateX(-50%);
-      color: #ffffff;
+      color: #ffffff; /* Always keep this white or light for wallpaper contrast */
       font-family: 'CustomFont', sans-serif;
       font-size: 4rem;
       z-index: 1;
       cursor: grab;
-      text-shadow: none;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.5);
       background: transparent;
       border: none;
     }
 
-    #dayDisplay.dragging {
-      cursor: grabbing;
-    }
+    #dayDisplay.dragging { cursor: grabbing; }
 
     #rainCanvas {
       position: absolute;
@@ -81,19 +95,24 @@
 
     .app-window {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: #09090b;
-      border-radius: 0;
-      box-shadow: none;
+      background: var(--window-bg);
       display: flex;
       flex-direction: column;
       z-index: 800;
       overflow: hidden;
-      border: none;
       transition: width 0.2s cubic-bezier(0.2, 0, 0, 1), height 0.2s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    /* FIX: Ensure fullscreen doesn't inherit inline dragged top/left styles */
+    .app-window:not(.windowed) {
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      transform: none !important;
+      border-radius: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
     }
 
     .app-window.windowed {
@@ -101,7 +120,7 @@
       height: 600px;
       border-radius: 16px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border-color);
       z-index: 10;
     }
 
@@ -110,19 +129,17 @@
       transition: none !important;
     }
 
-    .app-window.hidden {
-      display: none !important;
-    }
+    .app-window.hidden { display: none !important; }
 
     .window-header {
       height: 40px;
-      background: #050505;
+      background: rgba(0, 0, 0, 0.2);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 14px;
       cursor: move;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid var(--border-color);
       flex-shrink: 0;
     }
 
@@ -132,20 +149,12 @@
       gap: 10px;
       font-size: 13px;
       font-weight: 500;
-      color: #ffffff;
+      color: var(--text-primary);
     }
 
-    .window-title img {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
-    }
+    .window-title img { width: 18px; height: 18px; border-radius: 4px; }
 
-    .window-controls {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .window-controls { display: flex; align-items: center; gap: 6px; }
 
     .win-btn {
       width: 26px;
@@ -157,44 +166,30 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 12px;
-      color: #ffffff;
+      color: var(--text-primary);
       transition: background 0.15s;
     }
 
-    .win-btn img {
-      width: 14px;
-      height: 14px;
-      object-fit: contain;
-      filter: invert(1);
-    }
+    .win-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+    .win-btn img { width: 14px; height: 14px; filter: invert(1); } /* Fallback for legacy imgs */
+    
+    /* Auto invert icons for light mode dynamically based on var */
+    :root:has([style*="--bg-color: #f5f5f5"]) .win-btn img { filter: invert(0); }
 
-    .win-btn:hover {
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .win-btn.close:hover {
-      background: #e81123;
-      color: white;
-    }
+    .win-btn:hover { background: var(--hover-bg); color: var(--accent-color); }
+    .win-btn.close:hover { background: #e81123; color: white; }
+    .win-btn.close:hover svg { stroke: white; }
 
     .window-body {
       flex: 1;
       padding: 0;
       overflow: hidden;
       position: relative;
-      background: #000000;
+      background: var(--bg-color);
     }
 
-    .window-body iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    body.is-interacting iframe {
-      pointer-events: none !important;
-    }
+    .window-body iframe { width: 100%; height: 100%; border: none; }
+    body.is-interacting iframe { pointer-events: none !important; }
 
     .resize-handle { position: absolute; z-index: 999; display: none; }
     .app-window.windowed .resize-handle, .launcher .resize-handle { display: block; }
@@ -210,10 +205,10 @@
     .context-menu {
       position: absolute;
       width: 220px;
-      background: rgba(18, 18, 18, 0.85);
+      background: var(--modal-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--border-color);
       border-radius: 18px;
       padding: 8px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
@@ -221,7 +216,6 @@
       display: none;
       flex-direction: column;
     }
-
     .context-menu.active { display: flex; }
 
     .context-item {
@@ -230,34 +224,33 @@
       gap: 12px;
       padding: 10px 14px;
       font-size: 13px;
-      color: #ffffff;
+      color: var(--text-primary);
       border-radius: 10px;
       cursor: pointer;
       transition: background 0.10s ease;
       position: relative;
     }
-
-    .context-item:hover { background: rgba(255, 255, 255, 0.12); }
+    .context-item:hover { background: var(--hover-bg); color: var(--accent-color); }
     .context-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; opacity: 0.8; }
+    .context-icon img { width: 100%; height: 100%; object-fit: contain; }
     .context-label { flex: 1; }
-    .context-arrow { font-size: 10px; color: #888888; }
+    .context-arrow { font-size: 10px; color: var(--text-secondary); }
 
     .submenu {
       position: absolute;
       left: 100%;
       top: 0;
       width: 160px;
-      background: rgba(18, 18, 18, 0.9);
+      background: var(--modal-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--border-color);
       border-radius: 14px;
       padding: 6px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
       display: none;
       flex-direction: column;
     }
-
     .context-item:hover .submenu { display: flex; }
 
     .launcher {
@@ -266,10 +259,10 @@
       height: 580px;
       min-width: 320px;
       min-height: 350px;
-      background: rgba(12, 12, 12, 0.85);
+      background: var(--launcher-bg);
       backdrop-filter: blur(35px);
       -webkit-backdrop-filter: blur(35px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--border-color);
       border-radius: 28px;
       padding: 24px;
       display: flex;
@@ -282,222 +275,101 @@
       overflow: hidden;
     }
 
-    .launcher.pos-bottom {
-      bottom: 60px;
-      left: 12px;
-      transform: translateY(15px) scale(0.97);
-    }
-    .launcher.pos-bottom.active {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      pointer-events: auto;
-    }
+    .launcher.pos-bottom { bottom: 60px; left: 12px; transform: translateY(15px) scale(0.97); }
+    .launcher.pos-bottom.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
 
-    .launcher.pos-left {
-      top: 12px;
-      left: 64px;
-      transform: translateX(-15px) scale(0.97);
-    }
-    .launcher.pos-left.active {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-      pointer-events: auto;
-    }
+    .launcher.pos-left { top: 12px; left: 64px; transform: translateX(-15px) scale(0.97); }
+    .launcher.pos-left.active { opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; }
 
-    .launcher.pos-right {
-      top: 12px;
-      right: 64px;
-      transform: translateX(15px) scale(0.97);
-    }
-    .launcher.pos-right.active {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-      pointer-events: auto;
-    }
+    .launcher.pos-right { top: 12px; right: 64px; transform: translateX(15px) scale(0.97); }
+    .launcher.pos-right.active { opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; }
 
-    .launcher.dragged-active {
-      transform: scale(1) !important;
-    }
+    .launcher.dragged-active { transform: scale(1) !important; }
 
     .launcher-header-drag {
-      width: 100%;
-      padding-bottom: 12px;
-      margin-top: -12px;
-      cursor: move;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-shrink: 0;
+      width: 100%; padding-bottom: 12px; margin-top: -12px;
+      cursor: move; display: flex; justify-content: center; align-items: center; flex-shrink: 0;
     }
+    .launcher-drag-handle { width: 40px; height: 5px; background: rgba(150, 150, 150, 0.5); border-radius: 3px; }
 
-    .launcher-drag-handle {
-      width: 40px;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 3px;
-    }
+    .launcher-content-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-right: 4px; }
 
-    .launcher-content-scroll {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      padding-right: 4px;
-    }
-
-    .launcher-search {
-      position: relative;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
-    }
-
+    .launcher-search { position: relative; margin-bottom: 20px; display: flex; align-items: center; flex-shrink: 0; }
     .launcher-search input {
-      width: 100%;
-      padding: 14px 20px 14px 44px;
-      border-radius: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      outline: none;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
-      color: #ffffff;
-      font-size: 14px;
+      width: 100%; padding: 14px 20px 14px 44px; border-radius: 24px;
+      border: 1px solid var(--border-color); outline: none;
+      background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px);
+      color: var(--text-primary); font-size: 14px;
     }
-
     .search-app-icon { position: absolute; left: 16px; width: 18px; height: 18px; opacity: 0.7; }
 
     .default-view { display: flex; flex-direction: column; gap: 20px; }
     .default-view.hidden { display: none; }
 
-    .app-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 20px 16px;
-      padding-top: 6px;
-    }
+    .app-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px 16px; padding-top: 6px; }
 
     .app-icon {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #ffffff;
-      font-size: 11px;
-      font-weight: 500;
-      cursor: pointer;
-      padding: 6px 2px;
-      text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+      color: var(--text-primary); font-size: 11px; font-weight: 500;
+      cursor: pointer; padding: 6px 2px; text-align: center;
       transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1);
       position: relative;
+      overflow: visible !important; /* Fix for pin badge overlap */
     }
-
-    .app-icon:hover { transform: translateY(-3px) scale(1.05); }
+    .app-icon:hover { transform: translateY(-3px) scale(1.05); color: var(--accent-color); }
 
     .icon-img {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
-      border-radius: 12px;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.05);
+      width: 48px; height: 48px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)); border-radius: 12px; overflow: hidden; background: rgba(150, 150, 150, 0.1);
     }
+    .icon-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
 
-    .icon-img img { 
-      width: 100%; 
-      height: 100%; 
-      object-fit: cover; 
-      border-radius: 12px; 
-    }
-
-    /* --- NEW PIN BADGE STYLES --- */
     .pin-badge {
       position: absolute;
-      top: -4px;
-      right: 4px;
-      width: 22px;
-      height: 22px;
+      top: -8px;
+      right: -2px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      background: rgba(0, 0, 0, 0.5);
-      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      background: var(--badge-bg);
+      border: 2px solid var(--accent-color);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 5;
+      z-index: 9999 !important; /* Ensured overlap */
       backdrop-filter: blur(4px);
-      transition: background 0.2s, border-color 0.2s;
+      transition: transform 0.2s, background 0.2s, border-color 0.2s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     }
     
-    .pin-badge:hover {
-      background: rgba(0, 0, 0, 0.8);
-      border-color: rgba(255, 255, 255, 0.6);
-    }
-
+    .pin-badge:hover { background: var(--accent-color); transform: scale(1.1); }
+    .pin-badge img { width: 12px; height: 12px; object-fit: contain; filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.5)); }
     .app-icon:hover .pin-badge { display: flex; }
+    .app-icon.pinned .pin-badge { display: flex; background: var(--accent-color); border-color: var(--bg-color); }
     
-    .app-icon.pinned .pin-badge { 
-      display: flex; 
-      background: rgba(255, 255, 255, 0.2); 
-      border-color: rgba(255, 255, 255, 0.8);
-    }
-    /* ---------------------------- */
-
     .search-view { display: none; flex-direction: column; gap: 16px; }
     .search-view.active { display: flex; }
-    .search-category-title { font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .search-category-title { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
 
     .search-result-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      background: rgba(255, 255, 255, 0.05);
-      transition: transform 0.15s ease;
-      color: #ffffff;
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+      border-radius: 12px; cursor: pointer; background: var(--hover-bg);
+      transition: transform 0.15s ease; color: var(--text-primary);
     }
-
-    .search-result-item:hover { transform: translateX(3px); background: rgba(255, 255, 255, 0.12); }
+    .search-result-item:hover { transform: translateX(3px); background: rgba(150,150,150, 0.2); }
     .search-result-item img { width: 24px; height: 24px; border-radius: 6px; object-fit: cover; }
 
     .shelf {
-      position: fixed;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 1000;
-      transition: transform 0.35s cubic-bezier(0.1, 0.9, 0.2, 1);
+      position: fixed; background: var(--shelf-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;
+      z-index: 1000; transition: transform 0.35s cubic-bezier(0.1, 0.9, 0.2, 1);
     }
-
-    .shelf.pos-bottom {
-      height: 48px; bottom: 0; left: 0; right: 0;
-      flex-direction: row; padding: 0 8px; border-width: 1px 0 0 0;
-      transform: translateY(0);
-    }
+    .shelf.pos-bottom { height: 48px; bottom: 0; left: 0; right: 0; flex-direction: row; padding: 0 8px; border-width: 1px 0 0 0; transform: translateY(0); }
     .shelf.pos-bottom.autohide, .shelf.pos-bottom.app-fullscreen-hide { transform: translateY(100%); }
-
-    .shelf.pos-left {
-      width: 52px; top: 0; bottom: 0; left: 0;
-      flex-direction: column; padding: 8px 0; border-width: 0 1px 0 0;
-      transform: translateX(0);
-    }
+    .shelf.pos-left { width: 52px; top: 0; bottom: 0; left: 0; flex-direction: column; padding: 8px 0; border-width: 0 1px 0 0; transform: translateX(0); }
     .shelf.pos-left.autohide, .shelf.pos-left.app-fullscreen-hide { transform: translateX(-100%); }
-
-    .shelf.pos-right {
-      width: 52px; top: 0; bottom: 0; right: 0;
-      flex-direction: column; padding: 8px 0; border-width: 0 0 0 1px;
-      transform: translateX(0);
-    }
+    .shelf.pos-right { width: 52px; top: 0; bottom: 0; right: 0; flex-direction: column; padding: 8px 0; border-width: 0 0 0 1px; transform: translateX(0); }
     .shelf.pos-right.autohide, .shelf.pos-right.app-fullscreen-hide { transform: translateX(100%); }
-
     .shelf.autohide.reveal, .shelf.app-fullscreen-hide.reveal { transform: translate(0, 0) !important; }
 
     .shelf-trigger-zone { position: fixed; z-index: 1100; display: none; }
@@ -507,88 +379,105 @@
     .shelf-trigger-zone.pos-right { right: 0; top: 0; bottom: 0; width: 8px; }
 
     .shelf-left { display: flex; align-items: center; justify-content: center; }
-
     .launcher-btn {
       width: 36px; height: 36px; border-radius: 50%; border: none;
-      background: rgba(255, 255, 255, 0.1); cursor: pointer;
-      display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+      background: var(--hover-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s;
     }
-
-    .launcher-btn:hover { background: rgba(255, 255, 255, 0.25); }
-    .launcher-btn::after { content: ''; width: 12px; height: 12px; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.6); }
+    .launcher-btn:hover { background: rgba(150,150,150, 0.4); }
+    .launcher-btn::after { content: ''; width: 12px; height: 12px; border: 2px solid var(--accent-color); border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.6); }
 
     .shelf-center { display: flex; gap: 12px; align-items: center; justify-content: center; }
-
     .shelf.pos-bottom .shelf-center { position: absolute; left: 50%; transform: translateX(-50%); flex-direction: row; }
     .shelf.pos-left .shelf-center, .shelf.pos-right .shelf-center { position: absolute; top: 50%; transform: translateY(-50%); flex-direction: column; }
 
     .shelf-app-icon {
-      position: relative; width: 36px; height: 36px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; border-radius: 10px; transition: transform 0.15s, background 0.15s;
-      overflow: hidden;
+      position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 10px; transition: transform 0.15s, background 0.15s; overflow: hidden;
     }
-
-    .shelf-app-icon:hover { transform: scale(1.08); background: rgba(255, 255, 255, 0.15); }
-    .shelf-app-icon img { width: 28px; height: 28px; object-fit: cover; border-radius: 8px; }
-
-    .shelf-app-icon.active::after {
-      display: none !important;
+    .shelf-app-icon:hover { background: var(--hover-bg); }
+    .shelf-app-icon img { width: 28px; height: 28px; object-fit: cover; border-radius: 8px; transition: transform 0.15s; }
+    .shelf-app-icon:hover img { transform: scale(1.08); }
+    .shelf-app-icon::after {
+      content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; background: var(--accent-color); border-radius: 50%; opacity: 0; transition: opacity 0.2s, width 0.2s, border-radius 0.2s;
     }
+    .shelf-app-icon.is-open::after { opacity: 0.6; }
+    .shelf-app-icon.active-window::after { opacity: 1; width: 14px; border-radius: 2px; }
 
     .shelf-right { display: flex; align-items: center; gap: 6px; }
-
     .tray-pill {
-      background: rgba(255, 255, 255, 0.1); height: 32px; padding: 0 10px;
-      border-radius: 16px; display: flex; align-items: center; justify-content: center;
-      gap: 4px; font-size: 11px; font-weight: 600; color: #ffffff;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); cursor: default; white-space: nowrap;
+      background: var(--hover-bg); height: 32px; padding: 0 10px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+      gap: 4px; font-size: 11px; font-weight: 600; color: var(--text-primary); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); cursor: default; white-space: nowrap;
     }
 
     .wallpaper-modal {
-      position: fixed; top: 50%; left: 50%;
-      transform: translate(-50%, -50%) scale(0.95);
-      width: 560px; max-width: 90vw; max-height: 80vh;
-      background: rgba(18, 18, 18, 0.85);
-      backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 20px; padding: 20px; box-shadow: 0 16px 40px rgba(0,0,0,0.6);
-      z-index: 2500; display: none; flex-direction: column; gap: 16px;
-      opacity: 0; transition: all 0.2s ease;
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95);
+      width: 650px; max-width: 90vw; max-height: 85vh;
+      background: var(--modal-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--border-color); border-radius: 24px; padding: 24px;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.6); z-index: 2500; display: none; flex-direction: column; gap: 20px;
+      opacity: 0; transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
     }
-
     .wallpaper-modal.active { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    .wallpaper-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    .wallpaper-header h3 { font-size: 16px; color: #ffffff; }
-    .wallpaper-header-actions { display: flex; align-items: center; gap: 8px; }
 
-    .loop-toggle-btn, .rain-toggle-btn {
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.2s ease;
+    .wallpaper-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .wallpaper-header h3 { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+    
+    .wallpaper-preview-area {
+      width: 100%; height: 200px; border-radius: 16px; background: #222; overflow: hidden;
+      position: relative; border: 1px solid var(--border-color);
+    }
+    .wallpaper-preview-area img, .wallpaper-preview-area video {
+      width: 100%; height: 100%; object-fit: cover;
     }
 
-    .loop-toggle-btn:hover, .rain-toggle-btn:hover { background: rgba(255, 255, 255, 0.25); }
+    .my-section-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .my-section-subtitle { font-size: 12px; color: var(--accent-color); margin-bottom: 12px; opacity: 0.9;}
+
+    .accent-colors-row {
+      display: flex; gap: 12px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .color-swatch-wrapper {
+      width: 50px; height: 50px; border-radius: 14px; background: var(--hover-bg); 
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      border: 2px solid transparent; transition: border-color 0.2s;
+    }
+    .color-swatch-wrapper:hover, .color-swatch-wrapper.active { border-color: var(--accent-color); }
+    .color-swatch { width: 34px; height: 34px; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    
+    /* Custom color input styling to match swatches */
+    .custom-color-input-wrapper {
+       position: relative; width: 50px; height: 50px; border-radius: 14px;
+       background: var(--hover-bg); display: flex; align-items: center; justify-content: center;
+       cursor: pointer; overflow: hidden;
+    }
+    .custom-color-input-wrapper input[type="color"] {
+       position: absolute; width: 200%; height: 200%; top: -50%; left: -50%; cursor: pointer; opacity: 0;
+    }
+    .custom-color-icon { width: 34px; height: 34px; border-radius: 50%; background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); display:flex; align-items:center; justify-content:center; color:white; font-size:20px; font-weight:bold; text-shadow:0 1px 2px rgba(0,0,0,0.5);}
+
+    .theme-row { display: flex; gap: 12px; }
+    .theme-btn {
+      flex: 1; padding: 12px; border-radius: 12px; background: var(--hover-bg); border: 2px solid transparent;
+      color: var(--text-primary); cursor: pointer; font-weight: 500; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .theme-btn.active { background: rgba(var(--accent-color-rgb), 0.2); border-color: var(--accent-color); color: var(--accent-color);}
+    .theme-btn:hover { background: rgba(150,150,150,0.2); }
+    .theme-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
     .wallpaper-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-      overflow-y: auto; max-height: 340px; padding-right: 4px;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      overflow-y: auto; max-height: 180px; padding-right: 4px;
     }
-
     .wallpaper-option {
-      height: 100px; border-radius: 12px; background-size: cover;
-      background-position: center; cursor: pointer; border: 2px solid transparent;
-      position: relative; overflow: hidden; transition: transform 0.15s, border-color 0.15s;
+      height: 90px; border-radius: 12px; background-size: cover; background-position: center;
+      cursor: pointer; border: 2px solid transparent; position: relative; overflow: hidden;
+      transition: transform 0.15s, border-color 0.15s;
     }
-
     .wallpaper-option video { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; pointer-events: none; }
-    .wallpaper-option:hover { transform: scale(1.03); border-color: #ffffff; }
+    .wallpaper-option:hover { transform: scale(1.05); border-color: var(--accent-color); }
+    .wallpaper-option.selected { border-color: var(--accent-color); border-width: 3px; }
 
     .alttab-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px);
@@ -596,13 +485,13 @@
     }
     .alttab-overlay.active { display: flex; }
     .alttab-card {
-      width: 180px; height: 140px; background: #181818; border-radius: 14px;
+      width: 180px; height: 140px; background: var(--modal-bg); border-radius: 14px;
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-      cursor: pointer; border: 2px solid #2a2a2a; transition: transform 0.15s, border-color 0.15s;
+      cursor: pointer; border: 2px solid transparent; transition: transform 0.15s, border-color 0.15s;
     }
-    .alttab-card.selected { border-color: #ffffff; transform: scale(1.08); background: #222222; }
+    .alttab-card.selected { border-color: var(--accent-color); transform: scale(1.08); background: var(--hover-bg); }
     .alttab-card img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; }
-    .alttab-card span { font-size: 13px; font-weight: 600; color: #ffffff; text-align: center; }
+    .alttab-card span { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: center; }
   </style>
 </head>
 <body>
@@ -615,22 +504,59 @@
 
   <div class="wallpaper-modal" id="wallpaperModal">
     <div class="wallpaper-header">
-      <h3>Select Media Wallpaper</h3>
-      <div class="wallpaper-header-actions">
-        <button class="loop-toggle-btn" id="loopVideoModalBtn" onclick="toggleVideoLooping()">Loop Video: ON</button>
-        <button class="rain-toggle-btn" id="rainModalBtn" onclick="toggleRainEffect()">Rain Effect: ON</button>
-        <button class="win-btn close" onclick="closeWallpaperModal()">✕</button>
+      <h3>Wallpaper & style</h3>
+      <div style="display:flex; gap: 8px;">
+         <button class="win-btn" onclick="toggleRainEffect()" title="Toggle Rain" id="rainModalBtn">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8 2 4.5 5.5 4.5 9.5c0 1.5.5 2.8 1.3 4C6.5 14.5 9 17 12 22c3-5 5.5-7.5 6.2-8.5.8-1.2 1.3-2.5 1.3-4C19.5 5.5 16 2 12 2zm0 10.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 7.5 12 7.5s2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z"/></svg>
+         </button>
+         <button class="win-btn close" onclick="closeWallpaperModal()">
+            <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+         </button>
       </div>
     </div>
-    <div class="wallpaper-grid" id="wallpaperGridContainer"></div>
+    
+    <div class="wallpaper-preview-area" id="wallpaperPreviewArea">
+      <!-- Injected via JS -->
+    </div>
+
+    <div>
+      <div class="my-section-title">Accent colors</div>
+      <div class="my-section-subtitle">Use color sets that match your vibe</div>
+      <div class="accent-colors-row">
+        <div class="color-swatch-wrapper active" onclick="setAccentColor('#ffffff', this)"><div class="color-swatch" style="background: linear-gradient(135deg, #ffffff, #cccccc);"></div></div>
+        <div class="color-swatch-wrapper" onclick="setAccentColor('#f28b82', this)"><div class="color-swatch" style="background: linear-gradient(135deg, #f28b82, #e57373);"></div></div>
+        <div class="color-swatch-wrapper" onclick="setAccentColor('#81c784', this)"><div class="color-swatch" style="background: linear-gradient(135deg, #81c784, #66bb6a);"></div></div>
+        <div class="color-swatch-wrapper" onclick="setAccentColor('#8ab4f8', this)"><div class="color-swatch" style="background: linear-gradient(135deg, #8ab4f8, #64b5f6);"></div></div>
+        <div class="color-swatch-wrapper" onclick="setAccentColor('#ce93d8', this)"><div class="color-swatch" style="background: linear-gradient(135deg, #ce93d8, #ba68c8);"></div></div>
+        <div class="color-swatch-wrapper" onclick="setAccentColor('#fdd663', this)"><div class="color-swatch" style="background: linear-gradient(135deg, #fdd663, #ffd54f);"></div></div>
+        
+        <div class="custom-color-input-wrapper">
+           <div class="custom-color-icon">+</div>
+           <input type="color" id="customColorPicker" onchange="setAccentColor(this.value, this.parentElement)">
+        </div>
+      </div>
+    </div>
+
+    <div>
+       <div class="theme-row">
+          <button class="theme-btn" id="themeLightBtn" onclick="setTheme('light')">
+             <svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41.39.39 1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41.39.39 1.03.39 1.41 0l1.06-1.06z"/></svg> Light
+          </button>
+          <button class="theme-btn active" id="themeDarkBtn" onclick="setTheme('dark')">
+             <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg> Dark
+          </button>
+       </div>
+    </div>
+
+    <div>
+       <div class="my-section-title">My Images</div>
+       <div class="wallpaper-grid" id="wallpaperGridContainer"></div>
+    </div>
   </div>
 
   <div class="context-menu" id="appContextMenu">
-    <!-- Pin App Context Menu Option -->
     <div class="context-item" id="pinAppCtxBtn">
-      <div class="context-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-      </div>
+      <div class="context-icon"><img src="https://img.icons8.com/?size=100&id=0BngLkWjYAnC&format=png&color=FFFFFF" alt="Pin Icon"></div>
       <span class="context-label" id="pinAppCtxLabel">Pin this app</span>
     </div>
     <div class="context-item" id="deleteAppBtn" style="color: #ff5555;">
@@ -644,13 +570,13 @@
   <div class="context-menu" id="contextMenu">
     <div class="context-item" onclick="toggleAlwaysHideShelf()">
       <div class="context-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><rect x="2" y="16" width="20" height="5" rx="2"/><rect x="2" y="3" width="20" height="10" rx="2"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="16" width="20" height="5" rx="2"/><rect x="2" y="3" width="20" height="10" rx="2"/></svg>
       </div>
       <span class="context-label" id="autohideLabel">Autohide Shelf</span>
     </div>
     <div class="context-item">
       <div class="context-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><rect x="2" y="15" width="20" height="6" rx="2"/><line x1="6" y1="18" x2="8" y2="18"/><line x1="11" y1="18" x2="13" y2="18"/><line x1="16" y1="18" x2="18" y2="18"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="15" width="20" height="6" rx="2"/><line x1="6" y1="18" x2="8" y2="18"/><line x1="11" y1="18" x2="13" y2="18"/><line x1="16" y1="18" x2="18" y2="18"/></svg>
       </div>
       <span class="context-label">Shelf position</span>
       <span class="context-arrow">›</span>
@@ -662,21 +588,15 @@
     </div>
     <div class="context-item" onclick="openWallpaperModal()">
       <div class="context-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
       </div>
       <span class="context-label">Set wallpaper & style</span>
     </div>
   </div>
 
   <div class="launcher pos-bottom" id="launcherMenu">
-    <div class="resize-handle n"></div>
-    <div class="resize-handle s"></div>
-    <div class="resize-handle w"></div>
-    <div class="resize-handle e"></div>
-    <div class="resize-handle nw"></div>
-    <div class="resize-handle ne"></div>
-    <div class="resize-handle sw"></div>
-    <div class="resize-handle se"></div>
+    <div class="resize-handle n"></div><div class="resize-handle s"></div><div class="resize-handle w"></div><div class="resize-handle e"></div>
+    <div class="resize-handle nw"></div><div class="resize-handle ne"></div><div class="resize-handle sw"></div><div class="resize-handle se"></div>
 
     <div class="launcher-header-drag" id="launcherDragHandle" title="Drag to move launcher">
       <div class="launcher-drag-handle"></div>
@@ -690,80 +610,9 @@
     <div class="launcher-content-scroll">
       <div class="default-view" id="defaultView">
         <div class="app-grid" id="mainAppGrid">
-          <!-- Apps will be dynamically loaded or pre-rendered with pins -->
-          <div class="app-icon" onclick="openApp('Notes', 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.25.09%20PM-inverted.png', 'APP/Notes.html')">
-            <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </div>
-            <div class="icon-img"><img src="https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.25.09%20PM-inverted.png" alt="Notes"></div>
-            <span>Notes</span>
-          </div>
-          <div class="app-icon" onclick="openApp('movies', 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.59%20PM-inverted%20(1).png', 'https://school-rgb.github.io/frutimovies/')">
-            <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </div>
-            <div class="icon-img"><img src="https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.59%20PM-inverted%20(1).png" alt="netflix"></div>
-            <span>movies</span>
-          </div>
-          <div class="app-icon" onclick="openApp('YouTube', 'https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-21%206.52.10%20PM-inverted%20(1).png?raw=true', 'https://youtube-9f1.pages.dev/')">
-            <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </div>
-            <div class="icon-img"><img src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-21%206.52.10%20PM-inverted%20(1).png?raw=true" alt="YouTube"></div>
-            <span>YouTube</span>
-          </div>
-          <div class="app-icon" onclick="openApp('Anime', 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.17%20PM-inverted.png', 'https://school-rgb.github.io/anime-movies-in-html/')">
-            <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </div>
-            <div class="icon-img"><img src="https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.17%20PM-inverted.png" alt="Anime"></div>
-            <span>anime</span> 
-          </div>
-          <div class="app-icon" onclick="openApp('timer', 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.51%20PM-inverted.png', 'APP/timer.html')">
-             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </div>
-            <div class="icon-img"><img src="https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.51%20PM-inverted.png" alt="timer"></div>
-            <span>timer</span>
-          </div>
-          <div class="app-icon" onclick="openApp('frutiger game', 'https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM-inverted.png?raw=true', 'APP/gamehub.html')">
-             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </div>
-            <div class="icon-img"><img src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM-inverted.png?raw=true" alt="frutiger game"></div>
-            <span>frutiger game</span>
-          </div>
-          <div class="app-icon" onclick="openApp('geometry dash', 'https://th.bing.com/th/id/R.67dcf797f79315589cc8b18f502f93f5?rik=A7ss82CSOJPrkg&riu=http%3a%2f%2fvignette2.wikia.nocookie.net%2fgeometry-dash%2fimages%2f9%2f90%2fGeometryDash.png%2frevision%2flatest%3fcb%3d20160224042843&ehk=Hvk2rFdCmF08iQinZYieMsLbvo4NDNdKYic8xB6GqZE%3d&risl=&pid=ImgRaw&r=0', 'APP/Geometry Dash (1).html')">
-             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </div>
-            <div class="icon-img"><img src="https://th.bing.com/th/id/R.67dcf797f79315589cc8b18f502f93f5?rik=A7ss82CSOJPrkg&riu=http%3a%2f%2fvignette2.wikia.nocookie.net%2fgeometry-dash%2fimages%2f9%2f90%2fGeometryDash.png%2frevision%2flatest%3fcb%3d20160224042843&ehk=Hvk2rFdCmF08iQinZYieMsLbvo4NDNdKYic8xB6GqZE%3d&risl=&pid=ImgRaw&r=0" alt="Geometry Dash"></div>
-            <span>geometry dash</span>
-          </div>
-          <div class="app-icon" onclick="openApp('Plants vs. Zombies 2 Gardenless', 'https://th.bing.com/th/id/OIP.dqZAfbbyk9LZmU43iotB3wHaHa?w=173&h=183&c=7&r=0&o=7&dpr=1.4&pid=1.7&rm=3', 'APP/Plants vs. Zombies 2 Gardenless.html')">
-             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </div>
-            <div class="icon-img"><img src="https://th.bing.com/th/id/OIP.dqZAfbbyk9LZmU43iotB3wHaHa?w=173&h=183&c=7&r=0&o=7&dpr=1.4&pid=1.7&rm=3" alt="PvZ 2"></div>
-            <span>Plants vs. Zombies 2 Gardenless</span>
-          </div>
-          <div class="app-icon" onclick="openApp('Subway Surfers', 'https://macmagazine.com.br/wp-content/uploads/2012/09/17-icone-subway-surfers.png', 'APP/Subway Surfers.html')">
-             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </div>
-            <div class="icon-img"><img src="https://macmagazine.com.br/wp-content/uploads/2012/09/17-icone-subway-surfers.png" alt="Subway Surfers"></div>
-            <span>Subway Surfers</span>
-          </div>
-          <div class="app-icon" onclick="openApp('crossy road', 'https://tse3.mm.bing.net/th/id/OIP.h2WLBdFHanMVXtPH277EwAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3', 'APP/clcrossyroad.html')">
-             <div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </div>
-            <div class="icon-img"><img src="https://tse3.mm.bing.net/th/id/OIP.h2WLBdFHanMVXtPH277EwAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="crossy road"></div>
-            <span>crossy road</span>
-          </div>
+          <!-- Apps dynamically inserted here -->
         </div>
       </div>
-
       <div class="search-view" id="searchView"></div>
     </div>
   </div>
@@ -774,9 +623,7 @@
     <div class="shelf-left">
       <button class="launcher-btn" id="launcherBtn" onclick="toggleLauncher(event)"></button>
     </div>
-    
     <div class="shelf-center" id="shelfCenter"></div>
-
     <div class="shelf-right">
       <div class="tray-pill">
         <span id="clockTime">12:00</span>
@@ -785,49 +632,41 @@
   </div>
 
   <script>
-    // Updated Storage Key to reset state while allowing future saving
-    const STORAGE_KEY = 'osState_v2.5_reset';
+    const STORAGE_KEY = 'osState_v4.0';
+    const pinIconUrl = 'https://img.icons8.com/?size=100&id=0BngLkWjYAnC&format=png&color=FFFFFF';
 
-    // SVG Pin icon reused for injections
+    const defaultAppsData = [
+      { name: 'Notes', icon: 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.25.09%20PM-inverted.png', url: 'APP/Notes.html' },
+      { name: 'movies', icon: 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.59%20PM-inverted%20(1).png', url: 'https://school-rgb.github.io/frutimovies/' },
+      { name: 'YouTube', icon: 'https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-21%206.52.10%20PM-inverted%20(1).png?raw=true', url: 'https://youtube-9f1.pages.dev/' },
+      { name: 'anime', icon: 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.17%20PM-inverted.png', url: 'https://school-rgb.github.io/anime-movies-in-html/' },
+      { name: 'timer', icon: 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.24.51%20PM-inverted.png', url: 'APP/timer.html' },
+      { name: 'frutiger game', icon: 'https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM-inverted.png?raw=true', url: 'APP/gamehub.html' },
+      { name: 'geometry dash', icon: 'https://th.bing.com/th/id/R.67dcf797f79315589cc8b18f502f93f5?rik=A7ss82CSOJPrkg&riu=http%3a%2f%2fvignette2.wikia.nocookie.net%2fgeometry-dash%2fimages%2f9%2f90%2fGeometryDash.png%2frevision%2flatest%3fcb%3d20160224042843&ehk=Hvk2rFdCmF08iQinZYieMsLbvo4NDNdKYic8xB6GqZE%3d&risl=&pid=ImgRaw&r=0', url: 'APP/Geometry Dash (1).html' },
+      { name: 'Plants vs. Zombies 2 Gardenless', icon: 'https://th.bing.com/th/id/OIP.dqZAfbbyk9LZmU43iotB3wHaHa?w=173&h=183&c=7&r=0&o=7&dpr=1.4&pid=1.7&rm=3', url: 'APP/Plants vs. Zombies 2 Gardenless.html' },
+      { name: 'Subway Surfers', icon: 'https://macmagazine.com.br/wp-content/uploads/2012/09/17-icone-subway-surfers.png', url: 'APP/Subway Surfers.html' },
+      { name: 'crossy road', icon: 'https://tse3.mm.bing.net/th/id/OIP.h2WLBdFHanMVXtPH277EwAHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3', url: 'APP/clcrossyroad.html' }
+    ];
+
     const pinBadgeHTML = `<div class="pin-badge" onclick="togglePin(event, this.closest('.app-icon'))" title="Toggle Pin">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 11.2V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5.2a2 2 0 0 1-1.11 1.35l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+      <img src="${pinIconUrl}" alt="Pin">
     </div>`;
 
-    // --- LISTEN FOR MESSAGES FROM APP STORE IFRAME ---
-    window.addEventListener('message', (event) => {
-      if (!event.data) return;
-      if (event.data.type === 'INSTALL_APP') {
-        const { name, icon, url, isFromAppStore } = event.data.app;
-        installAppToOS(name, icon, url, isFromAppStore !== false);
-      } else if (event.data.type === 'OPEN_APP') {
-        const { name, icon, url } = event.data.app;
-        openApp(name, icon, url);
-      }
-    });
-
-    function installAppToOS(name, icon, url, isFromAppStore = true, isPinned = false) {
-      const mainAppGrid = document.getElementById('mainAppGrid');
-      if (!mainAppGrid) return;
-
-      const existing = Array.from(mainAppGrid.querySelectorAll('.app-icon span')).some(span => span.textContent === name);
-      if (existing) {
-        openApp(name, icon, url);
-        return;
-      }
-
-      const el = document.createElement('div');
-      el.className = 'app-icon' + (isPinned ? ' pinned' : '');
-      if (isFromAppStore) {
-        el.setAttribute('data-appstore', 'true');
-      }
-      el.setAttribute('onclick', `openApp('${name}', '${icon}', '${url}')`);
-      el.innerHTML = `${pinBadgeHTML}<div class="icon-img"><img src="${icon}" alt="${name}"></div><span>${name}</span>`;
-      
-      mainAppGrid.appendChild(el);
-
-      saveState();
-      updateInstalledApps();
-    }
+    let highestZIndex = 100;
+    let currentPosition = 'bottom';
+    let isAutohideEnabled = false;
+    let isVideoLooping = true;
+    let isRainActive = true;
+    let currentWallpaperUrl = '';
+    let currentWallpaperType = 'image';
+    let installedApps = [];
+    let wallpapers = [];
+    let currentTheme = 'dark';
+    let currentAccent = '#ffffff';
+    
+    const openApps = {};
+    let altTabAppKeys = [];
+    let altTabIndex = 0;
 
     const desktop = document.getElementById('desktop');
     const contextMenu = document.getElementById('contextMenu');
@@ -842,20 +681,38 @@
     const altTabOverlay = document.getElementById('altTabOverlay');
     const dayDisplay = document.getElementById('dayDisplay');
     const wg = document.getElementById('wallpaperGridContainer');
-    
-    let highestZIndex = 100;
-    let currentPosition = 'bottom';
-    let isAutohideEnabled = false;
-    let isVideoLooping = true;
-    let isRainActive = true;
-    let currentWallpaperUrl = '';
-    let currentWallpaperType = 'image';
-    let installedApps = [];
-    let wallpapers = [];
-    
-    const openApps = {};
-    let altTabAppKeys = [];
-    let altTabIndex = 0;
+    const previewArea = document.getElementById('wallpaperPreviewArea');
+
+    window.addEventListener('message', (event) => {
+      if (!event.data) return;
+      if (event.data.type === 'INSTALL_APP') {
+        const { name, icon, url, isFromAppStore } = event.data.app;
+        installAppToOS(name, icon, url, isFromAppStore !== false);
+      } else if (event.data.type === 'OPEN_APP') {
+        const { name, icon, url } = event.data.app;
+        openApp(name, icon, url);
+      }
+    });
+
+    function installAppToOS(name, icon, url, isFromAppStore = true, isPinned = false, toGrid = true) {
+      if (!toGrid) return;
+      const mainAppGrid = document.getElementById('mainAppGrid');
+      if (!mainAppGrid) return;
+
+      const existing = Array.from(mainAppGrid.querySelectorAll('.app-icon span')).some(span => span.textContent === name);
+      if (existing) return;
+
+      const el = document.createElement('div');
+      el.className = 'app-icon' + (isPinned ? ' pinned' : '');
+      if (isFromAppStore) el.setAttribute('data-appstore', 'true');
+      el.setAttribute('onclick', `openApp('${name}', '${icon}', '${url}')`);
+      el.innerHTML = `${pinBadgeHTML}<div class="icon-img"><img src="${icon}" alt="${name}"></div><span>${name}</span>`;
+      
+      mainAppGrid.appendChild(el);
+      saveState();
+      updateInstalledApps();
+      renderShelf();
+    }
 
     const daysOfTheWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     
@@ -863,7 +720,6 @@
       const today = new Date();
       dayDisplay.textContent = daysOfTheWeek[today.getDay()];
     }
-    
     updateDayText();
     setInterval(updateDayText, 60000);
 
@@ -877,12 +733,10 @@
         e.stopPropagation();
         isDraggingDay = true;
         dayDisplay.classList.add('dragging');
-
         const rect = dayDisplay.getBoundingClientRect();
         dayDisplay.style.transform = 'none';
         dayDisplay.style.left = rect.left + 'px';
         dayDisplay.style.top = rect.top + 'px';
-
         dayDragOffsetX = e.clientX - rect.left;
         dayDragOffsetY = e.clientY - rect.top;
       }
@@ -890,12 +744,8 @@
 
     window.addEventListener('mousemove', (e) => {
       if (isDraggingDay) {
-        let newX = e.clientX - dayDragOffsetX;
-        let newY = e.clientY - dayDragOffsetY;
-
-        newX = Math.round(newX / 4) * 4;
-        newY = Math.round(newY / 4) * 4;
-
+        let newX = Math.round((e.clientX - dayDragOffsetX) / 4) * 4;
+        let newY = Math.round((e.clientY - dayDragOffsetY) / 4) * 4;
         dayDisplay.style.left = newX + 'px';
         dayDisplay.style.top = newY + 'px';
       }
@@ -908,18 +758,13 @@
       }
     });
 
-    dayDisplay.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    });
+    dayDisplay.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); });
 
-    // Toggle Pin Function
     function togglePin(e, appElement) {
-      if(e) {
-        e.stopPropagation(); // Prevents the app from opening when clicking the pin
-      }
+      if (e) e.stopPropagation();
       appElement.classList.toggle('pinned');
       saveState();
+      renderShelf();
     }
 
     function saveState() {
@@ -930,6 +775,8 @@
         autohide: isAutohideEnabled,
         loopVideo: isVideoLooping,
         rainActive: isRainActive,
+        theme: currentTheme,
+        accentColor: currentAccent,
         apps: Array.from(document.querySelectorAll('#mainAppGrid .app-icon')).map(app => ({
           name: app.querySelector('span').textContent,
           icon: app.querySelector('.icon-img img').src,
@@ -943,22 +790,16 @@
 
     function loadState() {
       const state = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (state) {
-        if (state.apps && state.apps.length > 0) {
-          const grid = document.getElementById('mainAppGrid');
-          grid.innerHTML = '';
-          state.apps.forEach(app => {
-            const el = document.createElement('div');
-            el.className = 'app-icon' + (app.isPinned ? ' pinned' : '');
-            if (app.isFromAppStore) {
-              el.setAttribute('data-appstore', 'true');
-            }
-            el.setAttribute('onclick', `openApp('${app.name}', '${app.icon}', '${app.url}')`);
-            el.innerHTML = `${pinBadgeHTML}<div class="icon-img"><img src="${app.icon}" alt="${app.name}"></div><span>${app.name}</span>`;
-            grid.appendChild(el);
-          });
-        }
+      const grid = document.getElementById('mainAppGrid');
+      grid.innerHTML = '';
+      
+      if (state && state.apps) {
+        state.apps.forEach(app => installAppToOS(app.name, app.icon, app.url, app.isFromAppStore, app.isPinned, true));
+      } else {
+        defaultAppsData.forEach(app => installAppToOS(app.name, app.icon, app.url, false, false, true));
+      }
         
+      if (state) {
         currentPosition = state.shelfPosition || 'bottom';
         setShelfPosition(currentPosition);
 
@@ -967,19 +808,63 @@
         if(isAutohideEnabled) shelf.classList.add('autohide');
 
         isVideoLooping = state.loopVideo !== false;
-        document.getElementById('loopVideoModalBtn').textContent = isVideoLooping ? "Loop Video: ON" : "Loop Video: OFF";
-
         isRainActive = state.rainActive !== false;
-        document.getElementById('rainModalBtn').textContent = isRainActive ? "Rain Effect: ON" : "Rain Effect: OFF";
         if(isRainActive) initRain(); else ctxRain.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+
+        if (state.theme) setTheme(state.theme);
+        if (state.accentColor) {
+           setAccentColor(state.accentColor);
+           document.getElementById('customColorPicker').value = state.accentColor;
+        }
 
         if (state.wallpaperSrc) {
           setWallpaper(state.wallpaperSrc, state.wallpaperType || 'image');
         }
       } else {
         initRain();
+        setTheme('dark');
+        setAccentColor('#ffffff');
       }
       updateInstalledApps();
+      renderShelf();
+    }
+
+    function setAccentColor(color, el = null) {
+       currentAccent = color;
+       document.documentElement.style.setProperty('--accent-color', color);
+       if(el) {
+          document.querySelectorAll('.color-swatch-wrapper').forEach(w => w.classList.remove('active'));
+          el.classList.add('active');
+       }
+       saveState();
+    }
+
+    function setTheme(mode) {
+       currentTheme = mode;
+       document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+       
+       if (mode === 'light') {
+          document.getElementById('themeLightBtn').classList.add('active');
+          document.documentElement.style.setProperty('--bg-color', '#f5f5f5');
+          document.documentElement.style.setProperty('--window-bg', '#ffffff');
+          document.documentElement.style.setProperty('--launcher-bg', 'rgba(240, 240, 240, 0.85)');
+          document.documentElement.style.setProperty('--shelf-bg', 'rgba(255, 255, 255, 0.65)');
+          document.documentElement.style.setProperty('--text-primary', '#000000');
+          document.documentElement.style.setProperty('--modal-bg', 'rgba(240, 240, 240, 0.95)');
+          document.documentElement.style.setProperty('--border-color', 'rgba(0, 0, 0, 0.12)');
+          document.documentElement.style.setProperty('--hover-bg', 'rgba(0, 0, 0, 0.08)');
+       } else { // dark
+          document.getElementById('themeDarkBtn').classList.add('active');
+          document.documentElement.style.setProperty('--bg-color', '#000000');
+          document.documentElement.style.setProperty('--window-bg', '#09090b');
+          document.documentElement.style.setProperty('--launcher-bg', 'rgba(12, 12, 12, 0.85)');
+          document.documentElement.style.setProperty('--shelf-bg', 'rgba(0, 0, 0, 0.65)');
+          document.documentElement.style.setProperty('--text-primary', '#ffffff');
+          document.documentElement.style.setProperty('--modal-bg', 'rgba(18, 18, 18, 0.85)');
+          document.documentElement.style.setProperty('--border-color', 'rgba(255, 255, 255, 0.12)');
+          document.documentElement.style.setProperty('--hover-bg', 'rgba(255, 255, 255, 0.12)');
+       }
+       saveState();
     }
 
     function renderWallpapers() {
@@ -988,12 +873,12 @@
         const div = document.createElement('div');
         div.className = 'wallpaper-option';
         const isVideo = wp.url.toLowerCase().endsWith('.mp4');
+        if (wp.url === currentWallpaperUrl) div.classList.add('selected');
 
         if(isVideo) {
           const vid = document.createElement('video');
           vid.src = wp.url;
-          vid.muted = true; 
-          vid.loop = true;
+          vid.muted = true; vid.loop = true;
           div.appendChild(vid);
           div.addEventListener('mouseenter', () => vid.play());
           div.addEventListener('mouseleave', () => vid.pause());
@@ -1003,11 +888,34 @@
         
         div.onclick = () => { 
           setWallpaper(wp.url, isVideo ? 'video' : 'image'); 
-          closeWallpaperModal(); 
-          saveState(); 
+          document.querySelectorAll('.wallpaper-option').forEach(el => el.classList.remove('selected'));
+          div.classList.add('selected');
         };
         wg.appendChild(div);
       });
+    }
+
+    function setWallpaper(src, type) {
+      currentWallpaperUrl = src;
+      currentWallpaperType = type;
+      
+      // Desktop
+      if (type === 'image') {
+        wallpaperContainer.innerHTML = '';
+        wallpaperContainer.style.backgroundImage = `url('${src}')`;
+      } else {
+        wallpaperContainer.style.backgroundImage = 'none';
+        wallpaperContainer.innerHTML = `<video src="${src}" autoplay muted ${isVideoLooping ? 'loop' : ''}></video>`;
+      }
+      
+      // Preview in Modal
+      if (type === 'image') {
+        previewArea.innerHTML = `<img src="${src}" alt="Wallpaper Preview">`;
+      } else {
+        previewArea.innerHTML = `<video src="${src}" autoplay muted loop></video>`;
+      }
+
+      saveState();
     }
 
     async function fetchGitHubWallpapers() {
@@ -1018,16 +926,12 @@
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
         const files = await response.json();
         const imageExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.mp4'];
 
         const remoteWallpapers = files
           .filter(file => file.type === 'file' && imageExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
-          .map(file => ({
-            name: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' '),
-            url: file.download_url
-          }));
+          .map(file => ({ name: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' '), url: file.download_url }));
 
         wallpapers.push(...remoteWallpapers);
         renderWallpapers();
@@ -1036,30 +940,7 @@
         if ((!state || !state.wallpaperSrc) && wallpapers.length > 0) {
           setWallpaper(wallpapers[0].url, wallpapers[0].url.toLowerCase().endsWith('.mp4') ? 'video' : 'image');
         }
-      } catch (error) {
-        console.error('Failed to load GitHub wallpapers:', error);
-      }
-    }
-
-    function setWallpaper(src, type) {
-      currentWallpaperUrl = src;
-      currentWallpaperType = type;
-      if (type === 'image') {
-        wallpaperContainer.innerHTML = '';
-        wallpaperContainer.style.backgroundImage = `url(${src})`;
-      } else {
-        wallpaperContainer.style.backgroundImage = 'none';
-        wallpaperContainer.innerHTML = `<video src="${src}" autoplay muted ${isVideoLooping ? 'loop' : ''}></video>`;
-      }
-      saveState();
-    }
-
-    function toggleVideoLooping() {
-      isVideoLooping = !isVideoLooping;
-      document.getElementById('loopVideoModalBtn').textContent = isVideoLooping ? "Loop Video: ON" : "Loop Video: OFF";
-      const vid = wallpaperContainer.querySelector('video');
-      if (vid) vid.loop = isVideoLooping;
-      saveState();
+      } catch (error) { console.error('Failed to load GitHub wallpapers:', error); }
     }
 
     const rainCanvas = document.getElementById('rainCanvas');
@@ -1067,10 +948,7 @@
     let rainDrops = [];
     let rainAnimationId;
 
-    function resizeRain() {
-      rainCanvas.width = window.innerWidth;
-      rainCanvas.height = window.innerHeight;
-    }
+    function resizeRain() { rainCanvas.width = window.innerWidth; rainCanvas.height = window.innerHeight; }
     window.addEventListener('resize', resizeRain);
     resizeRain();
 
@@ -1078,12 +956,7 @@
       if(!isRainActive) return;
       rainDrops = [];
       for(let i=0; i<150; i++) {
-        rainDrops.push({
-          x: Math.random() * rainCanvas.width,
-          y: Math.random() * rainCanvas.height,
-          l: Math.random() * 20 + 10,
-          s: Math.random() * 10 + 5
-        });
+        rainDrops.push({ x: Math.random() * rainCanvas.width, y: Math.random() * rainCanvas.height, l: Math.random() * 20 + 10, s: Math.random() * 10 + 5 });
       }
       drawRain();
     }
@@ -1099,10 +972,7 @@
         ctxRain.moveTo(d.x, d.y);
         ctxRain.lineTo(d.x, d.y + d.l);
         d.y += d.s;
-        if(d.y > rainCanvas.height) {
-          d.y = -d.l;
-          d.x = Math.random() * rainCanvas.width;
-        }
+        if(d.y > rainCanvas.height) { d.y = -d.l; d.x = Math.random() * rainCanvas.width; }
       }
       ctxRain.stroke();
       rainAnimationId = requestAnimationFrame(drawRain);
@@ -1110,39 +980,64 @@
 
     function toggleRainEffect() {
       isRainActive = !isRainActive;
-      document.getElementById('rainModalBtn').textContent = isRainActive ? "Rain Effect: ON" : "Rain Effect: OFF";
-      if(isRainActive) {
-        initRain();
-      } else {
-        cancelAnimationFrame(rainAnimationId);
-        ctxRain.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
-      }
+      if(isRainActive) initRain(); else { cancelAnimationFrame(rainAnimationId); ctxRain.clearRect(0, 0, rainCanvas.width, rainCanvas.height); }
       saveState();
+    }
+
+    function renderShelf() {
+      shelfCenter.innerHTML = '';
+      const allApps = Array.from(document.querySelectorAll('#mainAppGrid .app-icon')).map(app => ({
+        name: app.querySelector('span').textContent,
+        icon: app.querySelector('.icon-img img').src,
+        url: app.getAttribute('onclick').match(/'([^']*)'/g)[2].replace(/'/g, ''),
+        isPinned: app.classList.contains('pinned')
+      }));
+
+      const appsToDisplay = [];
+      allApps.forEach(app => { if (app.isPinned || openApps[app.name]) appsToDisplay.push(app); });
+
+      appsToDisplay.forEach(app => {
+        const shelfIcon = document.createElement('div');
+        shelfIcon.className = 'shelf-app-icon';
+        if (openApps[app.name]) {
+          shelfIcon.classList.add('is-open');
+          if (!openApps[app.name].window.classList.contains('hidden')) shelfIcon.classList.add('active-window');
+        }
+        shelfIcon.title = app.name;
+        shelfIcon.innerHTML = `<img src="${app.icon}" alt="${app.name}">`;
+        
+        shelfIcon.onclick = () => {
+          if (openApps[app.name]) {
+            const win = openApps[app.name].window;
+            if (win.classList.contains('hidden') || win.style.zIndex != highestZIndex) {
+              win.classList.remove('hidden'); highestZIndex++; win.style.zIndex = highestZIndex;
+            } else {
+              win.classList.add('hidden');
+            }
+            checkFullscreenApps(); renderShelf();
+          } else { openApp(app.name, app.icon, app.url); }
+        };
+        shelfCenter.appendChild(shelfIcon);
+      });
     }
 
     setInterval(() => {
       const now = new Date();
       let h = now.getHours(), m = now.getMinutes();
       const ampm = h >= 12 ? 'PM' : 'AM';
-      h = h % 12 || 12;
-      m = m < 10 ? '0'+m : m;
+      h = h % 12 || 12; m = m < 10 ? '0'+m : m;
       document.getElementById('clockTime').textContent = `${h}:${m} ${ampm}`;
     }, 1000);
 
-    // Context Menu Handling
     window.addEventListener('contextmenu', e => {
       if (e.target.closest('#launcherMenu') && !e.target.closest('.app-icon')) return;
-      if (e.target.closest('.app-window') || e.target.closest('#dayDisplay')) return;
+      if (e.target.closest('.app-window') || e.target.closest('#dayDisplay') || e.target.closest('.wallpaper-modal')) return;
       
       const appIconEl = e.target.closest('.app-icon');
       if (appIconEl) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // Update the Pin label depending on state
+        e.preventDefault(); e.stopPropagation();
         const isPinned = appIconEl.classList.contains('pinned');
         document.getElementById('pinAppCtxLabel').textContent = isPinned ? 'Unpin this app' : 'Pin this app';
-
         appContextMenu.style.display = 'flex';
         appContextMenu.style.left = Math.min(e.pageX, window.innerWidth - 220) + 'px';
         appContextMenu.style.top = Math.min(e.pageY, window.innerHeight - 80) + 'px';
@@ -1161,21 +1056,14 @@
     });
 
     window.addEventListener('click', e => {
-      if (!e.target.closest('.context-menu')) {
-        contextMenu.classList.remove('active');
-        appContextMenu.style.display = 'none';
-      }
+      if (!e.target.closest('.context-menu')) { contextMenu.classList.remove('active'); appContextMenu.style.display = 'none'; }
     });
 
-    // Pin app from Right Click context menu
     document.getElementById('pinAppCtxBtn').onclick = () => {
       const targetAppName = appContextMenu.getAttribute('data-target-app');
       if (targetAppName) {
-        const appIcons = document.querySelectorAll('#mainAppGrid .app-icon');
-        appIcons.forEach(app => {
-          if (app.querySelector('span').textContent === targetAppName) {
-            togglePin(null, app); // null event since we aren't clicking directly
-          }
+        document.querySelectorAll('#mainAppGrid .app-icon').forEach(app => {
+          if (app.querySelector('span').textContent === targetAppName) togglePin(null, app);
         });
         appContextMenu.style.display = 'none';
       }
@@ -1184,15 +1072,11 @@
     document.getElementById('deleteAppBtn').onclick = () => {
       const targetAppName = appContextMenu.getAttribute('data-target-app');
       if (targetAppName) {
-        const appIcons = document.querySelectorAll('#mainAppGrid .app-icon');
-        appIcons.forEach(app => {
+        document.querySelectorAll('#mainAppGrid .app-icon').forEach(app => {
           if (app.querySelector('span').textContent === targetAppName) {
             app.remove();
-            if (openApps[targetAppName]) {
-              closeApp(targetAppName);
-            }
-            updateInstalledApps();
-            saveState();
+            if (openApps[targetAppName]) closeApp(targetAppName);
+            updateInstalledApps(); saveState(); renderShelf();
           }
         });
         appContextMenu.style.display = 'none';
@@ -1202,461 +1086,266 @@
     function toggleAlwaysHideShelf() {
       isAutohideEnabled = !isAutohideEnabled;
       document.getElementById('autohideLabel').textContent = isAutohideEnabled ? "Disable Autohide" : "Autohide Shelf";
-      if (isAutohideEnabled) {
-        shelf.classList.add('autohide');
-        shelfTriggerZone.classList.add('active');
-      } else {
-        shelf.classList.remove('autohide', 'reveal');
-        shelfTriggerZone.classList.remove('active');
-      }
-      saveState();
-      contextMenu.classList.remove('active');
+      if (isAutohideEnabled) { shelf.classList.add('autohide'); shelfTriggerZone.classList.add('active'); } 
+      else { shelf.classList.remove('autohide', 'reveal'); shelfTriggerZone.classList.remove('active'); }
+      saveState(); contextMenu.classList.remove('active');
     }
 
     function setShelfPosition(pos) {
       shelf.classList.remove('pos-bottom', 'pos-left', 'pos-right');
       launcher.classList.remove('pos-bottom', 'pos-left', 'pos-right');
       shelfTriggerZone.classList.remove('pos-bottom', 'pos-left', 'pos-right');
-
-      shelf.classList.add(`pos-${pos}`);
-      launcher.classList.add(`pos-${pos}`);
-      shelfTriggerZone.classList.add(`pos-${pos}`);
-      currentPosition = pos;
-      saveState();
-      contextMenu.classList.remove('active');
+      shelf.classList.add(`pos-${pos}`); launcher.classList.add(`pos-${pos}`); shelfTriggerZone.classList.add(`pos-${pos}`);
+      currentPosition = pos; saveState(); contextMenu.classList.remove('active');
     }
 
-    shelfTriggerZone.addEventListener('mouseenter', () => {
-      if (isAutohideEnabled || shelf.classList.contains('app-fullscreen-hide')) {
-        shelf.classList.add('reveal');
-      }
-    });
-
-    shelf.addEventListener('mouseleave', () => {
-      if (isAutohideEnabled || shelf.classList.contains('app-fullscreen-hide')) {
-        setTimeout(() => shelf.classList.remove('reveal'), 150);
-      }
-    });
+    shelfTriggerZone.addEventListener('mouseenter', () => { if (isAutohideEnabled || shelf.classList.contains('app-fullscreen-hide')) shelf.classList.add('reveal'); });
+    shelf.addEventListener('mouseleave', () => { if (isAutohideEnabled || shelf.classList.contains('app-fullscreen-hide')) setTimeout(() => shelf.classList.remove('reveal'), 150); });
 
     function toggleLauncher(e) {
       if (e) e.stopPropagation();
       if (launcher.classList.contains('active')) {
-        launcher.classList.remove('active', 'dragged-active');
-        launcher.style.transform = '';
+        launcher.classList.remove('active', 'dragged-active'); launcher.style.transform = '';
       } else {
-        launcher.classList.add('active');
-        document.getElementById('searchInput').value = '';
-        document.getElementById('defaultView').classList.remove('hidden');
-        document.getElementById('searchView').classList.remove('active');
+        launcher.classList.add('active'); document.getElementById('searchInput').value = '';
+        document.getElementById('defaultView').classList.remove('hidden'); document.getElementById('searchView').classList.remove('active');
       }
       contextMenu.classList.remove('active');
     }
 
     document.addEventListener('click', e => {
       if (launcher.classList.contains('active') && !e.target.closest('.launcher') && !e.target.closest('.launcher-btn')) {
-        launcher.classList.remove('active', 'dragged-active');
-        launcher.style.transform = '';
+        launcher.classList.remove('active', 'dragged-active'); launcher.style.transform = '';
       }
     });
 
-    // MAKE LAUNCHER DRAGGABLE
     let isDraggingLauncher = false;
-    let launcherDragOffsetX = 0;
-    let launcherDragOffsetY = 0;
-
+    let launcherDragOffsetX = 0, launcherDragOffsetY = 0;
     launcherDragHandle.addEventListener('mousedown', (e) => {
-      isDraggingLauncher = true;
-      launcher.classList.add('dragging', 'dragged-active');
-      
+      isDraggingLauncher = true; launcher.classList.add('dragging', 'dragged-active');
       const rect = launcher.getBoundingClientRect();
-      launcher.style.transform = 'none';
-      launcher.style.left = rect.left + 'px';
-      launcher.style.top = rect.top + 'px';
-      launcher.style.bottom = 'auto';
-      launcher.style.right = 'auto';
-
-      launcherDragOffsetX = e.clientX - rect.left;
-      launcherDragOffsetY = e.clientY - rect.top;
-      
+      launcher.style.transform = 'none'; launcher.style.left = rect.left + 'px'; launcher.style.top = rect.top + 'px'; launcher.style.bottom = 'auto'; launcher.style.right = 'auto';
+      launcherDragOffsetX = e.clientX - rect.left; launcherDragOffsetY = e.clientY - rect.top;
       e.preventDefault();
     });
-
     window.addEventListener('mousemove', (e) => {
-      if (isDraggingLauncher) {
-        launcher.style.left = (e.clientX - launcherDragOffsetX) + 'px';
-        launcher.style.top = (e.clientY - launcherDragOffsetY) + 'px';
-      }
+      if (isDraggingLauncher) { launcher.style.left = (e.clientX - launcherDragOffsetX) + 'px'; launcher.style.top = (e.clientY - launcherDragOffsetY) + 'px'; }
     });
-
     window.addEventListener('mouseup', () => {
-      if (isDraggingLauncher) {
-        isDraggingLauncher = false;
-        launcher.classList.remove('dragging');
-      }
+      if (isDraggingLauncher) { isDraggingLauncher = false; launcher.classList.remove('dragging'); }
     });
-
-    // Make launcher resizable
-    function setupLauncherResizing() {
-      const handles = launcher.querySelectorAll('.resize-handle');
-      let isResizing = false;
-      let currentHandle = null;
-      let startX, startY, startWidth, startHeight, startLeft, startTop;
-
-      handles.forEach(handle => {
-        handle.addEventListener('mousedown', (e) => {
-          isResizing = true;
-          currentHandle = handle;
-          startX = e.clientX;
-          startY = e.clientY;
-          const rect = launcher.getBoundingClientRect();
-          startWidth = rect.width;
-          startHeight = rect.height;
-          startLeft = rect.left;
-          startTop = rect.top;
-          
-          launcher.style.transform = 'none';
-          launcher.style.left = startLeft + 'px';
-          launcher.style.top = startTop + 'px';
-          launcher.style.bottom = 'auto';
-          launcher.style.right = 'auto';
-          
-          launcher.classList.add('resizing', 'dragged-active');
-          document.body.classList.add('is-interacting');
-          e.preventDefault();
-        });
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (!isResizing) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        
-        let newWidth = startWidth;
-        let newHeight = startHeight;
-        let newLeft = startLeft;
-        let newTop = startTop;
-
-        const isN = currentHandle.classList.contains('n') || currentHandle.classList.contains('nw') || currentHandle.classList.contains('ne');
-        const isS = currentHandle.classList.contains('s') || currentHandle.classList.contains('sw') || currentHandle.classList.contains('se');
-        const isW = currentHandle.classList.contains('w') || currentHandle.classList.contains('nw') || currentHandle.classList.contains('sw');
-        const isE = currentHandle.classList.contains('e') || currentHandle.classList.contains('ne') || currentHandle.classList.contains('se');
-
-        if (isE) newWidth = startWidth + dx;
-        if (isW) { newWidth = startWidth - dx; newLeft = startLeft + dx; }
-        if (isS) newHeight = startHeight + dy;
-        if (isN) { newHeight = startHeight - dy; newTop = startTop + dy; }
-
-        if (newWidth > 320) {
-          launcher.style.width = `${newWidth}px`;
-          launcher.style.left = `${newLeft}px`;
-        }
-        if (newHeight > 350) {
-          launcher.style.height = `${newHeight}px`;
-          launcher.style.top = `${newTop}px`;
-        }
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (isResizing) {
-          isResizing = false;
-          launcher.classList.remove('resizing');
-          document.body.classList.remove('is-interacting');
-        }
-      });
-    }
-    setupLauncherResizing();
 
     const searchInput = document.getElementById('searchInput');
     const searchView = document.getElementById('searchView');
     const defaultView = document.getElementById('defaultView');
 
     function updateInstalledApps() {
-      installedApps = Array.from(document.querySelectorAll('#mainAppGrid .app-icon')).map(el => {
-        return {
-          name: el.querySelector('span').textContent,
-          icon: el.querySelector('.icon-img img').src,
-          url: el.getAttribute('onclick').match(/'([^']*)'/g)[2].replace(/'/g, '')
-        };
-      });
+      installedApps = Array.from(document.querySelectorAll('#mainAppGrid .app-icon')).map(el => ({
+        name: el.querySelector('span').textContent, icon: el.querySelector('.icon-img img').src, url: el.getAttribute('onclick').match(/'([^']*)'/g)[2].replace(/'/g, '')
+      }));
     }
 
     searchInput.addEventListener('input', (e) => {
       const q = e.target.value.trim().toLowerCase();
-      if (q === '') {
-        defaultView.classList.remove('hidden');
-        searchView.classList.remove('active');
-        return;
-      }
-
-      defaultView.classList.add('hidden');
-      searchView.classList.add('active');
-      searchView.innerHTML = '';
-
+      if (q === '') { defaultView.classList.remove('hidden'); searchView.classList.remove('active'); return; }
+      defaultView.classList.add('hidden'); searchView.classList.add('active'); searchView.innerHTML = '';
       const localMatches = installedApps.filter(app => app.name.toLowerCase().includes(q));
-      
       if (localMatches.length > 0) {
         const cat = document.createElement('div');
         cat.innerHTML = `<div class="search-category-title">Installed Apps</div>`;
         localMatches.forEach(app => {
-          const item = document.createElement('div');
-          item.className = 'search-result-item';
+          const item = document.createElement('div'); item.className = 'search-result-item';
           item.innerHTML = `<img src="${app.icon}" alt="${app.name}"><span>${app.name}</span>`;
           item.onclick = () => { toggleLauncher(); openApp(app.name, app.icon, app.url); };
           cat.appendChild(item);
         });
         searchView.appendChild(cat);
-      } else {
-        searchView.innerHTML = '<div style="color:#aaa; font-size:12px; text-align:center; margin-top:20px;">No results found.</div>';
-      }
+      } else { searchView.innerHTML = '<div style="color:var(--text-secondary); font-size:12px; text-align:center; margin-top:20px;">No results found.</div>'; }
     });
 
-    function makeWindowDraggable(win, header) {
-      let isDragging = false;
-      let offsetX, offsetY;
+    // Handle new button clicks
+    window.winAction = function(name, action) {
+      if(!openApps[name]) return;
+      const win = openApps[name].window;
+      const iframe = win.querySelector('iframe');
+      if(!iframe) return;
 
+      if(action === 'back') {
+        try { iframe.contentWindow.history.back(); } catch(e) { console.warn("CORS prevented history back"); }
+      } else if(action === 'forward') {
+        try { iframe.contentWindow.history.forward(); } catch(e) { console.warn("CORS prevented history forward"); }
+      } else if(action === 'refresh') {
+        try { iframe.contentWindow.location.reload(); } catch(e) { iframe.src = iframe.src; }
+      }
+    };
+
+    function openApp(name, iconUrl, iframeUrl) {
+      if (launcher.classList.contains('active')) toggleLauncher();
+      if (openApps[name]) {
+        const win = openApps[name].window; win.classList.remove('hidden'); highestZIndex++; win.style.zIndex = highestZIndex;
+        checkFullscreenApps(); renderShelf(); return;
+      }
+
+      const win = document.createElement('div');
+      win.className = 'app-window windowed'; highestZIndex++; win.style.zIndex = highestZIndex;
+      win.innerHTML = `
+        <div class="resize-handle n"></div><div class="resize-handle s"></div><div class="resize-handle w"></div><div class="resize-handle e"></div>
+        <div class="resize-handle nw"></div><div class="resize-handle ne"></div><div class="resize-handle sw"></div><div class="resize-handle se"></div>
+        <div class="window-header">
+          <div class="window-title"><img src="${iconUrl}" alt="${name}"> ${name}</div>
+          <div class="window-controls">
+            <!-- Back Button -->
+            <button class="win-btn" onclick="winAction('${name}', 'back')" title="Go Back">
+              <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <!-- Forward Button -->
+            <button class="win-btn" onclick="winAction('${name}', 'forward')" title="Go Forward">
+              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+            <!-- Refresh Button -->
+            <button class="win-btn" onclick="winAction('${name}', 'refresh')" title="Refresh App">
+              <svg viewBox="0 0 24 24"><path d="M2 12A10 10 0 1 1 12 22 10 10 0 0 1 2 12zM12 6v6l4 4"/></svg>
+            </button>
+            <!-- Maximize Button -->
+            <button class="win-btn" onclick="toggleWindowMode('${name}')" title="Maximize">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+            </button>
+            <!-- Close Button -->
+            <button class="win-btn close" onclick="closeApp('${name}')" title="Close">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="window-body"><iframe src="${iframeUrl}"></iframe></div>
+      `;
+      win.style.left = (window.innerWidth / 2 - 475) + 'px'; win.style.top = (window.innerHeight / 2 - 300) + 'px';
+      desktop.appendChild(win);
+      
+      makeWindowDraggable(win, win.querySelector('.window-header')); makeWindowResizable(win);
+      win.addEventListener('mousedown', () => { highestZIndex++; win.style.zIndex = highestZIndex; renderShelf(); });
+      
+      openApps[name] = { window: win, iconUrl: iconUrl, name: name };
+      checkFullscreenApps(); renderShelf();
+    }
+
+    function toggleWindowMode(name) {
+      if (openApps[name]) { openApps[name].window.classList.toggle('windowed'); checkFullscreenApps(); }
+    }
+
+    function closeApp(name) {
+      if (openApps[name]) { openApps[name].window.remove(); delete openApps[name]; checkFullscreenApps(); renderShelf(); }
+    }
+
+    function makeWindowDraggable(win, header) {
+      let isDragging = false, offsetX, offsetY;
       header.addEventListener('mousedown', (e) => {
-        if (win.classList.contains('windowed')) {
-          isDragging = true;
-          win.classList.add('dragging');
-          highestZIndex++;
-          win.style.zIndex = highestZIndex;
-          
-          offsetX = e.clientX - win.getBoundingClientRect().left;
-          offsetY = e.clientY - win.getBoundingClientRect().top;
-          
+        if (win.classList.contains('windowed') && !e.target.closest('.win-btn')) {
+          isDragging = true; win.classList.add('dragging'); highestZIndex++; win.style.zIndex = highestZIndex;
+          offsetX = e.clientX - win.getBoundingClientRect().left; offsetY = e.clientY - win.getBoundingClientRect().top;
           document.body.classList.add('is-interacting');
         }
       });
-
       window.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-          win.style.left = (e.clientX - offsetX) + 'px';
-          win.style.top = (e.clientY - offsetY) + 'px';
-        }
+        if (isDragging) { win.style.left = (e.clientX - offsetX) + 'px'; win.style.top = (e.clientY - offsetY) + 'px'; }
       });
-
       window.addEventListener('mouseup', () => {
-        if (isDragging) {
-          isDragging = false;
-          win.classList.remove('dragging');
-          document.body.classList.remove('is-interacting');
-        }
+        if (isDragging) { isDragging = false; win.classList.remove('dragging'); document.body.classList.remove('is-interacting'); }
       });
     }
 
     function makeWindowResizable(win) {
       const handles = win.querySelectorAll('.resize-handle');
-      let isResizing = false;
-      let currentHandle = null;
-      let startX, startY, startWidth, startHeight, startLeft, startTop;
-
+      let isResizing = false, currentHandle = null, startX, startY, startWidth, startHeight, startLeft, startTop;
       handles.forEach(handle => {
         handle.addEventListener('mousedown', (e) => {
           if (!win.classList.contains('windowed')) return;
-          isResizing = true;
-          currentHandle = handle;
-          startX = e.clientX;
-          startY = e.clientY;
-          const rect = win.getBoundingClientRect();
-          startWidth = rect.width;
-          startHeight = rect.height;
-          startLeft = rect.left;
-          startTop = rect.top;
-          
-          win.classList.add('resizing');
-          document.body.classList.add('is-interacting');
-          highestZIndex++;
-          win.style.zIndex = highestZIndex;
+          isResizing = true; currentHandle = handle; startX = e.clientX; startY = e.clientY;
+          const rect = win.getBoundingClientRect(); startWidth = rect.width; startHeight = rect.height; startLeft = rect.left; startTop = rect.top;
+          win.classList.add('resizing'); document.body.classList.add('is-interacting'); highestZIndex++; win.style.zIndex = highestZIndex;
           e.preventDefault();
         });
       });
-
       window.addEventListener('mousemove', (e) => {
         if (!isResizing) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        
-        let newWidth = startWidth;
-        let newHeight = startHeight;
-        let newLeft = startLeft;
-        let newTop = startTop;
-
+        const dx = e.clientX - startX, dy = e.clientY - startY;
+        let newWidth = startWidth, newHeight = startHeight, newLeft = startLeft, newTop = startTop;
         const isN = currentHandle.classList.contains('n') || currentHandle.classList.contains('nw') || currentHandle.classList.contains('ne');
         const isS = currentHandle.classList.contains('s') || currentHandle.classList.contains('sw') || currentHandle.classList.contains('se');
         const isW = currentHandle.classList.contains('w') || currentHandle.classList.contains('nw') || currentHandle.classList.contains('sw');
         const isE = currentHandle.classList.contains('e') || currentHandle.classList.contains('ne') || currentHandle.classList.contains('se');
 
-        if (isE) newWidth = startWidth + dx;
-        if (isW) { newWidth = startWidth - dx; newLeft = startLeft + dx; }
-        if (isS) newHeight = startHeight + dy;
-        if (isN) { newHeight = startHeight - dy; newTop = startTop + dy; }
-
-        if (newWidth > 300) {
-          win.style.width = `${newWidth}px`;
-          win.style.left = `${newLeft}px`;
-        }
-        if (newHeight > 200) {
-          win.style.height = `${newHeight}px`;
-          win.style.top = `${newTop}px`;
-        }
+        if (isE) newWidth = startWidth + dx; if (isW) { newWidth = startWidth - dx; newLeft = startLeft + dx; }
+        if (isS) newHeight = startHeight + dy; if (isN) { newHeight = startHeight - dy; newTop = startTop + dy; }
+        if (newWidth > 300) { win.style.width = `${newWidth}px`; win.style.left = `${newLeft}px`; }
+        if (newHeight > 200) { win.style.height = `${newHeight}px`; win.style.top = `${newTop}px`; }
       });
-
       window.addEventListener('mouseup', () => {
-        if (isResizing) {
-          isResizing = false;
-          win.classList.remove('resizing');
-          document.body.classList.remove('is-interacting');
-        }
+        if (isResizing) { isResizing = false; win.classList.remove('resizing'); document.body.classList.remove('is-interacting'); }
       });
     }
+
+    function setupLauncherResizing() {
+      const handles = launcher.querySelectorAll('.resize-handle');
+      let isResizing = false, currentHandle = null, startX, startY, startWidth, startHeight, startLeft, startTop;
+      handles.forEach(handle => {
+        handle.addEventListener('mousedown', (e) => {
+          isResizing = true; currentHandle = handle; startX = e.clientX; startY = e.clientY;
+          const rect = launcher.getBoundingClientRect(); startWidth = rect.width; startHeight = rect.height; startLeft = rect.left; startTop = rect.top;
+          launcher.style.transform = 'none'; launcher.style.left = startLeft + 'px'; launcher.style.top = startTop + 'px'; launcher.style.bottom = 'auto'; launcher.style.right = 'auto';
+          launcher.classList.add('resizing', 'dragged-active'); document.body.classList.add('is-interacting'); e.preventDefault();
+        });
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const dx = e.clientX - startX, dy = e.clientY - startY;
+        let newWidth = startWidth, newHeight = startHeight, newLeft = startLeft, newTop = startTop;
+        const isN = currentHandle.classList.contains('n') || currentHandle.classList.contains('nw') || currentHandle.classList.contains('ne');
+        const isS = currentHandle.classList.contains('s') || currentHandle.classList.contains('sw') || currentHandle.classList.contains('se');
+        const isW = currentHandle.classList.contains('w') || currentHandle.classList.contains('nw') || currentHandle.classList.contains('sw');
+        const isE = currentHandle.classList.contains('e') || currentHandle.classList.contains('ne') || currentHandle.classList.contains('se');
+
+        if (isE) newWidth = startWidth + dx; if (isW) { newWidth = startWidth - dx; newLeft = startLeft + dx; }
+        if (isS) newHeight = startHeight + dy; if (isN) { newHeight = startHeight - dy; newTop = startTop + dy; }
+        if (newWidth > 320) { launcher.style.width = `${newWidth}px`; launcher.style.left = `${newLeft}px`; }
+        if (newHeight > 350) { launcher.style.height = `${newHeight}px`; launcher.style.top = `${newTop}px`; }
+      });
+      window.addEventListener('mouseup', () => {
+        if (isResizing) { isResizing = false; launcher.classList.remove('resizing'); document.body.classList.remove('is-interacting'); }
+      });
+    }
+    setupLauncherResizing();
 
     function checkFullscreenApps() {
       const hasFullscreen = Array.from(document.querySelectorAll('.app-window')).some(w => !w.classList.contains('hidden') && !w.classList.contains('windowed'));
-      if (hasFullscreen) {
-        shelf.classList.add('app-fullscreen-hide');
-        shelfTriggerZone.classList.add('active');
-      } else {
-        shelf.classList.remove('app-fullscreen-hide');
-        if (!isAutohideEnabled) shelfTriggerZone.classList.remove('active');
-      }
-    }
-
-    function openApp(name, iconUrl, iframeUrl) {
-      if (launcher.classList.contains('active')) toggleLauncher();
-      
-      if (openApps[name]) {
-        const win = openApps[name].window;
-        win.classList.remove('hidden');
-        highestZIndex++;
-        win.style.zIndex = highestZIndex;
-        checkFullscreenApps();
-        return;
-      }
-
-      const win = document.createElement('div');
-      win.className = 'app-window windowed'; 
-      highestZIndex++;
-      win.style.zIndex = highestZIndex;
-
-      win.innerHTML = `
-        <div class="resize-handle n"></div>
-        <div class="resize-handle s"></div>
-        <div class="resize-handle w"></div>
-        <div class="resize-handle e"></div>
-        <div class="resize-handle nw"></div>
-        <div class="resize-handle ne"></div>
-        <div class="resize-handle sw"></div>
-        <div class="resize-handle se"></div>
-        <div class="window-header">
-          <div class="window-title">
-            <img src="${iconUrl}" alt="${name}">
-            ${name}
-          </div>
-          <div class="window-controls">
-            <button class="win-btn" onclick="toggleWindowMode('${name}')"><img src="https://img.icons8.com/ios-glyphs/30/maximize-button.png"></button>
-            <button class="win-btn close" onclick="closeApp('${name}')">✕</button>
-          </div>
-        </div>
-        <div class="window-body">
-          <iframe src="${iframeUrl}"></iframe>
-        </div>
-      `;
-
-      win.style.left = (window.innerWidth / 2 - 475) + 'px';
-      win.style.top = (window.innerHeight / 2 - 300) + 'px';
-
-      desktop.appendChild(win);
-      
-      const header = win.querySelector('.window-header');
-      makeWindowDraggable(win, header);
-      makeWindowResizable(win);
-
-      win.addEventListener('mousedown', () => {
-        highestZIndex++;
-        win.style.zIndex = highestZIndex;
-      });
-
-      const shelfIcon = document.createElement('div');
-      shelfIcon.className = 'shelf-app-icon active';
-      shelfIcon.title = name;
-      shelfIcon.innerHTML = `<img src="${iconUrl}" alt="${name}">`;
-      shelfIcon.onclick = () => {
-        if (win.classList.contains('hidden')) {
-          win.classList.remove('hidden');
-          highestZIndex++;
-          win.style.zIndex = highestZIndex;
-        } else if (win.style.zIndex == highestZIndex) {
-          win.classList.add('hidden');
-        } else {
-          highestZIndex++;
-          win.style.zIndex = highestZIndex;
-        }
-        checkFullscreenApps();
-      };
-      shelfCenter.appendChild(shelfIcon);
-
-      openApps[name] = { window: win, shelfIcon: shelfIcon, iconUrl: iconUrl, name: name };
-      checkFullscreenApps();
-    }
-
-    function toggleWindowMode(name) {
-      if (openApps[name]) {
-        const win = openApps[name].window;
-        win.classList.toggle('windowed');
-        checkFullscreenApps();
-      }
-    }
-
-    function closeApp(name) {
-      if (openApps[name]) {
-        openApps[name].window.remove();
-        openApps[name].shelfIcon.remove();
-        delete openApps[name];
-        checkFullscreenApps();
-      }
+      if (hasFullscreen) { shelf.classList.add('app-fullscreen-hide'); shelfTriggerZone.classList.add('active'); } 
+      else { shelf.classList.remove('app-fullscreen-hide'); if (!isAutohideEnabled) shelfTriggerZone.classList.remove('active'); }
     }
 
     function openWallpaperModal() { wallpaperModal.classList.add('active'); contextMenu.classList.remove('active'); }
     function closeWallpaperModal() { wallpaperModal.classList.remove('active'); }
 
-    // Alt+Tab Logic
     window.addEventListener('keydown', e => {
       if (e.altKey && e.key === 'Tab') {
         e.preventDefault();
         altTabAppKeys = Object.keys(openApps).filter(key => !openApps[key].window.classList.contains('hidden'));
         if (altTabAppKeys.length === 0) return;
-
-        if (!altTabOverlay.classList.contains('active')) {
-          altTabOverlay.classList.add('active');
-          altTabIndex = 0;
-        } else {
-          altTabIndex = (altTabIndex + 1) % altTabAppKeys.length;
-        }
-        renderAltTab();
+        if (!altTabOverlay.classList.contains('active')) { altTabOverlay.classList.add('active'); altTabIndex = 0; } 
+        else { altTabIndex = (altTabIndex + 1) % altTabAppKeys.length; }
+        altTabOverlay.innerHTML = '';
+        altTabAppKeys.forEach((key, index) => {
+          const app = openApps[key]; const card = document.createElement('div'); card.className = `alttab-card ${index === altTabIndex ? 'selected' : ''}`;
+          card.innerHTML = `<img src="${app.iconUrl}" alt="${app.name}"><span>${app.name}</span>`;
+          altTabOverlay.appendChild(card);
+        });
       }
     });
 
     window.addEventListener('keyup', e => {
       if (e.key === 'Alt' && altTabOverlay.classList.contains('active')) {
         altTabOverlay.classList.remove('active');
-        if (altTabAppKeys.length > 0) {
-          const selectedApp = openApps[altTabAppKeys[altTabIndex]];
-          highestZIndex++;
-          selectedApp.window.style.zIndex = highestZIndex;
-        }
+        if (altTabAppKeys.length > 0) { const selectedApp = openApps[altTabAppKeys[altTabIndex]]; highestZIndex++; selectedApp.window.style.zIndex = highestZIndex; renderShelf(); }
       }
     });
-
-    function renderAltTab() {
-      altTabOverlay.innerHTML = '';
-      altTabAppKeys.forEach((key, index) => {
-        const app = openApps[key];
-        const card = document.createElement('div');
-        card.className = `alttab-card ${index === altTabIndex ? 'selected' : ''}`;
-        card.innerHTML = `<img src="${app.iconUrl}" alt="${app.name}"><span>${app.name}</span>`;
-        altTabOverlay.appendChild(card);
-      });
-    }
 
     fetchGitHubWallpapers();
     loadState();
