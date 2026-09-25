@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Tab OS</title>
+  <title>New Tab OS 2.5</title>
   <style>
     @font-face {
       font-family: 'CustomFont';
-      src: url('Electroharmonix.otf') format('opentype');
+      src: url('CustomFont.ttf') format('truetype'), url('Electroharmonix.otf') format('opentype');
     }
 
     :root {
@@ -21,7 +21,9 @@
       --modal-bg: rgba(18, 18, 18, 0.85);
       --border-color: rgba(255, 255, 255, 0.12);
       --hover-bg: rgba(255, 255, 255, 0.12);
-      --badge-bg: rgba(0, 0, 0, 0.5);
+      --shadow-color: rgba(0, 0, 0, 0.5);
+      --icon-filter: invert(0);
+      --widget-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
 
     * {
@@ -58,26 +60,6 @@
       inset: 0;
     }
 
-    #topLeftWidget {
-      position: absolute;
-      left: 24px;
-      top: 24px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      color: #ffffff;
-      font-family: 'CustomFont', sans-serif;
-      font-size: 1.6rem;
-      z-index: 1;
-      text-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-
-    #topLeftWidget img {
-      width: 24px;
-      height: 24px;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-    }
-
     #topCenterWidget {
       position: absolute;
       left: 50%;
@@ -85,14 +67,17 @@
       transform: translateX(-50%);
       display: flex;
       align-items: center;
-      color: #ffffff;
-      font-family: 'CustomFont', sans-serif;
-      font-size: 2.2rem; /* Made smaller than the original 3rem */
+      color: var(--text-primary);
+      font-size: 2.2rem;
       z-index: 1;
       cursor: grab;
-      text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      text-shadow: var(--widget-shadow);
     }
     
+    #topDay {
+      font-family: 'CustomFont', sans-serif;
+    }
+
     #topCenterWidget.dragging { cursor: grabbing; }
 
     #rainCanvas {
@@ -137,7 +122,7 @@
       width: 950px;
       height: 600px;
       border-radius: 16px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      box-shadow: 0 20px 50px var(--shadow-color);
       border: 1px solid var(--border-color);
       z-index: 10;
     }
@@ -151,7 +136,7 @@
 
     .window-header {
       height: 40px;
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--hover-bg);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -189,11 +174,8 @@
     }
 
     .win-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
-    .win-btn img { width: 14px; height: 14px; filter: invert(1); } 
+    .win-btn img { width: 14px; height: 14px; filter: var(--icon-filter); } 
     
-    :root:has([style*="--bg-color: #f5f5f5"]) .win-btn img { filter: invert(0); }
-    :root:has([style*="--bg-color: #f5f5f5"]) .search-app-icon { filter: invert(1); }
-
     .win-btn:hover { background: var(--hover-bg); color: var(--accent-color); }
     .win-btn.close:hover { background: #e81123; color: white; }
     .win-btn.close:hover svg { stroke: white; }
@@ -229,7 +211,7 @@
       border: 1px solid var(--border-color);
       border-radius: 18px;
       padding: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 8px 24px var(--shadow-color);
       z-index: 1500;
       display: none;
       flex-direction: column;
@@ -250,7 +232,7 @@
     }
     .context-item:hover { background: var(--hover-bg); color: var(--accent-color); }
     .context-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; opacity: 0.8; }
-    .context-icon img { width: 100%; height: 100%; object-fit: contain; }
+    .context-icon img { width: 100%; height: 100%; object-fit: contain; filter: var(--icon-filter); }
     .context-label { flex: 1; }
     .context-arrow { font-size: 10px; color: var(--text-secondary); }
 
@@ -265,7 +247,7 @@
       border: 1px solid var(--border-color);
       border-radius: 14px;
       padding: 6px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 8px 24px var(--shadow-color);
       display: none;
       flex-direction: column;
     }
@@ -285,7 +267,7 @@
       padding: 24px;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 16px 40px var(--shadow-color);
       z-index: 1200;
       opacity: 0;
       pointer-events: none;
@@ -308,7 +290,7 @@
       width: 100%; padding-bottom: 12px; margin-top: -12px;
       cursor: move; display: flex; justify-content: center; align-items: center; flex-shrink: 0;
     }
-    .launcher-drag-handle { width: 40px; height: 5px; background: rgba(150, 150, 150, 0.5); border-radius: 3px; }
+    .launcher-drag-handle { width: 40px; height: 5px; background: var(--text-secondary); opacity: 0.5; border-radius: 3px; }
 
     .launcher-content-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-right: 4px; }
 
@@ -316,10 +298,10 @@
     .launcher-search input {
       width: 100%; padding: 14px 20px 14px 44px; border-radius: 24px;
       border: 1px solid var(--border-color); outline: none;
-      background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px);
+      background: var(--hover-bg); backdrop-filter: blur(10px);
       color: var(--text-primary); font-size: 14px;
     }
-    .search-app-icon { position: absolute; left: 16px; width: 18px; height: 18px; opacity: 0.7; }
+    .search-app-icon { position: absolute; left: 16px; width: 18px; height: 18px; opacity: 0.7; filter: var(--icon-filter); }
 
     .default-view { display: flex; flex-direction: column; gap: 20px; }
     .default-view.hidden { display: none; }
@@ -343,7 +325,7 @@
 
     .icon-img {
       width: 48px; height: 48px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)); border-radius: 12px; overflow: hidden; background: rgba(150, 150, 150, 0.1);
+      filter: drop-shadow(0 2px 4px var(--shadow-color)); border-radius: 12px; overflow: hidden; background: var(--hover-bg);
     }
     .icon-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
 
@@ -356,7 +338,7 @@
       border-radius: 12px; cursor: pointer; background: var(--hover-bg);
       transition: transform 0.15s ease; color: var(--text-primary);
     }
-    .search-result-item:hover { transform: translateX(3px); background: rgba(150,150,150, 0.2); }
+    .search-result-item:hover { transform: translateX(3px); filter: brightness(1.2); }
     .search-result-item img { width: 24px; height: 24px; border-radius: 6px; object-fit: cover; }
 
     .shelf {
@@ -383,8 +365,8 @@
       width: 36px; height: 36px; border-radius: 50%; border: none;
       background: var(--hover-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s;
     }
-    .launcher-btn:hover { background: rgba(150,150,150, 0.4); }
-    .launcher-btn::after { content: ''; width: 12px; height: 12px; border: 2px solid var(--accent-color); border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.6); }
+    .launcher-btn:hover { filter: brightness(1.2); }
+    .launcher-btn::after { content: ''; width: 12px; height: 12px; border: 2px solid var(--accent-color); border-radius: 50%; box-shadow: 0 0 4px var(--shadow-color); }
 
     .shelf-center { display: flex; gap: 12px; align-items: center; justify-content: center; }
     .shelf.pos-bottom .shelf-center { position: absolute; left: 50%; transform: translateX(-50%); flex-direction: row; }
@@ -399,7 +381,7 @@
     .shelf-app-icon:hover img { transform: scale(1.08); }
     .shelf-app-icon::after {
       content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
-      width: 4px; height: 4px; background: var(--accent-color); border-radius: 50%; opacity: 0; transition: opacity 0.3s ease, width 0.3s ease, border-radius 0.3s ease;
+      width: 4px; height: 4px; background: var(--text-primary); border-radius: 50%; opacity: 0; transition: opacity 0.3s ease, width 0.3s ease, border-radius 0.3s ease;
     }
     .shelf-app-icon.is-open::after { opacity: 0.6; }
     .shelf-app-icon.active-window::after { opacity: 1; width: 14px; border-radius: 2px; }
@@ -407,7 +389,7 @@
     .shelf-right { display: flex; align-items: center; gap: 6px; }
     .tray-pill {
       background: var(--hover-bg); height: 32px; padding: 0 10px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
-      gap: 4px; font-size: 11px; font-weight: 600; color: var(--text-primary); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); cursor: default; white-space: nowrap;
+      gap: 4px; font-size: 11px; font-weight: 600; color: var(--text-primary); text-shadow: 0 1px 3px var(--shadow-color); cursor: default; white-space: nowrap;
     }
 
     .wallpaper-modal {
@@ -415,7 +397,7 @@
       width: 650px; max-width: 90vw; max-height: 85vh;
       background: var(--modal-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
       border: 1px solid var(--border-color); border-radius: 24px; padding: 24px;
-      box-shadow: 0 16px 50px rgba(0,0,0,0.6); z-index: 2500; display: none; flex-direction: column; gap: 20px;
+      box-shadow: 0 16px 50px var(--shadow-color); z-index: 2500; display: none; flex-direction: column; gap: 20px;
       opacity: 0; transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
     }
     .wallpaper-modal.active { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -424,7 +406,7 @@
     .wallpaper-header h3 { font-size: 20px; font-weight: 600; color: var(--text-primary); }
     
     .wallpaper-preview-area {
-      width: 100%; height: 280px; border-radius: 16px; background: #222; overflow: hidden;
+      width: 100%; height: 280px; border-radius: 16px; background: var(--bg-color); overflow: hidden;
       position: relative; border: 1px solid var(--border-color);
     }
     .wallpaper-preview-area img, .wallpaper-preview-area video {
@@ -439,8 +421,8 @@
       color: var(--text-primary); cursor: pointer; font-weight: 500; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;
       transition: background 0.2s, border-color 0.2s;
     }
-    .theme-btn.active { background: rgba(var(--accent-color-rgb), 0.2); border-color: var(--accent-color); color: var(--accent-color);}
-    .theme-btn:hover { background: rgba(150,150,150,0.2); }
+    .theme-btn.active { background: var(--hover-bg); border-color: var(--text-primary); color: var(--text-primary);}
+    .theme-btn:hover { filter: brightness(1.2); }
     .theme-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
     .wallpaper-grid {
@@ -453,8 +435,8 @@
       transition: transform 0.15s, border-color 0.15s;
     }
     .wallpaper-option video { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; pointer-events: none; }
-    .wallpaper-option:hover { transform: scale(1.05); border-color: var(--accent-color); }
-    .wallpaper-option.selected { border-color: var(--accent-color); border-width: 3px; }
+    .wallpaper-option:hover { transform: scale(1.05); border-color: var(--text-primary); }
+    .wallpaper-option.selected { border-color: var(--text-primary); border-width: 3px; }
 
     .alttab-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px);
@@ -466,7 +448,7 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
       cursor: pointer; border: 2px solid transparent; transition: transform 0.15s, border-color 0.15s;
     }
-    .alttab-card.selected { border-color: var(--accent-color); transform: scale(1.08); background: var(--hover-bg); }
+    .alttab-card.selected { border-color: var(--text-primary); transform: scale(1.08); background: var(--hover-bg); }
     .alttab-card img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; }
     .alttab-card span { font-size: 13px; font-weight: 600; color: var(--text-primary); text-align: center; }
   </style>
@@ -475,11 +457,6 @@
 
   <div id="desktopWallpaperContainer"></div>
   
-  <div id="topLeftWidget">
-    <span id="topTime"></span>
-    <span id="topBattery" style="display:flex; align-items:center; gap: 8px;"></span>
-  </div>
-
   <div id="topCenterWidget">
     <span id="topDay"></span>
   </div>
@@ -600,7 +577,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'osState_v2.2.9';
+    const STORAGE_KEY = 'osState_v2.5';
 
     const defaultAppsData = [
       { name: 'Notes', icon: 'https://raw.githubusercontent.com/school-rgb/frutiger-logo/9efd20ee6fe476529d6dbaf0dcbaad8b9404ee6c/Screenshot%202026-09-21%206.25.09%20PM-inverted.png', url: 'APP/Notes.html' },
@@ -684,38 +661,10 @@
       const ampm = h >= 12 ? 'PM' : 'AM';
       h = h % 12 || 12; m = m < 10 ? '0'+m : m;
       document.getElementById('clockTime').textContent = `${h}:${m} ${ampm}`;
-      document.getElementById('topTime').textContent = `${h}:${m} ${ampm}`;
       document.getElementById('topDay').textContent = daysOfTheWeek[now.getDay()];
     }
     updateClockInfo();
     setInterval(updateClockInfo, 1000);
-
-    async function initBattery() {
-      const batEl = document.getElementById('topBattery');
-      if (navigator.getBattery) {
-        try {
-          const battery = await navigator.getBattery();
-          const update = () => { 
-            let level = Math.round(battery.level * 100);
-            let iconId = '107380'; // Default Full Battery
-            if (battery.charging) {
-              iconId = '10080'; // Charging
-            } else if (level <= 20) {
-              iconId = '51878'; // Low
-            } else if (level <= 50) {
-              iconId = '51876'; // Half
-            } else {
-              iconId = '51873'; // Full
-            }
-            batEl.innerHTML = `${level}% <img src="https://img.icons8.com/?size=100&id=${iconId}&format=png&color=FFFFFF" alt="Battery">`; 
-          };
-          update();
-          battery.addEventListener('levelchange', update);
-          battery.addEventListener('chargingchange', update);
-        } catch(e) { batEl.innerHTML = ''; }
-      }
-    }
-    initBattery();
 
     let isDraggingTopWidget = false;
     let topDragOffsetX = 0;
@@ -823,14 +772,18 @@
        
        if (mode === 'light') {
           document.getElementById('themeLightBtn').classList.add('active');
-          document.documentElement.style.setProperty('--bg-color', '#f5f5f5');
-          document.documentElement.style.setProperty('--window-bg', '#ffffff');
-          document.documentElement.style.setProperty('--launcher-bg', 'rgba(240, 240, 240, 0.85)');
-          document.documentElement.style.setProperty('--shelf-bg', 'rgba(255, 255, 255, 0.65)');
+          document.documentElement.style.setProperty('--bg-color', '#ffffff');
+          document.documentElement.style.setProperty('--window-bg', '#f6f6f6');
+          document.documentElement.style.setProperty('--launcher-bg', 'rgba(243, 243, 243, 0.85)');
+          document.documentElement.style.setProperty('--shelf-bg', 'rgba(255, 255, 255, 0.75)');
           document.documentElement.style.setProperty('--text-primary', '#000000');
-          document.documentElement.style.setProperty('--modal-bg', 'rgba(240, 240, 240, 0.95)');
-          document.documentElement.style.setProperty('--border-color', 'rgba(0, 0, 0, 0.12)');
-          document.documentElement.style.setProperty('--hover-bg', 'rgba(0, 0, 0, 0.08)');
+          document.documentElement.style.setProperty('--text-secondary', '#555555');
+          document.documentElement.style.setProperty('--modal-bg', 'rgba(237, 237, 237, 0.90)');
+          document.documentElement.style.setProperty('--border-color', 'rgba(0, 0, 0, 0.15)');
+          document.documentElement.style.setProperty('--hover-bg', 'rgba(0, 0, 0, 0.10)');
+          document.documentElement.style.setProperty('--shadow-color', 'rgba(255, 255, 255, 0.6)');
+          document.documentElement.style.setProperty('--icon-filter', 'invert(1)');
+          document.documentElement.style.setProperty('--widget-shadow', '0 4px 12px rgba(255, 255, 255, 0.7)');
        } else {
           document.getElementById('themeDarkBtn').classList.add('active');
           document.documentElement.style.setProperty('--bg-color', '#000000');
@@ -838,9 +791,13 @@
           document.documentElement.style.setProperty('--launcher-bg', 'rgba(12, 12, 12, 0.85)');
           document.documentElement.style.setProperty('--shelf-bg', 'rgba(0, 0, 0, 0.65)');
           document.documentElement.style.setProperty('--text-primary', '#ffffff');
+          document.documentElement.style.setProperty('--text-secondary', '#aaaaaa');
           document.documentElement.style.setProperty('--modal-bg', 'rgba(18, 18, 18, 0.85)');
           document.documentElement.style.setProperty('--border-color', 'rgba(255, 255, 255, 0.12)');
           document.documentElement.style.setProperty('--hover-bg', 'rgba(255, 255, 255, 0.12)');
+          document.documentElement.style.setProperty('--shadow-color', 'rgba(0, 0, 0, 0.5)');
+          document.documentElement.style.setProperty('--icon-filter', 'invert(0)');
+          document.documentElement.style.setProperty('--widget-shadow', '0 4px 12px rgba(0, 0, 0, 0.5)');
        }
        saveState();
     }
@@ -935,7 +892,7 @@
     function drawRain() {
       if(!isRainActive) return;
       ctxRain.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
-      ctxRain.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctxRain.strokeStyle = currentTheme === 'light' ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.15)';
       ctxRain.lineWidth = 1;
       ctxRain.beginPath();
       for(let i=0; i<rainDrops.length; i++) {
@@ -994,7 +951,7 @@
 
     window.addEventListener('contextmenu', e => {
       if (e.target.closest('#launcherMenu') && !e.target.closest('.app-icon')) return;
-      if (e.target.closest('.app-window') || e.target.closest('#topLeftWidget') || e.target.closest('#topCenterWidget') || e.target.closest('.wallpaper-modal')) return;
+      if (e.target.closest('.app-window') || e.target.closest('#topCenterWidget') || e.target.closest('.wallpaper-modal')) return;
       
       const appIconEl = e.target.closest('.app-icon');
       if (appIconEl) {
