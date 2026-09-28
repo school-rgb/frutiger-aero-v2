@@ -24,31 +24,40 @@
     <title>Fruit Games</title>
     <meta name="title" content="Fruit Games">
     <meta name="description" content="Play unblocked games on Fruit Games. Fast, free, no downloads—perfect for school or home.">
+    
+    <!-- Direct Hosted Web Font Stream -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
-        /* Custom OTF Font Definition */
+        /* Custom Local/CORS Font Fallback Definition */
         @font-face {
-            font-family: 'CustomFont';
-            src: url('dedicool.regular.ttf') format('opentype');
+            font-family: 'AvendiskCustom';
+            src: url('https://cdn.jsdelivr.net/gh/school-rgb/frutiger-logo@main/avendisk.regular.otf') format('opentype'),
+                 url('MessiSans-Regular.otf') format('opentype'),
+                 url('MessiSans-Regular.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
             font-display: swap;
         }
 
-        /* Apply the custom OTF font to absolutely EVERYTHING */
+        /* Primary Font Rule applied globally */
         *, *::before, *::after,
         html, body, input, button, select, textarea, option, optgroup,
         h1, h2, h3, h4, h5, h6, p, span, a, div, iframe {
-            font-family: 'CustomFont', system-ui, -apple-system, sans-serif !important;
+            font-family: 'AvendiskCustom', 'Fredoka', 'Outfit', system-ui, -apple-system, sans-serif !important;
         }
 
         :root {
-            --primary: #fc2651;
-            --text: #1a1a1a;
-            --bg: #ffffff;
-            --border: #e2e8f0;
-            --radius: 12px;
+            --primary: #ffffff;
+            --text: #ffffff;
+            --bg: #0a0a0c;
+            --card-bg: #16161a;
+            --border: #26262e;
+            --radius: 14px;
             --radius-sm: 8px;
-            --radius-lg: 16px;
+            --radius-lg: 20px;
         }
 
         .dark-mode {
@@ -71,6 +80,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* Splash Screen Container - Positioned Slightly Above Center */
         #appSplash {
             position: fixed;
             inset: 0;
@@ -81,6 +91,14 @@
             align-items: center;
             justify-content: center;
             transition: opacity 0.5s ease;
+        }
+
+        .splash-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-20px);
         }
 
         @keyframes float {
@@ -99,22 +117,41 @@
             filter: invert(100%);
         }
 
-        .mc-bar-container {
-            border: 2px solid #555555;
-            background-color: #222222;
-            padding: 2px;
-            box-sizing: border-box;
-            width: 75%;
-            max-width: 400px;
-            height: 16px;
-            margin-top: 2rem;
+        /* Bouncing Text Animation per Letter */
+        .bouncing-text {
+            display: flex;
+            gap: 2px;
+            margin-top: 1.5rem;
+            color: #8e8e93;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
 
-        .mc-bar-fill {
-            height: 100%;
-            background-color: #ffffff;
-            width: 0%;
-            transition: width 0.1s linear;
+        .bouncing-text span {
+            display: inline-block;
+            animation: bounceLetter 1.2s infinite ease-in-out;
+        }
+
+        .bouncing-text span:nth-child(1) { animation-delay: 0.0s; }
+        .bouncing-text span:nth-child(2) { animation-delay: 0.1s; }
+        .bouncing-text span:nth-child(3) { animation-delay: 0.2s; }
+        .bouncing-text span:nth-child(4) { animation-delay: 0.3s; }
+        .bouncing-text span:nth-child(5) { animation-delay: 0.4s; }
+        .bouncing-text span:nth-child(6) { animation-delay: 0.5s; }
+        .bouncing-text span:nth-child(7) { animation-delay: 0.6s; }
+        .bouncing-text span:nth-child(8) { animation-delay: 0.7s; }
+        .bouncing-text span:nth-child(9) { animation-delay: 0.8s; }
+        .bouncing-text span:nth-child(10) { animation-delay: 0.9s; }
+
+        @keyframes bounceLetter {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-7px);
+                color: #ffffff;
+            }
         }
 
         header {
@@ -127,13 +164,13 @@
         }
 
         .header-content {
-            max-width: 1400px;
+            width: 100%;
+            max-width: 100%;
             margin: 0 auto;
             padding: 1rem 1.5rem;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 1rem;
         }
 
         .logo-banner {
@@ -165,43 +202,31 @@
 
         .search-container {
             display: flex;
-            flex: 1;
             width: 100%;
             max-width: 100%;
-            gap: 0.75rem;
             align-items: center;
         }
 
         #searchBar {
-            flex: 1;
+            width: 100%;
             padding: 0.875rem 1.25rem;
-            border: 1px solid var(--border);
+            border: 1px solid #26262a;
             border-radius: var(--radius);
             background: #1c1c1e;
             color: var(--text);
             font-size: 15px;
             outline: none;
             transition: all 0.3s ease;
+            text-align: left;
         }
 
         #searchBar:focus {
-            border-color: #555;
+            border-color: #666666;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
         }
 
         #searchBar::placeholder {
             color: #8e8e93;
-        }
-
-        #sortOptions, #filterOptions {
-            padding: 0.875rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: #1c1c1e;
-            color: #8e8e93;
-            font-size: 15px;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.3s ease;
         }
 
         main {
@@ -210,17 +235,11 @@
             padding: 1.5rem 1.5rem 6rem 1.5rem;
         }
 
-        .library-heading {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 0 1.25rem 0;
-            color: #ffffff;
-        }
-
         #container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 1.25rem 0.85rem;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 1.25rem 1rem;
+            justify-items: center;
         }
 
         .zone-item {
@@ -232,21 +251,23 @@
             align-items: center;
             gap: 8px;
             padding: 0;
+            width: 100%;
         }
 
         .zone-box {
             width: 100%;
             aspect-ratio: 1 / 1;
-            border-radius: 14px;
+            border-radius: var(--radius-lg);
             background-size: cover;
             background-position: center;
             border: 1px solid #26262a;
-            transition: transform 0.2s ease, border-color 0.2s ease;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .zone-item:hover .zone-box {
             transform: translateY(-4px);
-            border-color: #555;
+            border-color: #666;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
         }
 
         .zone-item .zone-name {
@@ -260,6 +281,163 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+
+        /* Black and Gray Game Banner Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-card {
+            position: relative;
+            background: #141416;
+            border: 1px solid #28282c;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 520px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95);
+        }
+
+        .modal-hero {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid #222226;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 16px;
+        }
+
+        .modal-hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(20, 20, 22, 0.95) 100%);
+        }
+
+        .modal-back-btn {
+            position: relative;
+            z-index: 5;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .modal-back-btn:hover {
+            background: #e5e5e5;
+            transform: scale(1.03);
+        }
+
+        .modal-body {
+            position: relative;
+            z-index: 2;
+            padding: 0 24px 24px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: -45px;
+        }
+
+        .modal-header-info {
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+        }
+
+        .modal-game-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 3px solid #141416;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
+            background: #222226;
+            flex-shrink: 0;
+        }
+
+        .modal-meta {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding-bottom: 4px;
+        }
+
+        .modal-meta h2 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .modal-meta .modal-category {
+            font-size: 0.85rem;
+            color: #8e8e93;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .modal-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 0.85rem 1rem;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            border: none;
+        }
+
+        .btn-play-now {
+            background: #ffffff;
+            color: #000000;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-play-now:hover {
+            background: #e0e0e0;
+            transform: translateY(-1px);
+        }
+
+        .btn-install-os {
+            background: #242428;
+            color: #ffffff;
+            border: 1px solid #38383e !important;
+        }
+
+        .btn-install-os:hover {
+            background: #323238;
+            border-color: #4a4a52 !important;
+            transform: translateY(-1px);
         }
 
         #zoneViewer {
@@ -312,6 +490,7 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: 500;
+            transition: background 0.2s ease;
         }
 
         .zone-controls button:hover {
@@ -354,16 +533,18 @@
 </head>
 <body class="dark-mode">
 
+    <!-- Splash Screen with Centered Upper Logo & Animated Bouncing "loading..." Text -->
     <div id="appSplash">
-        <div class="mb-4 flex flex-col items-center justify-center">
+        <div class="splash-inner">
             <img id="floating-image" 
                  class="w-24 h-24 object-contain animate-float pixelated-inverted" 
                  src="https://github.com/school-rgb/frutiger-logo/blob/main/Screenshot%202026-09-19%202.03.59%20PM.png?raw=true" 
                  alt="Fruit Games Loading" 
                  onerror="this.src='https://placehold.co/200x200/111111/ffffff?text=Loading...';" />
-        </div>
-        <div class="mc-bar-container">
-            <div id="progress-fill" class="mc-bar-fill"></div>
+            
+            <div class="bouncing-text">
+                <span>l</span><span>o</span><span>a</span><span>d</span><span>i</span><span>n</span><span>g</span><span>.</span><span>.</span><span>.</span>
+            </div>
         </div>
     </div>
 
@@ -374,22 +555,37 @@
     <header>
         <div class="header-content">
             <div class="search-container">
-                <input type="text" id="searchBar" placeholder="Search games by name, tag, or genre..." oninput="filterZones()">
-                <select id="sortOptions" onchange="sortZones()">
-                    <option value="name">Name</option>
-                    <option value="id">ID (Date)</option>
-                </select>
-                <select id="filterOptions" onchange="filterZones2()">
-                    <option value="none">(SELECT TAG)</option>
-                </select>
+                <input type="text" id="searchBar" placeholder="Search games by name..." oninput="filterZones()">
             </div>
         </div>
     </header>
 
     <main>
-        <h2 id="libraryHeading" class="library-heading">Fruits Library</h2>
         <div id="container">Loading...</div>
     </main>
+
+    <!-- Black & Gray Game Preview Modal -->
+    <div id="gameModal" class="modal-overlay">
+        <div class="modal-card">
+            <div id="modalHeroBg" class="modal-hero">
+                <div class="modal-hero-overlay"></div>
+                <button class="modal-back-btn" onclick="closeGameModal()">Back</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-header-info">
+                    <img id="modalGameImage" class="modal-game-icon" src="" alt="Game Icon">
+                    <div class="modal-meta">
+                        <h2 id="modalGameTitle">Game Title</h2>
+                        <span class="modal-category">Game</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-play-now" onclick="playSelectedGame()">Play Now</button>
+                    <button class="btn-install-os" onclick="installSelectedGame()">Install to OS</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="zoneViewer">
         <div class="zone-header">
@@ -401,7 +597,6 @@
             <div class="zone-controls">
                 <button onclick="fullscreenZone()">Fullscreen</button>
                 <button onclick="aboutBlank()">New Tab</button>
-                <button onclick="downloadZone()">Install to OS</button>
                 <button onclick="closeZone()">Close</button>
             </div>
         </div>
@@ -413,8 +608,10 @@
         const zoneViewer = document.getElementById('zoneViewer');
         let zoneFrame = document.getElementById('zoneFrame');
         const searchBar = document.getElementById('searchBar');
-        const sortOptions = document.getElementById('sortOptions');
-        const filterOptions = document.getElementById('filterOptions');
+        const gameModal = document.getElementById('gameModal');
+        const modalHeroBg = document.getElementById('modalHeroBg');
+        const modalGameImage = document.getElementById('modalGameImage');
+        const modalGameTitle = document.getElementById('modalGameTitle');
 
         let currentLibrary = 'fruits';
         let fruitsZonesURL = "https://cdn.jsdelivr.net/gh/school-rgb/fruti-games-@main/game.json";
@@ -422,6 +619,7 @@
         const fruitsHtmlURL = "https://cdn.jsdelivr.net/gh/school-rgb/html@main";
 
         let zones = [];
+        let selectedZone = null;
 
         function sendInstallSignal(appName, appIconUrl, appPageUrl) {
             const payload = {
@@ -441,31 +639,7 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const progressFill = document.getElementById('progress-fill');
-            let currentProgress = 0;
-
-            function simulateAssetLoading() {
-                if (currentProgress < 100) {
-                    let jump = Math.random() * 7 + 1; 
-                    if (Math.random() > 0.85) jump = 0; 
-                    currentProgress += jump;
-                    if (currentProgress >= 100) currentProgress = 100;
-                    progressFill.style.width = `${currentProgress}%`;
-                    
-                    let delay = Math.random() * 120 + 20; 
-                    if (jump === 0) delay = Math.random() * 600 + 200;
-
-                    setTimeout(simulateAssetLoading, delay);
-                }
-            }
-            simulateAssetLoading();
-        });
-
         window.addEventListener('load', async () => {
-            const progressFill = document.getElementById('progress-fill');
-            if (progressFill) progressFill.style.width = '100%';
-            
             const urlParams = new URLSearchParams(window.location.search);
             const gameId = urlParams.get('id');
 
@@ -479,18 +653,15 @@
                 }
             }
 
+            // Smooth splash fade out once games are listed
             setTimeout(() => {
                 const splash = document.getElementById('appSplash');
                 if (splash) {
                     splash.style.opacity = '0';
                     setTimeout(() => splash.remove(), 500);
                 }
-            }, 400);
+            }, 1200);
         });
-
-        function toTitleCase(str) {
-            return str.replace(/\w\S*/g, text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase());
-        }
 
         async function listZones() {
             try {
@@ -510,44 +681,13 @@
 
                 const response = await fetch(targetURL + "?t=" + Date.now());
                 zones = await response.json();
+                zones.sort((a, b) => a.name.localeCompare(b.name));
 
-                sortZones();
-                
-                let alltags = [];
-                for (const obj of zones) {
-                    if (Array.isArray(obj.special)) {
-                        alltags.push(...obj.special);
-                    }
-                }
-
-                alltags = [...new Set(alltags)];
-                let filteroption = document.getElementById("filterOptions");
-                if (filteroption && filteroption.children.length > 1) {
-                    while (filteroption.children.length > 1) {
-                        filteroption.removeChild(filteroption.lastElementChild);
-                    }
-                }
-                for (const tag of alltags) {
-                    const opt = document.createElement("option");
-                    opt.value = tag;
-                    opt.textContent = toTitleCase(tag);
-                    filteroption.appendChild(opt);
-                }
+                displayZones(zones);
             } catch (error) {
                 console.error(error);
                 container.innerHTML = `Error loading zones: ${error}`;
             }
-        }
-
-        function sortZones() {
-            let workingZones = [...zones];
-            const sortBy = sortOptions.value;
-            if (sortBy === 'name') {
-                workingZones.sort((a, b) => a.name.localeCompare(b.name));
-            } else if (sortBy === 'id') {
-                workingZones.sort((a, b) => a.id - b.id);
-            }
-            displayZones(workingZones);
         }
 
         function displayZones(zonesList) {
@@ -555,7 +695,7 @@
             zonesList.forEach((file) => {
                 const zoneItem = document.createElement("div");
                 zoneItem.className = "zone-item";
-                zoneItem.onclick = () => openZone(file);
+                zoneItem.onclick = () => showGameModal(file);
 
                 const coverImgUrl = file.cover ? file.cover.replace("{COVER_URL}", fruitsCoverURL).replace("{HTML_URL}", fruitsHtmlURL) : '';
 
@@ -577,20 +717,38 @@
             }
         }
 
-        function filterZones2() {
-            const query = filterOptions.value;
-            if (query === "none") {
-                displayZones(zones);
-            } else {
-                const filteredZones = zones.filter(zone => zone.special?.includes(query));
-                displayZones(filteredZones);
-            }
-        }
-
         function filterZones() {
             const query = searchBar.value.toLowerCase();
             const filteredZones = zones.filter(zone => zone.name.toLowerCase().includes(query));
             displayZones(filteredZones);
+        }
+
+        function showGameModal(file) {
+            selectedZone = file;
+            const coverImgUrl = file.cover ? file.cover.replace("{COVER_URL}", fruitsCoverURL).replace("{HTML_URL}", fruitsHtmlURL) : '';
+            modalHeroBg.style.backgroundImage = `url('${coverImgUrl}')`;
+            modalGameImage.src = coverImgUrl;
+            modalGameTitle.textContent = file.name;
+            gameModal.style.display = 'flex';
+        }
+
+        function closeGameModal() {
+            gameModal.style.display = 'none';
+        }
+
+        function playSelectedGame() {
+            if (selectedZone) {
+                closeGameModal();
+                openZone(selectedZone);
+            }
+        }
+
+        function installSelectedGame() {
+            if (selectedZone) {
+                const iconUrl = selectedZone.cover ? selectedZone.cover.replace("{COVER_URL}", fruitsCoverURL).replace("{HTML_URL}", fruitsHtmlURL) : '';
+                const pageUrl = window.location.origin + window.location.pathname + "?id=" + selectedZone.id;
+                sendInstallSignal(selectedZone.name, iconUrl, pageUrl);
+            }
         }
 
         function openZone(file) {
@@ -623,7 +781,7 @@
                             <head>
                                 <meta charset="UTF-8">
                                 <style>
-                                    *, body { font-family: 'CustomFont', sans-serif !important; }
+                                    *, body { font-family: 'AvendiskCustom', 'Fredoka', sans-serif !important; }
                                     body { background: #000000; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
                                     h1 { color: #fc2651; font-size: 24px; }
                                     p { color: #8e8e93; font-size: 15px; }
@@ -672,16 +830,6 @@
                     }
                 });
             }
-        }
-
-        function downloadZone() {
-            let zone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent);
-            if (!zone) return;
-
-            const iconUrl = zone.cover ? zone.cover.replace("{COVER_URL}", fruitsCoverURL).replace("{HTML_URL}", fruitsHtmlURL) : '';
-            const pageUrl = window.location.origin + window.location.pathname + "?id=" + zone.id;
-
-            sendInstallSignal(zone.name, iconUrl, pageUrl);
         }
 
         function closeZone() {
