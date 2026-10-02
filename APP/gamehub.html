@@ -428,18 +428,6 @@
             transform: translateY(-1px);
         }
 
-        .btn-install-os {
-            background: #242428;
-            color: #ffffff;
-            border: 1px solid #38383e !important;
-        }
-
-        .btn-install-os:hover {
-            background: #323238;
-            border-color: #4a4a52 !important;
-            transform: translateY(-1px);
-        }
-
         #zoneViewer {
             position: fixed;
             inset: 0;
@@ -581,7 +569,6 @@
                 </div>
                 <div class="modal-actions">
                     <button class="btn-play-now" onclick="playSelectedGame()">Play Now</button>
-                    <button class="btn-install-os" onclick="installSelectedGame()">Install to OS</button>
                 </div>
             </div>
         </div>
@@ -620,24 +607,6 @@
 
         let zones = [];
         let selectedZone = null;
-
-        function sendInstallSignal(appName, appIconUrl, appPageUrl) {
-            const payload = {
-                type: 'INSTALL_APP',
-                app: {
-                    name: appName,
-                    icon: appIconUrl,
-                    url: appPageUrl,
-                    isFromAppStore: true
-                }
-            };
-
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage(payload, '*');
-            } else if (window.opener) {
-                window.opener.postMessage(payload, '*');
-            }
-        }
 
         window.addEventListener('load', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -740,14 +709,6 @@
             if (selectedZone) {
                 closeGameModal();
                 openZone(selectedZone);
-            }
-        }
-
-        function installSelectedGame() {
-            if (selectedZone) {
-                const iconUrl = selectedZone.cover ? selectedZone.cover.replace("{COVER_URL}", fruitsCoverURL).replace("{HTML_URL}", fruitsHtmlURL) : '';
-                const pageUrl = window.location.origin + window.location.pathname + "?id=" + selectedZone.id;
-                sendInstallSignal(selectedZone.name, iconUrl, pageUrl);
             }
         }
 
