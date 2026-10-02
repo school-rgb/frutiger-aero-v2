@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monochrome Music App</title>
+    <title> Music App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -165,10 +165,11 @@
         async function executeSearch(query) {
             showState('loading');
             let tracks = [];
+            const encodedQuery = encodeURIComponent(query);
 
             // 1. Primary API: Meting API
             try {
-                const res1 = await fetch(`https://api.qijieya.cn/meting/?type=search&name=${encodeURIComponent(query)}`, { mode: 'cors' });
+                const res1 = await fetch(`https://api.qijieya.cn/meting/?type=search&name=${encodedQuery}`, { mode: 'cors' });
                 if (res1.ok) {
                     const data1 = await res1.json();
                     if (Array.isArray(data1) && data1.length > 0) {
@@ -186,7 +187,7 @@
             // 2. First Backup API: KW API
             if (tracks.length === 0) {
                 try {
-                    const res2 = await fetch(`https://kw-api.cenguigui.cn?msg=${encodeURIComponent(query)}`, { mode: 'cors' });
+                    const res2 = await fetch(`https://kw-api.cenguigui.cn?msg=${encodedQuery}`, { mode: 'cors' });
                     if (res2.ok) {
                         const data2 = await res2.json();
                         let rawList = Array.isArray(data2) ? data2 : (data2.data || data2.result || []);
@@ -206,7 +207,7 @@
             // 3. Second Backup API: GDStudio API
             if (tracks.length === 0) {
                 try {
-                    const res3 = await fetch(`https://music-api.gdstudio.xyz/api.php?types=search&count=30&source=netease&name=${encodeURIComponent(query)}`, { mode: 'cors' });
+                    const res3 = await fetch(`https://music-api.gdstudio.xyz/api.php?types=search&count=30&source=netease&name=${encodedQuery}`, { mode: 'cors' });
                     if (res3.ok) {
                         const data3 = await res3.json();
                         let rawList3 = Array.isArray(data3) ? data3 : (data3.data || data3.result || []);
@@ -223,10 +224,10 @@
                 } catch (err) {}
             }
 
-            // 4. Third Backup API: Apple Music iTunes API
+            // 4. Final Backup API: Apple Music iTunes API (`https://itunes.apple.com/search?entity=song&term=${s}`)
             if (tracks.length === 0) {
                 try {
-                    const res4 = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=30`, { mode: 'cors' });
+                    const res4 = await fetch(`https://itunes.apple.com/search?entity=song&term=${encodedQuery}`, { mode: 'cors' });
                     if (res4.ok) {
                         const data4 = await res4.json();
                         if (data4 && Array.isArray(data4.results) && data4.results.length > 0) {
@@ -242,7 +243,7 @@
                 } catch (err) {}
             }
 
-            // 5. Final Backup: LocalStorage Result Caching Fallback
+            // 5. Ultimate Fallback: LocalStorage Result Caching
             if (tracks.length === 0) {
                 try {
                     const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
