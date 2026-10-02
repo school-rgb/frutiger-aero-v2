@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monochrome Music App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262626;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-36 w-full bg-[#000000] text-[#ffffff]">
+
+    <header class="sticky top-0 z-40 bg-[#000000]/95 backdrop-blur border-b border-[#1f1f1f] px-0 py-3.5 w-full">
+        <div class="w-full px-4 flex items-center justify-between">
+            <form id="search-form" onsubmit="handleSearchSubmit(event)" class="relative flex items-center w-full gap-2">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#737373]">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                </div>
+                <input type="text" id="search-input" placeholder="Search songs, artists, or albums..." 
+                    class="w-full pl-11 pr-32 py-3 bg-[#121212] border border-[#262626] rounded-2xl text-sm text-[#ffffff] placeholder-[#737373] focus:outline-none focus:border-[#525252] transition shadow-inner">
+                <button type="submit" class="absolute right-1.5 px-6 py-2 bg-[#ffffff] hover:bg-[#e5e5e5] text-[#000000] font-medium text-xs rounded-xl transition active:scale-95 shadow-sm">
+                    Search
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <main class="flex-1 w-full px-0 py-2">
+        
+        <!-- Welcome state view -->
+        <div id="welcome-state" class="text-center py-28 px-4 w-full">
+            <div class="w-20 h-20 bg-[#121212] border border-[#262626] rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#a3a3a3] shadow-lg">
+                <img src="https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF" alt="Music" class="w-10 h-10 opacity-80">
+            </div>
+            <h2 class="text-2xl font-semibold mb-2 tracking-tight text-[#ffffff]">Your Sound Library</h2>
+            <p class="text-[#888888] text-sm max-w-sm mx-auto mb-8 font-light">Search any track or artist above to begin instant audio streaming.</p>
+            <div class="flex flex-wrap justify-center gap-2.5 max-w-lg mx-auto">
+                <button onclick="quickSearch('Jay Chou')" class="px-5 py-2.5 bg-[#121212] hover:bg-[#262626] border border-[#262626] rounded-xl text-xs font-medium text-[#d4d4d4] transition shadow-sm">Jay Chou</button>
+                <button onclick="quickSearch('Taylor Swift')" class="px-5 py-2.5 bg-[#121212] hover:bg-[#262626] border border-[#262626] rounded-xl text-xs font-medium text-[#d4d4d4] transition shadow-sm">Taylor Swift</button>
+                <button onclick="quickSearch('Lofi Beats')" class="px-5 py-2.5 bg-[#121212] hover:bg-[#262626] border border-[#262626] rounded-xl text-xs font-medium text-[#d4d4d4] transition shadow-sm">Lofi Beats</button>
+                <button onclick="quickSearch('Classical Piano')" class="px-5 py-2.5 bg-[#121212] hover:bg-[#262626] border border-[#262626] rounded-xl text-xs font-medium text-[#d4d4d4] transition shadow-sm">Classical Piano</button>
+            </div>
+        </div>
+
+        <!-- Loading spinner state -->
+        <div id="loading-state" class="hidden text-center py-32 w-full">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[#ffffff] border-t-transparent mb-4"></div>
+            <p class="text-[#888888] text-sm font-medium tracking-wide">Querying music catalog backups...</p>
+        </div>
+
+        <!-- Search results list -->
+        <div id="results-container" class="hidden w-full px-4">
+            <div class="flex items-center justify-between mb-3 px-2">
+                <h3 class="text-xs font-semibold text-[#888888] uppercase tracking-wider">Search Results (<span id="result-count">0</span>)</h3>
+            </div>
+            <div id="results-list" class="w-full space-y-2">
+                <!-- Dynamically injected full-width song rows -->
+            </div>
+        </div>
+
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-[#0d0d0d]/95 backdrop-blur border-t border-[#1f1f1f] w-full px-4 py-4 shadow-2xl">
+        <div class="w-full flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Track Details & Cover -->
+            <div class="flex items-center space-x-3.5 w-full md:w-1/3">
+                <div class="relative w-14 h-14 rounded-2xl overflow-hidden bg-[#161616] border border-[#262626] flex-shrink-0 shadow-md">
+                    <img id="player-cover" src="https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF" alt="Cover" class="w-full h-full object-cover p-2.5 opacity-90" onerror="this.src='https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF'">
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h4 id="player-title" class="text-sm font-medium text-[#ffffff] truncate tracking-tight">No track selected</h4>
+                    <p id="player-artist" class="text-xs text-[#888888] truncate mt-0.5">Select a song to play</p>
+                </div>
+            </div>
+
+            <!-- Playback Controls, Repeat & Timeline -->
+            <div class="flex flex-col items-center w-full md:w-1/3 space-y-2">
+                <div class="flex items-center space-x-5">
+                    <button id="repeat-btn" onclick="toggleRepeat()" class="text-[#737373] transition active:scale-95 p-1" title="Loop Forever">
+                        <i data-lucide="repeat" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="previousTrack()" class="text-[#737373] hover:text-[#ffffff] transition active:scale-95"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
+                    <button id="play-pause-btn" onclick="togglePlayPause()" class="w-11 h-11 rounded-2xl bg-[#ffffff] hover:bg-[#e5e5e5] text-[#000000] flex items-center justify-center transition shadow-lg active:scale-95"><i data-lucide="play" class="w-4 h-4 ml-0.5"></i></button>
+                    <button onclick="nextTrack()" class="text-[#737373] hover:text-[#ffffff] transition active:scale-95"><i data-lucide="skip-forward" class="w-4 h-4"></i></button>
+                </div>
+                <div class="w-full flex items-center space-x-3 text-xs text-[#737373]">
+                    <span id="current-time">0:00</span>
+                    <input type="range" id="progress-bar" value="0" max="100" class="w-full h-1 bg-[#262626] rounded-full appearance-none cursor-pointer accent-[#ffffff]" oninput="seekAudio(this.value)">
+                    <span id="total-duration">0:00</span>
+                </div>
+            </div>
+
+            <!-- Volume Control -->
+            <div class="flex items-center justify-end space-x-3 w-full md:w-1/3">
+                <i data-lucide="volume-2" class="w-4 h-4 text-[#737373]"></i>
+                <input type="range" id="volume-bar" min="0" max="1" step="0.05" value="0.8" class="w-24 h-1 bg-[#262626] rounded-full appearance-none cursor-pointer accent-[#ffffff]" oninput="setVolume(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTracksList = [];
+        let currentIndex = -1;
+        let isLooping = false;
+        const audioElement = new Audio();
+        audioElement.volume = 0.8;
+        
+        const CACHE_KEY = 'monochrome_music_backup_cache';
+        const FALLBACK_ICON = 'https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF';
+
+        const defaultBackupDatabase = [
+            { id: '1', name: 'Falling', artist: 'Trevor Daniel', pic: FALLBACK_ICON, url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+            { id: '2', name: 'Blinding Lights', artist: 'The Weeknd', pic: FALLBACK_ICON, url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
+            { id: '3', name: 'Sunflower', artist: 'Post Malone, Swae Lee', pic: FALLBACK_ICON, url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
+            { id: '4', name: 'Levitating', artist: 'Dua Lipa', pic: FALLBACK_ICON, url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' },
+            { id: '5', name: 'Stay', artist: 'The Kid LAROI, Justin Bieber', pic: FALLBACK_ICON, url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3' }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            setupAudioListeners();
+            initializeLocalStorageCache();
+        });
+
+        function initializeLocalStorageCache() {
+            if (!localStorage.getItem(CACHE_KEY)) {
+                localStorage.setItem(CACHE_KEY, JSON.stringify(defaultBackupDatabase));
+            }
+        }
+
+        function quickSearch(query) {
+            document.getElementById('search-input').value = query;
+            executeSearch(query);
+        }
+
+        function handleSearchSubmit(e) {
+            e.preventDefault();
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) return;
+            executeSearch(query);
+        }
+
+        async function executeSearch(query) {
+            showState('loading');
+            let tracks = [];
+
+            // 1. Primary API: Meting API
+            try {
+                const res1 = await fetch(`https://api.qijieya.cn/meting/?type=search&name=${encodeURIComponent(query)}`, { mode: 'cors' });
+                if (res1.ok) {
+                    const data1 = await res1.json();
+                    if (Array.isArray(data1) && data1.length > 0) {
+                        tracks = data1.map((item, idx) => ({
+                            id: item.id || item.songid || idx,
+                            name: item.name || item.title || 'Unknown Title',
+                            artist: item.artist || item.author || 'Unknown Artist',
+                            pic: (item.pic || item.cover) ? (item.pic || item.cover) : FALLBACK_ICON,
+                            url: item.url || null
+                        }));
+                    }
+                }
+            } catch (err) {}
+
+            // 2. First Backup API: KW API
+            if (tracks.length === 0) {
+                try {
+                    const res2 = await fetch(`https://kw-api.cenguigui.cn?msg=${encodeURIComponent(query)}`, { mode: 'cors' });
+                    if (res2.ok) {
+                        const data2 = await res2.json();
+                        let rawList = Array.isArray(data2) ? data2 : (data2.data || data2.result || []);
+                        if (Array.isArray(rawList) && rawList.length > 0) {
+                            tracks = rawList.map((item, idx) => ({
+                                id: item.id || idx,
+                                name: item.name || item.title || 'Unknown Title',
+                                artist: item.artist || item.author || 'Unknown Artist',
+                                pic: (item.pic || item.cover) ? (item.pic || item.cover) : FALLBACK_ICON,
+                                url: item.url || null
+                            }));
+                        }
+                    }
+                } catch (err) {}
+            }
+
+            // 3. Second Backup API: GDStudio API
+            if (tracks.length === 0) {
+                try {
+                    const res3 = await fetch(`https://music-api.gdstudio.xyz/api.php?types=search&count=30&source=netease&name=${encodeURIComponent(query)}`, { mode: 'cors' });
+                    if (res3.ok) {
+                        const data3 = await res3.json();
+                        let rawList3 = Array.isArray(data3) ? data3 : (data3.data || data3.result || []);
+                        if (Array.isArray(rawList3) && rawList3.length > 0) {
+                            tracks = rawList3.map((item, idx) => ({
+                                id: item.id || idx,
+                                name: item.name || item.title || 'Unknown Title',
+                                artist: item.artist || item.author || 'Unknown Artist',
+                                pic: (item.pic || item.cover) ? (item.pic || item.cover) : FALLBACK_ICON,
+                                url: item.url || null
+                            }));
+                        }
+                    }
+                } catch (err) {}
+            }
+
+            // 4. Third Backup API: Apple Music iTunes API
+            if (tracks.length === 0) {
+                try {
+                    const res4 = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=30`, { mode: 'cors' });
+                    if (res4.ok) {
+                        const data4 = await res4.json();
+                        if (data4 && Array.isArray(data4.results) && data4.results.length > 0) {
+                            tracks = data4.results.map((item, idx) => ({
+                                id: item.trackId || idx,
+                                name: item.trackName || 'Unknown Title',
+                                artist: item.artistName || 'Unknown Artist',
+                                pic: item.artworkUrl100 ? item.artworkUrl100.replace('100x100bb', '300x300bb') : FALLBACK_ICON,
+                                url: item.previewUrl || null
+                            }));
+                        }
+                    }
+                } catch (err) {}
+            }
+
+            // 5. Final Backup: LocalStorage Result Caching Fallback
+            if (tracks.length === 0) {
+                try {
+                    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+                    const q = query.toLowerCase();
+                    tracks = cached.filter(s => s.name.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q));
+                    if (tracks.length === 0) tracks = cached;
+                } catch (e) {
+                    tracks = defaultBackupDatabase;
+                }
+            } else {
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(tracks));
+                } catch (e) {}
+            }
+
+            currentTracksList = tracks;
+            renderResults(currentTracksList);
+        }
+
+        function showState(stateName) {
+            document.getElementById('welcome-state').classList.add('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('results-container').classList.add('hidden');
+
+            if (stateName === 'welcome') document.getElementById('welcome-state').classList.remove('hidden');
+            if (stateName === 'loading') document.getElementById('loading-state').classList.remove('hidden');
+            if (stateName === 'results') document.getElementById('results-container').classList.remove('hidden');
+        }
+
+        function renderResults(tracks) {
+            const listEl = document.getElementById('results-list');
+            document.getElementById('result-count').textContent = tracks.length;
+            listEl.innerHTML = '';
+
+            tracks.forEach((track, index) => {
+                const itemNumber = index + 1;
+                const div = document.createElement('div');
+                div.className = "group w-full flex items-center justify-between px-4 py-3.5 bg-[#0a0a0a] hover:bg-[#161616] border border-[#1f1f1f] hover:border-[#333333] rounded-2xl transition cursor-pointer shadow-sm";
+                div.onclick = () => playTrackIndex(index);
+                
+                const coverImg = (track.pic && track.pic !== '') ? track.pic : FALLBACK_ICON;
+
+                div.innerHTML = `
+                    <div class="flex items-center space-x-4 min-w-0 flex-1">
+                        <span class="w-8 text-center text-xs font-semibold text-[#737373] group-hover:text-[#ffffff] transition">${itemNumber}</span>
+                        <div class="relative w-12 h-12 rounded-xl overflow-hidden bg-[#161616] flex-shrink-0 border border-[#262626]">
+                            <img src="${coverImg}" alt="${track.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300 ${coverImg === FALLBACK_ICON ? 'p-2.5 opacity-80' : ''}" onerror="this.src='${FALLBACK_ICON}'; this.className='w-full h-full object-cover p-2.5 opacity-80';">
+                        </div>
+                        <div class="min-w-0 flex-1 pr-4">
+                            <h4 class="text-sm font-medium text-[#ffffff] truncate group-hover:text-[#e5e5e5] tracking-tight">${track.name}</h4>
+                            <p class="text-xs text-[#888888] truncate mt-0.5">${track.artist}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 pl-3">
+                        <div class="w-10 h-10 rounded-xl bg-[#161616] group-hover:bg-[#ffffff] text-[#ffffff] group-hover:text-[#000000] flex items-center justify-center transition border border-[#262626] group-hover:border-[#ffffff] pointer-events-none shadow-sm">
+                            <i data-lucide="play" class="w-4 h-4 ml-0.5"></i>
+                        </div>
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+
+            showState('results');
+            lucide.createIcons();
+        }
+
+        async function playTrackIndex(index) {
+            if (index < 0 || index >= currentTracksList.length) return;
+            currentIndex = index;
+            const track = currentTracksList[index];
+
+            document.getElementById('player-title').textContent = track.name;
+            document.getElementById('player-artist').textContent = track.artist;
+            const activeCover = (track.pic && track.pic !== '') ? track.pic : FALLBACK_ICON;
+            const playerCoverEl = document.getElementById('player-cover');
+            playerCoverEl.src = activeCover;
+            if (activeCover === FALLBACK_ICON) {
+                playerCoverEl.className = 'w-full h-full object-cover p-2.5 opacity-90';
+            } else {
+                playerCoverEl.className = 'w-full h-full object-cover';
+            }
+
+            let streamUrl = track.url;
+            const cleanRid = track.id;
+
+            // Audio Stream Resolution Backup Chain
+            if (!streamUrl && cleanRid) {
+                try {
+                    const res1 = await fetch(`https://music-api.gdstudio.xyz/api.php?types=url&id=${cleanRid}&source=netease`);
+                    if (res1.ok) {
+                        const data1 = await res1.json();
+                        if (data1 && data1.url) streamUrl = data1.url;
+                    }
+                } catch (e) {}
+            }
+
+            if (!streamUrl && cleanRid) {
+                try {
+                    const res2 = await fetch(`https://kw-api.cenguigui.cn/url?id=${cleanRid}`);
+                    if (res2.ok) {
+                        const data2 = await res2.json();
+                        if (data2 && data2.url) streamUrl = data2.url;
+                    }
+                } catch (e) {}
+            }
+
+            if (!streamUrl && cleanRid) {
+                try {
+                    const res3 = await fetch(`https://api.qijieya.cn/meting/?type=url&id=${cleanRid}`);
+                    if (res3.ok) {
+                        const data3 = await res3.json();
+                        if (data3 && data3.url) streamUrl = data3.url;
+                    }
+                } catch (e) {}
+            }
+
+            audioElement.src = streamUrl || track.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+            try {
+                await audioElement.play();
+                updatePlayPauseButton(true);
+            } catch (err) {
+                updatePlayPauseButton(false);
+            }
+        }
+
+        function togglePlayPause() {
+            if (currentIndex === -1 && currentTracksList.length > 0) {
+                playTrackIndex(0);
+                return;
+            }
+            if (audioElement.paused) {
+                audioElement.play();
+                updatePlayPauseButton(true);
+            } else {
+                audioElement.pause();
+                updatePlayPauseButton(false);
+            }
+        }
+
+        function updatePlayPauseButton(isPlaying) {
+            const btn = document.getElementById('play-pause-btn');
+            btn.innerHTML = isPlaying ? '<i data-lucide="pause" class="w-4 h-4"></i>' : '<i data-lucide="play" class="w-4 h-4 ml-0.5"></i>';
+            lucide.createIcons();
+        }
+
+        function setupAudioListeners() {
+            audioElement.addEventListener('timeupdate', () => {
+                if (audioElement.duration) {
+                    const progressPercent = (audioElement.currentTime / audioElement.duration) * 100;
+                    document.getElementById('progress-bar').value = progressPercent;
+                    document.getElementById('current-time').textContent = formatTime(audioElement.currentTime);
+                    document.getElementById('total-duration').textContent = formatTime(audioElement.duration);
+                }
+            });
+            
+            audioElement.addEventListener('ended', () => {
+                if (isLooping) {
+                    audioElement.currentTime = 0;
+                    audioElement.play();
+                } else {
+                    if (currentIndex < currentTracksList.length - 1) {
+                        nextTrack();
+                    } else {
+                        updatePlayPauseButton(false);
+                    }
+                }
+            });
+        }
+
+        function toggleRepeat() {
+            isLooping = !isLooping;
+            const btn = document.getElementById('repeat-btn');
+            if (isLooping) {
+                btn.className = "text-[#ffffff] transition active:scale-95 p-1";
+            } else {
+                btn.className = "text-[#737373] transition active:scale-95 p-1";
+            }
+        }
+
+        function seekAudio(value) {
+            if (audioElement.duration) {
+                audioElement.currentTime = (value / 100) * audioElement.duration;
+            }
+        }
+
+        function setVolume(val) {
+            audioElement.volume = val;
+        }
+
+        function nextTrack() {
+            if (currentTracksList.length === 0) return;
+            let nextIdx = currentIndex + 1;
+            if (nextIdx >= currentTracksList.length) nextIdx = 0;
+            playTrackIndex(nextIdx);
+        }
+
+        function previousTrack() {
+            if (currentTracksList.length === 0) return;
+            let prevIdx = currentIndex - 1;
+            if (prevIdx < 0) prevIdx = currentTracksList.length - 1;
+            playTrackIndex(prevIdx);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+    </script>
+</body>
+</html>
