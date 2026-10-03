@@ -73,7 +73,7 @@
       font-family: 'Gnf', 'Inter', system-ui, sans-serif;
     }
 
-    /* Explicit exemption for the header elements */
+    /* Explicit exemption for header elements */
     #heroTitle, #welcomeSubtitle {
       font-family: 'Electroharmonix', 'Inter', system-ui, sans-serif !important;
     }
@@ -92,20 +92,10 @@
       transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
     }
 
-    /* Fast Partial Fade Animation (~0.22 opacity dip) */
     @keyframes fastPartialFade {
-      0% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      35% {
-        opacity: 0.22;
-        transform: scale(0.988);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
+      0% { opacity: 1; transform: scale(1); }
+      35% { opacity: 0.22; transform: scale(0.988); }
+      100% { opacity: 1; transform: scale(1); }
     }
 
     .animate-fast-fade {
@@ -120,22 +110,56 @@
 </head>
 <body class="h-screen w-screen bg-[#050505] text-mono-100 flex items-center justify-start overflow-hidden relative">
 
-  <!-- GLOBAL PERSISTENT AUDIO ELEMENT (Streams music across all tabs and never closes out unless paused/stopped) -->
+  <!-- GLOBAL PERSISTENT AUDIO ELEMENT -->
   <audio id="globalAudio" preload="auto" loop></audio>
 
-  <!-- Dynamic Background Container (Supports Canvas Dots or GitHub Wallpapers) -->
+  <!-- Dynamic Background Container -->
   <div id="bgContainer" class="fixed inset-0 pointer-events-none z-0 w-full h-full">
     <canvas id="bgCanvas" class="w-full h-full"></canvas>
     <div id="wallpaperLayer" class="absolute inset-0 bg-cover bg-center hidden"></div>
   </div>
 
-  <!-- 100% Viewport Height Sidebar (Edge-to-edge 60px vertical strip on left) -->
+  <!-- NEWS MODAL (With light blur and vertical straight-up lines next to headings) -->
+  <div id="newsModal" class="fixed inset-0 bg-black/40 backdrop-blur-[1px] z-[100] flex items-center justify-center hidden">
+    <div class="w-full max-w-md bg-[#121212] border border-[#2a2a2a] rounded-2xl p-6 shadow-2xl flex flex-col relative text-left">
+      <!-- Close Button with Smooth Rounded Corners -->
+      <button id="closeNewsBtn" class="absolute top-4 right-4 w-7 h-7 bg-[#1a1a1a] hover:bg-[#252525] border border-[#333333] rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors cursor-pointer">
+        ✕
+      </button>
+      <div class="text-xs font-bold tracking-[0.2em] text-mono-300 uppercase mb-4 flex items-center gap-2">
+        <span class="w-[2px] h-3 bg-white inline-block"></span> UPDATES
+      </div>
+      <div id="newsContentList" class="text-xs text-mono-300 space-y-4 max-h-60 overflow-y-auto pr-2 font-sans">
+        <div>
+          <span class="text-white font-bold mb-1 flex items-center gap-2"><span class="w-[2px] h-3 bg-white inline-block"></span> Games Added:</span>
+          <ul class="list-disc list-inside space-y-1 text-mono-400 pl-4">
+            <li>exam test 1</li>
+            <li>exam test 2</li>
+            <li>exam test 3</li>
+            <li>exam test 4</li>
+            <li>exam test 5</li>
+            <li>exam test 6</li>
+            <li>exam test 7</li>
+          </ul>
+        </div>
+        <div>
+          <span class="text-white font-bold mb-1 flex items-center gap-2"><span class="w-[2px] h-3 bg-white inline-block"></span> App Added:</span>
+          <p class="text-mono-400 pl-4">none</p>
+        </div>
+        <div>
+          <span class="text-white font-bold mb-1 flex items-center gap-2"><span class="w-[2px] h-3 bg-white inline-block"></span> Bugs That Have Been Fixed:</span>
+          <p class="text-mono-400 pl-4">none</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 100% Viewport Height Sidebar -->
   <aside id="sidebar" class="h-screen w-[60px] bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col justify-between items-center py-4 relative z-50 select-none shrink-0">
     
-    <!-- Active Indicator Bar: Height 20px, Width 3px, Solid White Pill -->
     <div id="activeIndicator" class="indicator-line absolute left-0 w-[3px] h-[20px] bg-white rounded-r-full z-40 pointer-events-none shadow-[0_0_10px_rgba(255,255,255,0.8)]" style="top: 0px; transform: translateY(0px);"></div>
 
-    <!-- UPPER SECTION: Primary navigation apps (Home to Anime) -->
+    <!-- UPPER SECTION -->
     <div class="w-full flex flex-col items-center">
       <nav class="w-full flex flex-col items-center gap-1.5 px-1" aria-label="Primary Navigation">
         
@@ -167,37 +191,36 @@
     </div>
 
     <!-- LOWER SECTION -->
-    <div class="w-full flex flex-col items-center px-1 mt-auto relative">
+    <div class="w-full flex flex-col items-center px-1 mt-auto relative gap-1.5">
       
-      <div class="w-6 h-[1px] bg-[#222222] mb-1.5 rounded-full"></div>
+      <div class="w-6 h-[1px] bg-[#222222] rounded-full"></div>
 
-      <!-- COMPACT MUSIC THUMBNAIL BOX (Initially hidden until music app sends activation signal) -->
-      <div id="musicThumbContainer" class="relative mb-1.5 flex justify-center w-full hidden">
+      <!-- COMPACT MUSIC THUMBNAIL BOX -->
+      <div id="musicThumbContainer" class="relative flex justify-center w-full hidden">
         <div id="musicThumbBox" class="w-7 h-7 bg-[#141414] border border-[#2a2a2a] rounded-md overflow-hidden flex items-center justify-center cursor-pointer hover:border-mono-400 transition-colors">
           <img id="sidebarMusicImg" src="https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF" alt="Now Playing" class="w-4 h-4 object-cover rounded">
         </div>
 
-        <!-- Popup flyout controls with exactly 1-second delay -->
         <div id="musicControlsPanel" class="absolute left-[64px] top-1/2 -translate-y-1/2 bg-[#121212] border border-[#2a2a2a] rounded-md shadow-2xl p-1.5 hidden items-center gap-1.5 z-50 whitespace-nowrap">
-          <button id="ctrlRewind" title="Rewind 5s" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#2a2a2a] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
+          <button id="ctrlRewind" title="Rewind 5s" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#252525] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
             <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 20L9 12l10-8v16zM5 19V5"/></svg>
           </button>
           <button id="ctrlPlayPause" title="Play/Pause" class="w-5 h-5 bg-white text-black hover:bg-mono-200 rounded flex items-center justify-center font-bold transition-colors cursor-pointer">
-            <svg id="ctrlPlayIcon" class="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            <svg id="ctrlPlayIcon" class="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </button>
-          <button id="ctrlForward" title="Fast Forward 5s" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#2a2a2a] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
+          <button id="ctrlForward" title="Fast Forward 5s" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#252525] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
             <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4zM19 5v14"/></svg>
           </button>
-          <button id="ctrlLoop" title="Loop" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#2a2a2a] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
+          <button id="ctrlLoop" title="Loop" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#252525] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
             <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
           </button>
         </div>
       </div>
 
-      <div class="w-6 h-[1px] bg-[#222222] mb-1.5 rounded-full"></div>
+      <div class="w-6 h-[1px] bg-[#222222] rounded-full"></div>
 
       <!-- CLOCK STREAM -->
-      <div id="clockStream" class="flex flex-col items-center text-[9px] leading-[1.2] tracking-widest text-[#666666] font-medium mb-1.5 select-none">
+      <div id="clockStream" class="flex flex-col items-center text-[9px] leading-[1.2] tracking-widest text-[#666666] font-medium select-none">
         <span id="stHours" class="text-mono-300 font-semibold">08</span>
         <span id="stMinutes" class="text-mono-400">05</span>
         <span id="stPeriod" class="text-[8px] text-mono-500 font-bold">PM</span>
@@ -208,9 +231,14 @@
         <span id="stYear" class="text-mono-500">26</span>
       </div>
 
-      <div class="w-6 h-[1px] bg-[#222222] mb-1.5 rounded-full"></div>
+      <div class="w-6 h-[1px] bg-[#222222] rounded-full"></div>
 
-      <!-- SETTINGS -->
+      <!-- NEWS POPUP BUTTON -->
+      <button id="newsModalBtn" title="Updates & News" class="w-9 h-9 rounded-lg flex items-center justify-center text-mono-400 hover:text-white hover:bg-[#181818] active:scale-95 transition-all duration-150 cursor-pointer">
+        <img src="news_icon.png" alt="News" class="w-[14px] h-[14px] object-contain transition-transform duration-200 group-hover:scale-110" onerror="this.src='https://img.icons8.com/?size=100&id=84041&format=png&color=FFFFFF'">
+      </button>
+
+      <!-- 6. SETTINGS -->
       <nav class="w-full flex flex-col items-center" aria-label="Settings Navigation">
         <button data-nav-id="settings" data-subtitle="SETTINGS" data-index="5" class="nav-btn group relative w-9 h-9 rounded-lg flex items-center justify-center text-mono-400 hover:text-white hover:bg-[#181818] active:scale-95 transition-all duration-150" aria-label="Settings">
           <img src="https://img.icons8.com/?size=100&id=84040&format=png&color=FFFFFF" alt="Settings" class="w-[14px] h-[14px] object-contain transition-transform duration-200 group-hover:scale-110" onerror="handleImgError(this, 'settings')">
@@ -231,25 +259,19 @@
 
     <div id="mainDisplay" class="flex flex-col items-center justify-center w-full h-full z-10">
 
-      <!-- Hero Title -->
       <h1 id="heroTitle" class="font-electro text-3xl sm:text-5xl md:text-7xl font-bold tracking-[0.18em] text-white uppercase text-center drop-shadow-[0_0_30px_rgba(255,255,255,0.25)] leading-none mb-3">
         THURSDAY
       </h1>
 
-      <!-- Full Date Display -->
       <div id="heroDate" class="text-sm sm:text-lg md:text-xl tracking-[0.25em] text-mono-300 uppercase mb-2 font-semibold">
         OCTOBER 1, 2026
       </div>
 
-      <!-- Subtitle -->
       <p id="welcomeSubtitle" class="font-electro text-[10px] sm:text-xs font-semibold tracking-[0.35em] text-mono-400 uppercase">
         WELCOME TO FRUITIGER
       </p>
 
-      <!-- Category Content Container -->
-      <div id="sectionContent" class="w-full h-full hidden relative">
-        <!-- Dynamic content injected via JavaScript -->
-      </div>
+      <div id="sectionContent" class="w-full h-full hidden relative"></div>
 
     </div>
 
@@ -257,6 +279,16 @@
 
   <!-- Application JavaScript Logic -->
   <script>
+    const CURRENT_NEWS_KEY = 'v1.6_exam_test'; 
+    const SAVED_NEWS_KEY = localStorage.getItem('fruitiger_news_key') || '';
+    const SAVED_WALLPAPER = localStorage.getItem('fruitiger_wallpaper') || '';
+    const SAVED_TITLE = localStorage.getItem('fruitiger_tab_title') || 'fruti';
+    const SAVED_FAVICON = localStorage.getItem('fruitiger_tab_favicon') || 'https://img.icons8.com/?size=100&id=1iF9PyJ2Thzo&format=png&color=FFFFFF';
+
+    document.title = SAVED_TITLE;
+    let favEl = document.getElementById('dynamicFavicon');
+    if (favEl) favEl.href = SAVED_FAVICON;
+
     const appUrls = {
       games: 'APP/gamehub.html',
       music: 'APP/music.html',
@@ -281,7 +313,6 @@
       update(w, h) {
         this.x += this.vx;
         this.y += this.vy;
-
         if (this.x < 0 || this.x > w) this.vx *= -1;
         if (this.y < 0 || this.y > h) this.vy *= -1;
 
@@ -325,7 +356,6 @@
         mouse.x = e.clientX;
         mouse.y = e.clientY;
       });
-
       window.addEventListener('mouseleave', () => {
         mouse.x = -1000;
         mouse.y = -1000;
@@ -362,12 +392,38 @@
           }
         }
       }
-
       requestAnimationFrame(animateCanvas);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       initCanvas();
+
+      const newsModal = document.getElementById('newsModal');
+      const closeNewsBtn = document.getElementById('closeNewsBtn');
+      const newsModalBtn = document.getElementById('newsModalBtn');
+
+      if (SAVED_NEWS_KEY !== CURRENT_NEWS_KEY) {
+        newsModal.classList.remove('hidden');
+      }
+
+      closeNewsBtn.addEventListener('click', () => {
+        newsModal.classList.add('hidden');
+        localStorage.setItem('fruitiger_news_key', CURRENT_NEWS_KEY);
+      });
+
+      newsModalBtn.addEventListener('click', () => {
+        newsModal.classList.remove('hidden');
+      });
+
+      if (SAVED_WALLPAPER) {
+        const canvasEl = document.getElementById('bgCanvas');
+        const layer = document.getElementById('wallpaperLayer');
+        if (canvasEl && layer) {
+          canvasEl.classList.add('hidden');
+          layer.classList.remove('hidden');
+          layer.style.backgroundImage = `url('${SAVED_WALLPAPER}')`;
+        }
+      }
 
       const sidebar = document.getElementById('sidebar');
       const navButtons = Array.from(document.querySelectorAll('.nav-btn'));
@@ -382,7 +438,6 @@
       const sectionContent = document.getElementById('sectionContent');
       const sidebarMusicImg = document.getElementById('sidebarMusicImg');
 
-      // Global Persistent Audio & Activation Logic
       const globalAudio = document.getElementById('globalAudio');
       const musicThumbContainer = document.getElementById('musicThumbContainer');
       const musicControlsPanel = document.getElementById('musicControlsPanel');
@@ -392,31 +447,28 @@
       const ctrlForward = document.getElementById('ctrlForward');
       const ctrlLoop = document.getElementById('ctrlLoop');
 
+      let musicActivated = false;
       let musicHideTimeout = null;
 
-      // Listen for activation and control signals from the music app / iframe
       window.addEventListener('message', (event) => {
         const data = event.data;
         if (!data) return;
 
-        if (data.type === 'activateMusic' || data.action) {
-          // Reveal the mini music player button in the sidebar once music is enabled
-          musicThumbContainer.classList.remove('hidden');
-          musicThumbContainer.classList.add('flex');
-        }
-
-        if (data.audioSrc) {
-          if (globalAudio.src !== data.audioSrc) {
-            globalAudio.src = data.audioSrc;
+        if (data.type === 'activateMusic') {
+          musicActivated = true;
+          if (activeIndex !== 2) {
+            musicThumbContainer.classList.remove('hidden');
+            musicThumbContainer.classList.add('flex');
           }
-          globalAudio.play().catch(() => {});
-          ctrlPlayIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
         }
-
+        if (data.audioSrc && globalAudio.src !== data.audioSrc) {
+          globalAudio.src = data.audioSrc;
+          globalAudio.pause();
+          ctrlPlayIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        }
         if (data.coverUrl && sidebarMusicImg) {
           sidebarMusicImg.src = data.coverUrl;
         }
-
         if (data.action === 'playPause') {
           toggleGlobalPlay();
         } else if (data.action === 'rewind') {
@@ -439,50 +491,23 @@
         }
       }
 
-      if (ctrlPlayPause) {
-        ctrlPlayPause.addEventListener('click', (e) => {
-          e.stopPropagation();
-          toggleGlobalPlay();
-        });
-      }
+      if (ctrlPlayPause) ctrlPlayPause.addEventListener('click', (e) => { e.stopPropagation(); toggleGlobalPlay(); });
+      if (ctrlRewind) ctrlRewind.addEventListener('click', (e) => { e.stopPropagation(); globalAudio.currentTime = Math.max(0, globalAudio.currentTime - 5); });
+      if (ctrlForward) ctrlForward.addEventListener('click', (e) => { e.stopPropagation(); globalAudio.currentTime = Math.min(globalAudio.duration || 0, globalAudio.currentTime + 5); });
+      if (ctrlLoop) ctrlLoop.addEventListener('click', (e) => { e.stopPropagation(); globalAudio.loop = !globalAudio.loop; ctrlLoop.classList.toggle('text-white', globalAudio.loop); });
 
-      if (ctrlRewind) {
-        ctrlRewind.addEventListener('click', (e) => {
-          e.stopPropagation();
-          globalAudio.currentTime = Math.max(0, globalAudio.currentTime - 5);
-        });
-      }
-
-      if (ctrlForward) {
-        ctrlForward.addEventListener('click', (e) => {
-          e.stopPropagation();
-          globalAudio.currentTime = Math.min(globalAudio.duration || 0, globalAudio.currentTime + 5);
-        });
-      }
-
-      if (ctrlLoop) {
-        ctrlLoop.addEventListener('click', (e) => {
-          e.stopPropagation();
-          globalAudio.loop = !globalAudio.loop;
-          ctrlLoop.classList.toggle('text-white', globalAudio.loop);
-        });
-      }
-
-      // Exact 1-second hover delay for music controls panel
       if (musicThumbContainer && musicControlsPanel) {
         const showPanel = () => {
           if (musicHideTimeout) clearTimeout(musicHideTimeout);
           musicControlsPanel.classList.remove('hidden');
           musicControlsPanel.classList.add('flex');
         };
-
         const hidePanel = () => {
           musicHideTimeout = setTimeout(() => {
             musicControlsPanel.classList.remove('flex');
             musicControlsPanel.classList.add('hidden');
-          }, 1000); // Exactly 1 second delay
+          }, 1000);
         };
-
         musicThumbContainer.addEventListener('mouseenter', showPanel);
         musicThumbContainer.addEventListener('mouseleave', hidePanel);
         musicControlsPanel.addEventListener('mouseenter', showPanel);
@@ -509,30 +534,19 @@
         rawHours = rawHours ? rawHours : 12;
         const hours = String(rawHours).padStart(2, '0');
 
-        const dayOfWeekName = daysOfWeek[now.getDay()];
-        const monthName = allMonths[now.getMonth()];
-        const dateNum = String(now.getDate()).padStart(2, '0');
-        const yearFull = String(now.getFullYear());
-        const yearShort = yearFull.slice(-2);
-
-        const monthShort = monthName.slice(0, 3);
-        const m1 = monthShort.slice(0, 2);
-        const m2 = (monthShort.slice(2, 3) + ' ').slice(0, 2);
-
         stHours.textContent = hours;
         stMinutes.textContent = minutes;
         stPeriod.textContent = period;
-        stMonth1.textContent = m1;
-        stMonth2.textContent = m2;
-        stDay.textContent = dateNum;
-        stYear.textContent = yearShort;
+        stMonth1.textContent = allMonths[now.getMonth()].slice(0, 2);
+        stMonth2.textContent = (allMonths[now.getMonth()].slice(2, 3) + ' ').slice(0, 2);
+        stDay.textContent = String(now.getDate()).padStart(2, '0');
+        stYear.textContent = String(now.getFullYear()).slice(-2);
 
         if (activeIndex === 0) {
-          heroTitle.textContent = dayOfWeekName;
-          heroDate.textContent = `${monthName} ${parseInt(dateNum, 10)}, ${yearFull}`;
+          heroTitle.textContent = daysOfWeek[now.getDay()];
+          heroDate.textContent = `${allMonths[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
         }
       }
-
       updateClockAndStream();
       setInterval(updateClockAndStream, 1000);
 
@@ -540,23 +554,17 @@
         if (!btn) return;
         const iconImg = btn.querySelector('img') || btn.querySelector('svg');
         const sidebarRect = sidebar.getBoundingClientRect();
-
         if (iconImg) {
           const iconRect = iconImg.getBoundingClientRect();
-          const topPos = iconRect.top - sidebarRect.top;
-          activeIndicator.style.transform = `translateY(${topPos}px)`;
+          activeIndicator.style.transform = `translateY(${iconRect.top - sidebarRect.top}px)`;
         } else {
           const btnRect = btn.getBoundingClientRect();
-          const indicatorHeight = 20;
-          const btnCenterY = btnRect.top - sidebarRect.top + (btnRect.height / 2);
-          const topPos = btnCenterY - (indicatorHeight / 2);
-          activeIndicator.style.transform = `translateY(${topPos}px)`;
+          activeIndicator.style.transform = `translateY(${btnRect.top - sidebarRect.top + (btnRect.height / 2) - 10}px)`;
         }
       }
 
       function setNavIndex(index) {
         if (index < 0 || index >= navButtons.length) return;
-
         activeIndex = index;
         const targetBtn = navButtons[activeIndex];
         const subtitle = targetBtn.getAttribute('data-subtitle');
@@ -565,29 +573,40 @@
           btn.classList.remove('bg-[#181818]', 'text-white');
           btn.classList.add('text-mono-400');
         });
-
         targetBtn.classList.remove('text-mono-400');
         targetBtn.classList.add('bg-[#181818]', 'text-white');
-
         updateIndicator(targetBtn);
 
         mainDisplay.classList.remove('animate-fast-fade');
         void mainDisplay.offsetWidth;
         mainDisplay.classList.add('animate-fast-fade');
 
-        const now = new Date();
-        const currentDayName = daysOfWeek[now.getDay()];
-        const monthName = allMonths[now.getMonth()];
-        const dateNum = now.getDate();
-        const yearFull = now.getFullYear();
+        if (subtitle === 'MUSIC') {
+          musicThumbContainer.classList.remove('flex');
+          musicThumbContainer.classList.add('hidden');
+          if (!globalAudio.paused) {
+            globalAudio.pause();
+            ctrlPlayIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+          }
+        } else {
+          if (musicActivated) {
+            musicThumbContainer.classList.remove('hidden');
+            musicThumbContainer.classList.add('flex');
+            if (globalAudio.paused && globalAudio.src) {
+              globalAudio.play().catch(() => {});
+              ctrlPlayIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+            }
+          }
+        }
 
+        const now = new Date();
         if (subtitle === 'HOME') {
           isAppLoading = false;
           mainContainer.className = "flex-1 h-screen bg-transparent flex flex-col items-center justify-center text-center p-0 relative overflow-hidden z-10";
           mainDisplay.className = "flex flex-col items-center justify-center w-full h-full z-10";
-          heroTitle.textContent = currentDayName;
+          heroTitle.textContent = daysOfWeek[now.getDay()];
           heroTitle.classList.remove('hidden');
-          heroDate.textContent = `${monthName} ${dateNum}, ${yearFull}`;
+          heroDate.textContent = `${allMonths[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
           heroDate.classList.remove('hidden');
           welcomeSubtitle.textContent = 'WELCOME TO FRUITIGER';
           welcomeSubtitle.classList.remove('hidden');
@@ -601,9 +620,7 @@
           welcomeSubtitle.classList.add('hidden');
           sectionContent.className = "w-full h-full block relative";
 
-          const urlKey = subtitle.toLowerCase();
-          const targetUrl = appUrls[urlKey];
-
+          const targetUrl = appUrls[subtitle.toLowerCase()];
           sectionContent.innerHTML = `
             <div id="appLoader" class="absolute inset-0 bg-black/75 backdrop-blur-xs z-30 flex flex-col items-center justify-center font-mono gap-3 transition-opacity duration-300">
               <div class="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
@@ -615,9 +632,8 @@
           const iframeEl = document.getElementById('appIframe');
           const loaderEl = document.getElementById('appLoader');
 
-          if (subtitle === 'MUSIC') {
-            const musicIconSrc = targetBtn.querySelector('img').src;
-            sidebarMusicImg.src = musicIconSrc;
+          if (subtitle === 'MUSIC' && targetBtn.querySelector('img')) {
+            sidebarMusicImg.src = targetBtn.querySelector('img').src;
           }
 
           const handleLoaded = () => {
@@ -627,7 +643,6 @@
               if (iframeEl) iframeEl.classList.remove('opacity-0');
             }, 500);
           };
-
           iframeEl.addEventListener('load', handleLoaded);
           setTimeout(handleLoaded, 2500);
 
@@ -639,13 +654,15 @@
           heroDate.classList.add('hidden');
           welcomeSubtitle.classList.add('hidden');
           sectionContent.className = "w-full block";
-
           renderSettingsView();
         }
       }
 
       function updateTabInfo(title, iconUrl) {
-        if (title) document.title = title;
+        if (title) {
+          document.title = title;
+          localStorage.setItem('fruitiger_tab_title', title);
+        }
         if (iconUrl) {
           let favicon = document.getElementById('dynamicFavicon');
           if (!favicon) {
@@ -655,6 +672,7 @@
             document.head.appendChild(favicon);
           }
           favicon.href = iconUrl;
+          localStorage.setItem('fruitiger_tab_favicon', iconUrl);
         }
       }
 
@@ -718,9 +736,9 @@
           const layer = document.getElementById('wallpaperLayer');
           layer.classList.add('hidden');
           layer.style.backgroundImage = '';
+          localStorage.removeItem('fruitiger_wallpaper');
         });
 
-        // Fetch wallpapers from GitHub repository API
         fetch('https://api.github.com/repos/school-rgb/frutiger-pr0xy-wallpapers/contents')
           .then(res => res.json())
           .then(data => {
@@ -730,7 +748,6 @@
               return;
             }
 
-            // Filter for image and video extensions (.png, .jpg, .jpeg, .webp, .mp4)
             const mediaFiles = data.filter(file => {
               const name = file.name.toLowerCase();
               return name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.webp') || name.endsWith('.mp4');
@@ -761,6 +778,7 @@
                 canvas.classList.add('hidden');
                 layer.classList.remove('hidden');
                 layer.style.backgroundImage = `url('${fileUrl}')`;
+                localStorage.setItem('fruitiger_wallpaper', fileUrl);
               });
 
               grid.appendChild(thumbDiv);
