@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Music App</title>
+    <title>Music App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -124,8 +124,6 @@
         let currentTracksList = [];
         let currentIndex = -1;
         let isLooping = false;
-        const audioElement = new Audio();
-        audioElement.volume = 0.8;
         
         const CACHE_KEY = 'monochrome_music_backup_cache';
         const FALLBACK_ICON = 'https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF';
@@ -140,8 +138,80 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            setupAudioListeners();
             initializeLocalStorageCache();
+
+            // Create or select audio element dynamically if not present
+            let audio = document.getElementById('musicAudio');
+            if (!audio) {
+                audio = document.createElement('audio');
+                audio.id = 'musicAudio';
+                audio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; 
+                audio.loop = true;
+                document.body.appendChild(audio);
+            }
+            audio.volume = 0.8;
+
+            // Setup audio event listeners for time updates
+            audio.addEventListener('timeupdate', () => {
+                if (audio.duration) {
+                    const progressPercent = (audio.currentTime / audio.duration) * 100;
+                    document.getElementById('progress-bar').value = progressPercent;
+                    document.getElementById('current-time').textContent = formatTime(audio.currentTime);
+                    document.getElementById('total-duration').textContent = formatTime(audio.duration);
+                }
+            });
+
+            audio.addEventListener('ended', () => {
+                if (isLooping) {
+                    audio.currentTime = 0;
+                    audio.play();
+                } else {
+                    if (currentIndex < currentTracksList.length - 1 && currentTracksList.length > 0) {
+                        nextTrack();
+                    } else {
+                        updatePlayPauseButton(false);
+                    }
+                }
+            });
+
+            // Broadcast track info and thumbnail back to main sidebar upon load
+            const trackData = {
+                title: 'Lo-Fi Chill Stream',
+                artist: 'Frutiger Audio',
+                coverUrl: FALLBACK_ICON
+            };
+
+            try {
+                window.parent.postMessage({ type: 'trackUpdate', ...trackData }, '*');
+            } catch (e) {}
+
+            // Listen for control commands sent from the main sidebar UI
+            window.addEventListener('message', (event) => {
+                const data = event.data;
+                if (!data || !data.action) return;
+
+                switch (data.action) {
+                    case 'rewind':
+                        audio.currentTime = Math.max(0, audio.currentTime - 5);
+                        break;
+                    case 'playPause':
+                        if (audio.paused) {
+                            audio.play().catch(err => console.log("Playback prevented:", err));
+                            updatePlayPauseButton(true);
+                        } else {
+                            audio.pause();
+                            updatePlayPauseButton(false);
+                        }
+                        break;
+                    case 'forward':
+                        audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5);
+                        break;
+                    case 'loop':
+                        audio.loop = !audio.loop;
+                        isLooping = audio.loop;
+                        break;
+                }
+            });
         });
 
         function initializeLocalStorageCache() {
@@ -224,7 +294,7 @@
                 } catch (err) {}
             }
 
-            // 4. Final Backup API: Apple Music iTunes API (`https://itunes.apple.com/search?entity=song&term=${s}`)
+            // 4. Final Backup API: Apple Music iTunes API
             if (tracks.length === 0) {
                 try {
                     const res4 = await fetch(`https://itunes.apple.com/search?entity=song&term=${encodedQuery}`, { mode: 'cors' });
@@ -360,25 +430,40 @@
                 } catch (e) {}
             }
 
-            audioElement.src = streamUrl || track.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+            const audio = document.getElementById('musicAudio') || document.createElement('audio');
+            audio.src = streamUrl || track.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+            
             try {
-                await audioElement.play();
+                await audio.play();
                 updatePlayPauseButton(true);
             } catch (err) {
                 updatePlayPauseButton(false);
             }
+
+            // Post track update back to parent window
+            try {
+                window.parent.postMessage({
+                    type: 'trackUpdate',
+                    title: track.name,
+                    artist: track.artist,
+                    coverUrl: activeCover
+                }, '*');
+            } catch (e) {}
         }
 
         function togglePlayPause() {
+            const audio = document.getElementById('musicAudio');
+            if (!audio) return;
+
             if (currentIndex === -1 && currentTracksList.length > 0) {
                 playTrackIndex(0);
                 return;
             }
-            if (audioElement.paused) {
-                audioElement.play();
+            if (audio.paused) {
+                audio.play();
                 updatePlayPauseButton(true);
             } else {
-                audioElement.pause();
+                audio.pause();
                 updatePlayPauseButton(false);
             }
         }
@@ -389,32 +474,11 @@
             lucide.createIcons();
         }
 
-        function setupAudioListeners() {
-            audioElement.addEventListener('timeupdate', () => {
-                if (audioElement.duration) {
-                    const progressPercent = (audioElement.currentTime / audioElement.duration) * 100;
-                    document.getElementById('progress-bar').value = progressPercent;
-                    document.getElementById('current-time').textContent = formatTime(audioElement.currentTime);
-                    document.getElementById('total-duration').textContent = formatTime(audioElement.duration);
-                }
-            });
-            
-            audioElement.addEventListener('ended', () => {
-                if (isLooping) {
-                    audioElement.currentTime = 0;
-                    audioElement.play();
-                } else {
-                    if (currentIndex < currentTracksList.length - 1) {
-                        nextTrack();
-                    } else {
-                        updatePlayPauseButton(false);
-                    }
-                }
-            });
-        }
-
         function toggleRepeat() {
             isLooping = !isLooping;
+            const audio = document.getElementById('musicAudio');
+            if (audio) audio.loop = isLooping;
+
             const btn = document.getElementById('repeat-btn');
             if (isLooping) {
                 btn.className = "text-[#ffffff] transition active:scale-95 p-1";
@@ -424,13 +488,15 @@
         }
 
         function seekAudio(value) {
-            if (audioElement.duration) {
-                audioElement.currentTime = (value / 100) * audioElement.duration;
+            const audio = document.getElementById('musicAudio');
+            if (audio && audio.duration) {
+                audio.currentTime = (value / 100) * audio.duration;
             }
         }
 
         function setVolume(val) {
-            audioElement.volume = val;
+            const audio = document.getElementById('musicAudio');
+            if (audio) audio.volume = val;
         }
 
         function nextTrack() {
