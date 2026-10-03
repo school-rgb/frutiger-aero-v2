@@ -120,8 +120,14 @@
 </head>
 <body class="h-screen w-screen bg-[#050505] text-mono-100 flex items-center justify-start overflow-hidden relative">
 
-  <!-- Interactive Background Canvas (Visible on Home & Loading screens) -->
-  <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0 w-full h-full"></canvas>
+  <!-- GLOBAL PERSISTENT AUDIO ELEMENT (Streams music across all tabs and never closes out unless paused/stopped) -->
+  <audio id="globalAudio" preload="auto" loop></audio>
+
+  <!-- Dynamic Background Container (Supports Canvas Dots or GitHub Wallpapers) -->
+  <div id="bgContainer" class="fixed inset-0 pointer-events-none z-0 w-full h-full">
+    <canvas id="bgCanvas" class="w-full h-full"></canvas>
+    <div id="wallpaperLayer" class="absolute inset-0 bg-cover bg-center hidden"></div>
+  </div>
 
   <!-- 100% Viewport Height Sidebar (Edge-to-edge 60px vertical strip on left) -->
   <aside id="sidebar" class="h-screen w-[60px] bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col justify-between items-center py-4 relative z-50 select-none shrink-0">
@@ -165,21 +171,21 @@
       
       <div class="w-6 h-[1px] bg-[#222222] mb-1.5 rounded-full"></div>
 
-      <!-- COMPACT MUSIC THUMBNAIL BOX WITH EXACT 1-SECOND HIDE DELAY -->
-      <div id="musicThumbContainer" class="relative mb-1.5 flex justify-center w-full">
+      <!-- COMPACT MUSIC THUMBNAIL BOX (Initially hidden until music app sends activation signal) -->
+      <div id="musicThumbContainer" class="relative mb-1.5 flex justify-center w-full hidden">
         <div id="musicThumbBox" class="w-7 h-7 bg-[#141414] border border-[#2a2a2a] rounded-md overflow-hidden flex items-center justify-center cursor-pointer hover:border-mono-400 transition-colors">
           <img id="sidebarMusicImg" src="https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF" alt="Now Playing" class="w-4 h-4 object-cover rounded">
         </div>
 
-        <!-- Popup flyout controls with exactly 1-second delay and full interactivity fix -->
+        <!-- Popup flyout controls with exactly 1-second delay -->
         <div id="musicControlsPanel" class="absolute left-[64px] top-1/2 -translate-y-1/2 bg-[#121212] border border-[#2a2a2a] rounded-md shadow-2xl p-1.5 hidden items-center gap-1.5 z-50 whitespace-nowrap">
-          <button id="ctrlRewind" title="Rewind" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#2a2a2a] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
+          <button id="ctrlRewind" title="Rewind 5s" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#2a2a2a] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
             <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 20L9 12l10-8v16zM5 19V5"/></svg>
           </button>
           <button id="ctrlPlayPause" title="Play/Pause" class="w-5 h-5 bg-white text-black hover:bg-mono-200 rounded flex items-center justify-center font-bold transition-colors cursor-pointer">
-            <svg class="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            <svg id="ctrlPlayIcon" class="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
           </button>
-          <button id="ctrlForward" title="Fast Forward" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#2a2a2a] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
+          <button id="ctrlForward" title="Fast Forward 5s" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#2a2a2a] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
             <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4zM19 5v14"/></svg>
           </button>
           <button id="ctrlLoop" title="Loop" class="w-5 h-5 bg-[#1a1a1a] hover:bg-[#2a2a2a] rounded flex items-center justify-center text-mono-300 hover:text-white transition-colors cursor-pointer">
@@ -225,17 +231,17 @@
 
     <div id="mainDisplay" class="flex flex-col items-center justify-center w-full h-full z-10">
 
-      <!-- Hero Title (Home View with Electroharmonix Font) -->
+      <!-- Hero Title -->
       <h1 id="heroTitle" class="font-electro text-3xl sm:text-5xl md:text-7xl font-bold tracking-[0.18em] text-white uppercase text-center drop-shadow-[0_0_30px_rgba(255,255,255,0.25)] leading-none mb-3">
         THURSDAY
       </h1>
 
-      <!-- Full Date Display (Now using Gnf Font) -->
+      <!-- Full Date Display -->
       <div id="heroDate" class="text-sm sm:text-lg md:text-xl tracking-[0.25em] text-mono-300 uppercase mb-2 font-semibold">
         OCTOBER 1, 2026
       </div>
 
-      <!-- Subtitle (Electroharmonix Font) -->
+      <!-- Subtitle -->
       <p id="welcomeSubtitle" class="font-electro text-[10px] sm:text-xs font-semibold tracking-[0.35em] text-mono-400 uppercase">
         WELCOME TO FRUITIGER
       </p>
@@ -376,11 +382,93 @@
       const sectionContent = document.getElementById('sectionContent');
       const sidebarMusicImg = document.getElementById('sidebarMusicImg');
 
-      // FIXED 1-SECOND HOVER STAY & FIX INTERACTIVITY BUG FOR MUSIC CONTROLS CONTAINER
+      // Global Persistent Audio & Activation Logic
+      const globalAudio = document.getElementById('globalAudio');
       const musicThumbContainer = document.getElementById('musicThumbContainer');
       const musicControlsPanel = document.getElementById('musicControlsPanel');
+      const ctrlPlayPause = document.getElementById('ctrlPlayPause');
+      const ctrlPlayIcon = document.getElementById('ctrlPlayIcon');
+      const ctrlRewind = document.getElementById('ctrlRewind');
+      const ctrlForward = document.getElementById('ctrlForward');
+      const ctrlLoop = document.getElementById('ctrlLoop');
+
       let musicHideTimeout = null;
 
+      // Listen for activation and control signals from the music app / iframe
+      window.addEventListener('message', (event) => {
+        const data = event.data;
+        if (!data) return;
+
+        if (data.type === 'activateMusic' || data.action) {
+          // Reveal the mini music player button in the sidebar once music is enabled
+          musicThumbContainer.classList.remove('hidden');
+          musicThumbContainer.classList.add('flex');
+        }
+
+        if (data.audioSrc) {
+          if (globalAudio.src !== data.audioSrc) {
+            globalAudio.src = data.audioSrc;
+          }
+          globalAudio.play().catch(() => {});
+          ctrlPlayIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+        }
+
+        if (data.coverUrl && sidebarMusicImg) {
+          sidebarMusicImg.src = data.coverUrl;
+        }
+
+        if (data.action === 'playPause') {
+          toggleGlobalPlay();
+        } else if (data.action === 'rewind') {
+          globalAudio.currentTime = Math.max(0, globalAudio.currentTime - 5);
+        } else if (data.action === 'forward') {
+          globalAudio.currentTime = Math.min(globalAudio.duration || 0, globalAudio.currentTime + 5);
+        } else if (data.action === 'loop') {
+          globalAudio.loop = !globalAudio.loop;
+          ctrlLoop.classList.toggle('text-white', globalAudio.loop);
+        }
+      });
+
+      function toggleGlobalPlay() {
+        if (globalAudio.paused) {
+          globalAudio.play().catch(() => {});
+          ctrlPlayIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+        } else {
+          globalAudio.pause();
+          ctrlPlayIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        }
+      }
+
+      if (ctrlPlayPause) {
+        ctrlPlayPause.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleGlobalPlay();
+        });
+      }
+
+      if (ctrlRewind) {
+        ctrlRewind.addEventListener('click', (e) => {
+          e.stopPropagation();
+          globalAudio.currentTime = Math.max(0, globalAudio.currentTime - 5);
+        });
+      }
+
+      if (ctrlForward) {
+        ctrlForward.addEventListener('click', (e) => {
+          e.stopPropagation();
+          globalAudio.currentTime = Math.min(globalAudio.duration || 0, globalAudio.currentTime + 5);
+        });
+      }
+
+      if (ctrlLoop) {
+        ctrlLoop.addEventListener('click', (e) => {
+          e.stopPropagation();
+          globalAudio.loop = !globalAudio.loop;
+          ctrlLoop.classList.toggle('text-white', globalAudio.loop);
+        });
+      }
+
+      // Exact 1-second hover delay for music controls panel
       if (musicThumbContainer && musicControlsPanel) {
         const showPanel = () => {
           if (musicHideTimeout) clearTimeout(musicHideTimeout);
@@ -401,16 +489,6 @@
         musicControlsPanel.addEventListener('mouseleave', hidePanel);
       }
 
-      // Inert click handlers so buttons respond properly without crashing
-      ['ctrlRewind', 'ctrlPlayPause', 'ctrlForward', 'ctrlLoop'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.addEventListener('click', (e) => {
-            e.stopPropagation();
-          });
-        }
-      });
-
       const stHours = document.getElementById('stHours');
       const stMinutes = document.getElementById('stMinutes');
       const stPeriod = document.getElementById('stPeriod');
@@ -424,7 +502,6 @@
 
       function updateClockAndStream() {
         const now = new Date();
-
         let rawHours = now.getHours();
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const period = rawHours >= 12 ? 'PM' : 'AM';
@@ -557,7 +634,7 @@
         } else if (subtitle === 'SETTINGS') {
           isAppLoading = false;
           mainContainer.className = "flex-1 h-screen bg-[#050505] flex flex-col items-center justify-start text-center p-8 relative overflow-y-auto z-10 select-text";
-          mainDisplay.className = "w-full max-w-md flex flex-col items-center justify-start pt-16 gap-6 text-center";
+          mainDisplay.className = "w-full max-w-xl flex flex-col items-center justify-start pt-12 gap-6 text-center";
           heroTitle.classList.add('hidden');
           heroDate.classList.add('hidden');
           welcomeSubtitle.classList.add('hidden');
@@ -568,9 +645,7 @@
       }
 
       function updateTabInfo(title, iconUrl) {
-        if (title) {
-          document.title = title;
-        }
+        if (title) document.title = title;
         if (iconUrl) {
           let favicon = document.getElementById('dynamicFavicon');
           if (!favicon) {
@@ -588,30 +663,24 @@
         const currentFavicon = document.getElementById('dynamicFavicon')?.href || '';
 
         sectionContent.innerHTML = `
-          <div class="w-full flex flex-col items-center text-center space-y-6 text-xs tracking-wider">
+          <div class="w-full flex flex-col items-center text-center space-y-6 text-xs tracking-wider pb-12">
             
-            <div class="text-mono-400 uppercase tracking-[0.25em] text-[11px] font-semibold border-b border-[#222222] pb-2 w-full max-w-xs text-center">
+            <div class="text-mono-400 uppercase tracking-[0.25em] text-[11px] font-semibold border-b border-[#222222] pb-2 w-full max-w-md text-center">
               TAB CLOAKING & CUSTOMIZATION
             </div>
 
             <!-- Quick Presets -->
-            <div class="flex flex-col items-center gap-2 w-full max-w-xs">
+            <div class="flex flex-col items-center gap-2 w-full max-w-md">
               <span class="text-[10px] text-mono-500 uppercase tracking-widest">QUICK CLOAK PRESETS</span>
               <div class="grid grid-cols-3 gap-2 w-full">
-                <button id="presetGoogle" class="px-2 py-2 bg-[#121212] hover:bg-[#1f1f1f] border border-[#2a2a2a] rounded-md text-[10px] text-mono-200 transition-colors font-bold cursor-pointer">
-                  GOOGLE
-                </button>
-                <button id="presetDrive" class="px-2 py-2 bg-[#121212] hover:bg-[#1f1f1f] border border-[#2a2a2a] rounded-md text-[10px] text-mono-200 transition-colors font-bold cursor-pointer">
-                  DRIVE
-                </button>
-                <button id="presetCanvas" class="px-2 py-2 bg-[#121212] hover:bg-[#1f1f1f] border border-[#2a2a2a] rounded-md text-[10px] text-mono-200 transition-colors font-bold cursor-pointer">
-                  CANVAS
-                </button>
+                <button id="presetGoogle" class="px-2 py-2 bg-[#121212] hover:bg-[#1f1f1f] border border-[#2a2a2a] rounded-md text-[10px] text-mono-200 transition-colors font-bold cursor-pointer">GOOGLE</button>
+                <button id="presetDrive" class="px-2 py-2 bg-[#121212] hover:bg-[#1f1f1f] border border-[#2a2a2a] rounded-md text-[10px] text-mono-200 transition-colors font-bold cursor-pointer">DRIVE</button>
+                <button id="presetCanvas" class="px-2 py-2 bg-[#121212] hover:bg-[#1f1f1f] border border-[#2a2a2a] rounded-md text-[10px] text-mono-200 transition-colors font-bold cursor-pointer">CANVAS</button>
               </div>
             </div>
 
             <!-- Custom Title & Favicon Input -->
-            <div class="flex flex-col gap-3 w-full max-w-xs text-left pt-1">
+            <div class="flex flex-col gap-3 w-full max-w-md text-left pt-1">
               <label class="flex flex-col gap-1">
                 <span class="text-[10px] text-mono-400 uppercase font-semibold">CUSTOM TAB TITLE</span>
                 <input id="tabTitleInput" type="text" value="${currentTitle}" placeholder="e.g. Google Search" class="bg-[#121212] border border-[#2a2a2a] rounded-md px-3 py-2 text-xs text-white focus:outline-none focus:border-mono-400">
@@ -627,55 +696,104 @@
               </button>
             </div>
 
+            <div class="text-mono-400 uppercase tracking-[0.25em] text-[11px] font-semibold border-b border-[#222222] pb-2 pt-4 w-full max-w-md text-center">
+              WALLPAPERS (GITHUB: school-rgb/frutiger-pr0xy-wallpapers)
+            </div>
+
+            <!-- Background Selector Section -->
+            <div class="flex flex-col items-center gap-3 w-full max-w-md">
+              <button id="bgDefaultBtn" class="w-full py-2 bg-[#121212] hover:bg-[#1a1a1a] border border-[#2a2a2a] rounded-md text-white font-bold cursor-pointer">
+                DEFAULT (PARTICLE DOTS)
+              </button>
+              <div id="githubWallpapersGrid" class="grid grid-cols-2 gap-2 w-full max-h-48 overflow-y-auto p-1 border border-[#222222] rounded-md bg-[#0c0c0c]">
+                <span class="text-[10px] text-mono-500 col-span-2 text-center py-4">Loading wallpapers from GitHub...</span>
+              </div>
+            </div>
+
           </div>
         `;
 
+        document.getElementById('bgDefaultBtn').addEventListener('click', () => {
+          document.getElementById('bgCanvas').classList.remove('hidden');
+          const layer = document.getElementById('wallpaperLayer');
+          layer.classList.add('hidden');
+          layer.style.backgroundImage = '';
+        });
+
+        // Fetch wallpapers from GitHub repository API
+        fetch('https://api.github.com/repos/school-rgb/frutiger-pr0xy-wallpapers/contents')
+          .then(res => res.json())
+          .then(data => {
+            const grid = document.getElementById('githubWallpapersGrid');
+            if (!Array.isArray(data)) {
+              grid.innerHTML = '<span class="text-[10px] text-mono-500 col-span-2 text-center py-4">Unable to load wallpapers.</span>';
+              return;
+            }
+
+            // Filter for image and video extensions (.png, .jpg, .jpeg, .webp, .mp4)
+            const mediaFiles = data.filter(file => {
+              const name = file.name.toLowerCase();
+              return name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.webp') || name.endsWith('.mp4');
+            });
+
+            if (mediaFiles.length === 0) {
+              grid.innerHTML = '<span class="text-[10px] text-mono-500 col-span-2 text-center py-4">No wallpapers found in repo.</span>';
+              return;
+            }
+
+            grid.innerHTML = '';
+            mediaFiles.forEach(file => {
+              const fileUrl = file.download_url;
+              const isVideo = file.name.toLowerCase().endsWith('.mp4');
+
+              const thumbDiv = document.createElement('div');
+              thumbDiv.className = 'relative h-20 bg-[#141414] border border-[#2a2a2a] rounded overflow-hidden cursor-pointer hover:border-white transition-all flex items-center justify-center group';
+              
+              if (isVideo) {
+                thumbDiv.innerHTML = `<video src="${fileUrl}" class="w-full h-full object-cover"></video>`;
+              } else {
+                thumbDiv.innerHTML = `<img src="${fileUrl}" class="w-full h-full object-cover">`;
+              }
+
+              thumbDiv.addEventListener('click', () => {
+                const canvas = document.getElementById('bgCanvas');
+                const layer = document.getElementById('wallpaperLayer');
+                canvas.classList.add('hidden');
+                layer.classList.remove('hidden');
+                layer.style.backgroundImage = `url('${fileUrl}')`;
+              });
+
+              grid.appendChild(thumbDiv);
+            });
+          })
+          .catch(() => {
+            const grid = document.getElementById('githubWallpapersGrid');
+            if (grid) grid.innerHTML = '<span class="text-[10px] text-mono-500 col-span-2 text-center py-4">Failed to connect to GitHub repo.</span>';
+          });
+
         document.getElementById('presetGoogle').addEventListener('click', () => {
-          const t = 'Google';
-          const i = 'https://www.google.com/favicon.ico';
-          document.getElementById('tabTitleInput').value = t;
-          document.getElementById('tabIconInput').value = i;
-          updateTabInfo(t, i);
+          updateTabInfo('Google', 'https://www.google.com/favicon.ico');
         });
-
         document.getElementById('presetDrive').addEventListener('click', () => {
-          const t = 'My Drive - Google Drive';
-          const i = 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png';
-          document.getElementById('tabTitleInput').value = t;
-          document.getElementById('tabIconInput').value = i;
-          updateTabInfo(t, i);
+          updateTabInfo('My Drive - Google Drive', 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png');
         });
-
         document.getElementById('presetCanvas').addEventListener('click', () => {
-          const t = 'Dashboard';
-          const i = 'https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico';
-          document.getElementById('tabTitleInput').value = t;
-          document.getElementById('tabIconInput').value = i;
-          updateTabInfo(t, i);
+          updateTabInfo('Dashboard', 'https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico');
         });
-
         document.getElementById('applyTabCustom').addEventListener('click', () => {
-          const t = document.getElementById('tabTitleInput').value;
-          const i = document.getElementById('tabIconInput').value;
-          updateTabInfo(t, i);
+          updateTabInfo(document.getElementById('tabTitleInput').value, document.getElementById('tabIconInput').value);
         });
       }
 
       navButtons.forEach((btn, index) => {
-        btn.addEventListener('click', () => {
-          setNavIndex(index);
-        });
-
+        btn.addEventListener('click', () => setNavIndex(index));
         btn.addEventListener('mouseenter', () => {
-          const subtitle = btn.getAttribute('data-subtitle');
-          tooltipText.textContent = subtitle;
-
+          tooltipText.textContent = btn.getAttribute('data-subtitle');
           const btnRect = btn.getBoundingClientRect();
           tooltip.style.top = `${btnRect.top + (btnRect.height / 2) - 12}px`;
           tooltip.classList.remove('opacity-0', 'pointer-events-none');
           tooltip.classList.add('opacity-100');
         });
-
         btn.addEventListener('mouseleave', () => {
           tooltip.classList.add('opacity-0', 'pointer-events-none');
           tooltip.classList.remove('opacity-100');
@@ -683,10 +801,7 @@
       });
 
       setNavIndex(0);
-
-      window.addEventListener('resize', () => {
-        updateIndicator(navButtons[activeIndex]);
-      });
+      window.addEventListener('resize', () => updateIndicator(navButtons[activeIndex]));
     });
 
     function handleImgError(imgElement, type) {
@@ -698,11 +813,8 @@
         'anime': `<svg class="w-[14px] h-[14px] text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M17 2l-5 5-5-5"/></svg>`,
         'settings': `<svg class="w-[14px] h-[14px] text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>`
       };
-
       const parent = imgElement.parentElement;
-      if (parent && svgs[type]) {
-        parent.innerHTML = svgs[type];
-      }
+      if (parent && svgs[type]) parent.innerHTML = svgs[type];
     }
   </script>
 </body>
