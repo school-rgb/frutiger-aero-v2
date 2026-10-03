@@ -47,6 +47,7 @@
     </header>
 
     <main class="flex-1 w-full px-0 py-2">
+        
         <!-- Welcome state view -->
         <div id="welcome-state" class="text-center py-28 px-4 w-full">
             <div class="w-20 h-20 bg-[#121212] border border-[#262626] rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#a3a3a3] shadow-lg">
@@ -77,9 +78,9 @@
                 <!-- Dynamically injected full-width song rows -->
             </div>
         </div>
+
     </main>
 
-    <!-- Unified Player Bar -->
     <div class="fixed bottom-0 left-0 right-0 z-50 bg-[#0d0d0d]/95 backdrop-blur border-t border-[#1f1f1f] w-full px-4 py-4 shadow-2xl">
         <div class="w-full flex flex-col md:flex-row items-center justify-between gap-4">
             
@@ -97,28 +98,20 @@
             <!-- Playback Controls, Repeat & Timeline -->
             <div class="flex flex-col items-center w-full md:w-1/3 space-y-2">
                 <div class="flex items-center space-x-5">
-                    <!-- Loop / Repeat Button -->
                     <button id="btnLoop" class="text-[#737373] transition active:scale-95 p-1" title="Loop Forever">
                         <i data-lucide="repeat" class="w-4 h-4"></i>
                     </button>
-                    <!-- Rewind Button -->
-                    <button id="btnRewind" onclick="previousTrack()" class="text-[#737373] hover:text-[#ffffff] transition active:scale-95">
-                        <i data-lucide="skip-back" class="w-4 h-4"></i>
+                    <button id="btnRewind" class="text-[#737373] hover:text-[#ffffff] transition active:scale-95"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
+                    <button id="btnPlayPause" class="w-11 h-11 rounded-2xl bg-[#ffffff] hover:bg-[#e5e5e5] text-[#000000] flex items-center justify-center transition shadow-lg active:scale-95">
+                        <span id="playIcon" class="flex items-center justify-center">
+                            <i data-lucide="play" class="w-4 h-4 ml-0.5"></i>
+                        </span>
                     </button>
-                    <!-- Play / Pause Button with Icon Swap -->
-                    <button id="btnPlayPause" onclick="togglePlayPause()" class="w-11 h-11 rounded-2xl bg-[#ffffff] hover:bg-[#e5e5e5] text-[#000000] flex items-center justify-center transition shadow-lg active:scale-95">
-                        <svg id="playIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8 5v14l11-7z"/>
-                        </svg>
-                    </button>
-                    <!-- Forward Button -->
-                    <button id="btnForward" onclick="nextTrack()" class="text-[#737373] hover:text-[#ffffff] transition active:scale-95">
-                        <i data-lucide="skip-forward" class="w-4 h-4"></i>
-                    </button>
+                    <button id="btnForward" class="text-[#737373] hover:text-[#ffffff] transition active:scale-95"><i data-lucide="skip-forward" class="w-4 h-4"></i></button>
                 </div>
                 <div class="w-full flex items-center space-x-3 text-xs text-[#737373]">
                     <span id="currentTime">0:00</span>
-                    <input type="range" id="progressBar" value="0" max="100" class="w-full h-1 bg-[#262626] rounded-full appearance-none cursor-pointer accent-[#ffffff]" oninput="seekAudio(this.value)">
+                    <input type="range" id="progressBar" value="0" max="100" class="w-full h-1 bg-[#262626] rounded-full appearance-none cursor-pointer accent-[#ffffff]">
                     <span id="duration">0:00</span>
                 </div>
             </div>
@@ -134,10 +127,40 @@
     <script>
         let currentTracksList = [];
         let currentIndex = -1;
-        let isPlaying = false;
         let isLooping = false;
-        const audioElement = new Audio();
-        audioElement.volume = 0.8;
+
+        // Find or create local audio element inside the music app page
+        let audio = document.getElementById('musicAppAudio');
+        if (!audio) {
+            audio = document.createElement('audio');
+            audio.id = 'musicAppAudio';
+            audio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+            audio.preload = 'auto';
+            audio.loop = false;
+            document.body.appendChild(audio);
+        }
+        audio.volume = 0.8;
+
+        // Track metadata
+        const trackInfo = {
+            title: 'Lo-Fi Chill Stream',
+            artist: 'Frutiger Audio',
+            coverUrl: 'https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF',
+            audioSrc: audio.src
+        };
+
+        // Send activation signal and stream info to the main parent window
+        function sendActivationToParent() {
+            try {
+                window.parent.postMessage({
+                    type: 'activateMusic',
+                    audioSrc: trackInfo.audioSrc,
+                    coverUrl: trackInfo.coverUrl,
+                    title: trackInfo.title,
+                    artist: trackInfo.artist
+                }, '*');
+            } catch(e) {}
+        }
         
         const CACHE_KEY = 'monochrome_music_backup_cache';
         const FALLBACK_ICON = 'https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF';
@@ -152,10 +175,9 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            setupAudioListeners();
             initializeLocalStorageCache();
 
-            // UI Elements hook-up based on snippet
+            // UI Element hooks
             const playBtn = document.getElementById('btnPlayPause');
             const playIcon = document.getElementById('playIcon');
             const rewindBtn = document.getElementById('btnRewind');
@@ -165,16 +187,118 @@
             const currentTimeEl = document.getElementById('currentTime');
             const durationEl = document.getElementById('duration');
 
-            if (durationEl) durationEl.textContent = '0:00';
-            if (currentTimeEl) currentTimeEl.textContent = '0:00';
+            audio.addEventListener('loadedmetadata', () => {
+                if (durationEl) durationEl.textContent = formatTime(audio.duration);
+            });
 
-            if (loopBtn) {
-                loopBtn.addEventListener('click', () => {
-                    isLooping = !isLooping;
-                    loopBtn.classList.toggle('text-white', isLooping);
-                    loopBtn.classList.toggle('border-white', isLooping);
+            audio.addEventListener('timeupdate', () => {
+                if (audio.duration && progressBar) {
+                    progressBar.value = (audio.currentTime / audio.duration) * 100;
+                    if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
+                    if (durationEl) durationEl.textContent = formatTime(audio.duration);
+                }
+            });
+
+            if (progressBar) {
+                progressBar.addEventListener('input', () => {
+                    if (audio.duration) {
+                        audio.currentTime = (progressBar.value / 100) * audio.duration;
+                    }
                 });
             }
+
+            function togglePlay() {
+                if (currentIndex !== -1 && currentTracksList.length > 0) {
+                    if (audio.paused) {
+                        audio.play().then(() => {
+                            sendActivationToParent();
+                            if (playIcon) playIcon.innerHTML = '<i data-lucide="pause" class="w-4 h-4"></i>';
+                            lucide.createIcons();
+                        }).catch(err => console.log("Playback error:", err));
+                    } else {
+                        audio.pause();
+                        if (playIcon) playIcon.innerHTML = '<i data-lucide="play" class="w-4 h-4 ml-0.5"></i>';
+                        lucide.createIcons();
+                    }
+                } else {
+                    if (audio.paused) {
+                        audio.play().then(() => {
+                            sendActivationToParent();
+                            if (playIcon) playIcon.innerHTML = '<i data-lucide="pause" class="w-4 h-4"></i>';
+                            lucide.createIcons();
+                        }).catch(err => console.log("Playback error:", err));
+                    } else {
+                        audio.pause();
+                        if (playIcon) playIcon.innerHTML = '<i data-lucide="play" class="w-4 h-4 ml-0.5"></i>';
+                        lucide.createIcons();
+                    }
+                }
+            }
+
+            if (playBtn) playBtn.addEventListener('click', togglePlay);
+            if (rewindBtn) rewindBtn.addEventListener('click', () => { 
+                if (currentIndex !== -1 && currentTracksList.length > 0) {
+                    previousTrack();
+                } else {
+                    audio.currentTime = Math.max(0, audio.currentTime - 5); 
+                }
+            });
+            if (forwardBtn) forwardBtn.addEventListener('click', () => { 
+                if (currentIndex !== -1 && currentTracksList.length > 0) {
+                    nextTrack();
+                } else {
+                    audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5); 
+                }
+            });
+            
+            if (loopBtn) {
+                loopBtn.addEventListener('click', () => {
+                    audio.loop = !audio.loop;
+                    isLooping = audio.loop;
+                    loopBtn.classList.toggle('text-white', audio.loop);
+                    loopBtn.classList.toggle('border-white', audio.loop);
+                    loopBtn.classList.toggle('text-[#ffffff]', audio.loop);
+                    loopBtn.classList.toggle('text-[#737373]', !audio.loop);
+                });
+            }
+
+            audio.addEventListener('ended', () => {
+                if (!audio.loop && currentIndex !== -1 && currentTracksList.length > 0) {
+                    if (currentIndex < currentTracksList.length - 1) {
+                        nextTrack();
+                    } else {
+                        if (playIcon) playIcon.innerHTML = '<i data-lucide="play" class="w-4 h-4 ml-0.5"></i>';
+                        lucide.createIcons();
+                    }
+                }
+            });
+
+            window.addEventListener('message', (event) => {
+                const data = event.data;
+                if (!data || !data.action) return;
+
+                switch (data.action) {
+                    case 'rewind':
+                        audio.currentTime = Math.max(0, audio.currentTime - 5);
+                        break;
+                    case 'playPause':
+                        togglePlay();
+                        break;
+                    case 'forward':
+                        audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5);
+                        break;
+                    case 'loop':
+                        audio.loop = !audio.loop;
+                        isLooping = audio.loop;
+                        if (loopBtn) {
+                            loopBtn.classList.toggle('text-white', audio.loop);
+                            loopBtn.classList.toggle('border-white', audio.loop);
+                            loopBtn.classList.toggle('text-[#ffffff]', audio.loop);
+                            loopBtn.classList.toggle('text-[#737373]', !audio.loop);
+                        }
+                        break;
+                }
+            });
         });
 
         function initializeLocalStorageCache() {
@@ -354,6 +478,10 @@
                 playerCoverEl.className = 'w-full h-full object-cover';
             }
 
+            trackInfo.title = track.name;
+            trackInfo.artist = track.artist;
+            trackInfo.coverUrl = activeCover;
+
             let streamUrl = track.url;
             const cleanRid = track.id;
 
@@ -387,81 +515,28 @@
                 } catch (e) {}
             }
 
-            audioElement.src = streamUrl || track.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+            audio.src = streamUrl || track.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+            trackInfo.audioSrc = audio.src;
+
             try {
-                await audioElement.play();
-                isPlaying = true;
-                updatePlayPauseState(true);
+                await audio.play();
+                sendActivationToParent();
+                updatePlayPauseButton(true);
             } catch (err) {
-                isPlaying = false;
-                updatePlayPauseState(false);
+                updatePlayPauseButton(false);
             }
         }
 
-        function togglePlayPause() {
-            if (currentIndex === -1 && currentTracksList.length > 0) {
-                playTrackIndex(0);
-                return;
-            }
-            if (audioElement.paused) {
-                audioElement.play();
-                isPlaying = true;
-                updatePlayPauseState(true);
-            } else {
-                audioElement.pause();
-                isPlaying = false;
-                updatePlayPauseState(false);
-            }
-        }
-
-        function updatePlayPauseState(playing) {
+        function updatePlayPauseButton(isPlaying) {
             const playIcon = document.getElementById('playIcon');
             if (playIcon) {
-                if (playing) {
-                    playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-                } else {
-                    playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-                }
+                playIcon.innerHTML = isPlaying ? '<i data-lucide="pause" class="w-4 h-4"></i>' : '<i data-lucide="play" class="w-4 h-4 ml-0.5"></i>';
             }
-        }
-
-        function setupAudioListeners() {
-            audioElement.addEventListener('timeupdate', () => {
-                if (audioElement.duration) {
-                    const progressPercent = (audioElement.currentTime / audioElement.duration) * 100;
-                    const progressBar = document.getElementById('progressBar');
-                    if (progressBar) progressBar.value = progressPercent;
-                    
-                    const currentTimeEl = document.getElementById('currentTime');
-                    const durationEl = document.getElementById('duration');
-                    if (currentTimeEl) currentTimeEl.textContent = formatTime(audioElement.currentTime);
-                    if (durationEl) durationEl.textContent = formatTime(audioElement.duration);
-                }
-            });
-            
-            audioElement.addEventListener('ended', () => {
-                if (isLooping) {
-                    audioElement.currentTime = 0;
-                    audioElement.play();
-                } else {
-                    if (currentIndex < currentTracksList.length - 1) {
-                        nextTrack();
-                    } else {
-                        isPlaying = false;
-                        updatePlayPauseState(false);
-                    }
-                }
-            });
-        }
-
-        function seekAudio(value) {
-            if (audioElement.duration) {
-                audioElement.currentTime = (value / 100) * audioElement.duration;
-            }
+            lucide.createIcons();
         }
 
         function setVolume(val) {
-            audioElement.volume = val;
+            audio.volume = val;
         }
 
         function nextTrack() {
