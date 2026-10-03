@@ -73,7 +73,7 @@
       font-family: 'Gnf', 'Inter', system-ui, sans-serif;
     }
 
-    /* Explicit exemption for the specific header elements */
+    /* Explicit exemption for the header elements */
     #heroTitle, #welcomeSubtitle {
       font-family: 'Electroharmonix', 'Inter', system-ui, sans-serif !important;
     }
@@ -160,13 +160,12 @@
       </nav>
     </div>
 
-    <!-- LOWER SECTION: Dividers, Centered Compact Music Thumbnail Box + Flyout Controls, Clock Stream & Settings -->
+    <!-- LOWER SECTION -->
     <div class="w-full flex flex-col items-center px-1 mt-auto relative">
       
-      <!-- FIRST DIVIDER LINE ABOVE MUSIC THUMBNAIL BOX -->
       <div class="w-6 h-[1px] bg-[#222222] mb-1.5 rounded-full"></div>
 
-      <!-- COMPACT MUSIC THUMBNAIL BOX WITH 1-SECOND HIDE DELAY -->
+      <!-- COMPACT MUSIC THUMBNAIL BOX WITH EXACT 1-SECOND HIDE DELAY -->
       <div id="musicThumbContainer" class="relative mb-1.5 flex justify-center w-full">
         <div id="musicThumbBox" class="w-7 h-7 bg-[#141414] border border-[#2a2a2a] rounded-md overflow-hidden flex items-center justify-center cursor-pointer hover:border-mono-400 transition-colors">
           <img id="sidebarMusicImg" src="https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF" alt="Now Playing" class="w-4 h-4 object-cover rounded">
@@ -189,11 +188,10 @@
         </div>
       </div>
 
-      <!-- SECOND DIVIDER LINE ABOVE CLOCK STREAM -->
       <div class="w-6 h-[1px] bg-[#222222] mb-1.5 rounded-full"></div>
 
-      <!-- UNBOXED 2-CHARACTER VERTICAL CLOCK & DATE STREAM -->
-      <div id="clockStream" class="flex flex-col items-center font-mono text-[9px] leading-[1.2] tracking-widest text-[#666666] font-medium mb-1.5 select-none">
+      <!-- CLOCK STREAM -->
+      <div id="clockStream" class="flex flex-col items-center text-[9px] leading-[1.2] tracking-widest text-[#666666] font-medium mb-1.5 select-none">
         <span id="stHours" class="text-mono-300 font-semibold">08</span>
         <span id="stMinutes" class="text-mono-400">05</span>
         <span id="stPeriod" class="text-[8px] text-mono-500 font-bold">PM</span>
@@ -204,10 +202,9 @@
         <span id="stYear" class="text-mono-500">26</span>
       </div>
 
-      <!-- THIRD DIVIDER LINE BELOW CLOCK STREAM -->
       <div class="w-6 h-[1px] bg-[#222222] mb-1.5 rounded-full"></div>
 
-      <!-- 6. SETTINGS -->
+      <!-- SETTINGS -->
       <nav class="w-full flex flex-col items-center" aria-label="Settings Navigation">
         <button data-nav-id="settings" data-subtitle="SETTINGS" data-index="5" class="nav-btn group relative w-9 h-9 rounded-lg flex items-center justify-center text-mono-400 hover:text-white hover:bg-[#181818] active:scale-95 transition-all duration-150" aria-label="Settings">
           <img src="https://img.icons8.com/?size=100&id=84040&format=png&color=FFFFFF" alt="Settings" class="w-[14px] h-[14px] object-contain transition-transform duration-200 group-hover:scale-110" onerror="handleImgError(this, 'settings')">
@@ -219,7 +216,7 @@
   </aside>
 
   <!-- Floating Hover Tooltip -->
-  <div id="tooltip" class="fixed left-[70px] bg-[#141414] text-white text-[10px] font-mono tracking-widest px-2.5 py-1 rounded-md border border-[#2a2a2a] shadow-2xl opacity-0 pointer-events-none z-50 transition-opacity duration-150 flex items-center uppercase">
+  <div id="tooltip" class="fixed left-[70px] bg-[#141414] text-white text-[10px] tracking-widest px-2.5 py-1 rounded-md border border-[#2a2a2a] shadow-2xl opacity-0 pointer-events-none z-50 transition-opacity duration-150 flex items-center uppercase">
     <span id="tooltipText">HOME</span>
   </div>
 
@@ -233,8 +230,8 @@
         THURSDAY
       </h1>
 
-      <!-- Full Date Display -->
-      <div id="heroDate" class="text-sm sm:text-lg md:text-xl font-mono tracking-[0.25em] text-mono-300 uppercase mb-2 font-semibold">
+      <!-- Full Date Display (Now using Gnf Font) -->
+      <div id="heroDate" class="text-sm sm:text-lg md:text-xl tracking-[0.25em] text-mono-300 uppercase mb-2 font-semibold">
         OCTOBER 1, 2026
       </div>
 
@@ -699,7 +696,7 @@
         'music': `<svg class="w-[14px] h-[14px] text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 .895-2 3-2 3 .895 3 2zm12-2c0 1.105-1.343 2-3 2s-3-.895-3-2 .895-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>`,
         'movies': `<svg class="w-[14px] h-[14px] text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 4v16M17 4v16M3 8h18M3 16h18M3 4h18v16H3V4z"/></svg>`,
         'anime': `<svg class="w-[14px] h-[14px] text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M17 2l-5 5-5-5"/></svg>`,
-        'settings': `<svg class="w-[14px] h-[14px] text-your-choice" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>`
+        'settings': `<svg class="w-[14px] h-[14px] text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>`
       };
 
       const parent = imgElement.parentElement;
