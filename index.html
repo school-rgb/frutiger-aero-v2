@@ -68,6 +68,12 @@
       letter-spacing: 0.15em;
     }
 
+    /* Black text outline effect for homepage */
+    .text-outline {
+      text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 
+                   0px -1px 0 #000, 0px 1px 0 #000, -1px 0px 0 #000, 1px 0px 0 #000;
+    }
+
     /* Force global application of Gnf font across all elements except exempted headers */
     html, body, div, span, p, a, button, input, label, aside, nav {
       font-family: 'Gnf', 'Inter', system-ui, sans-serif;
@@ -119,10 +125,10 @@
     <div id="wallpaperLayer" class="absolute inset-0 hidden overflow-hidden"></div>
   </div>
 
-  <!-- NEWS MODAL (Using smooth rounded small boxes) -->
+  <!-- NEWS MODAL (Using smooth rounded box for close button) -->
   <div id="newsModal" class="fixed inset-0 bg-black/40 backdrop-blur-[1px] z-[100] flex items-center justify-center hidden">
     <div class="w-full max-w-md bg-[#121212] border border-[#2a2a2a] rounded-2xl p-6 shadow-2xl flex flex-col relative text-left">
-      <button id="closeNewsBtn" class="absolute top-4 right-4 w-7 h-7 bg-[#1a1a1a] hover:bg-[#252525] border border-[#333333] rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors cursor-pointer">
+      <button id="closeNewsBtn" class="absolute top-4 right-4 w-7 h-7 bg-[#1a1a1a] hover:bg-[#252525] border border-[#333333] rounded-md flex items-center justify-center text-white text-xs font-bold transition-colors cursor-pointer">
         ✕
       </button>
       <div class="text-xs font-bold tracking-[0.2em] text-mono-300 uppercase mb-4 flex items-center gap-2">
@@ -219,7 +225,7 @@
       <div class="w-6 h-[1px] bg-[#222222] rounded-full"></div>
 
       <!-- CLOCK STREAM -->
-      <div id="clockStream" class="flex flex-col items-center text-[9px] leading-[1.2] tracking-widest text-[#666666] font-medium select-none">
+      <div id="clockStream" class="flex flex-col items-center text-[9px] leading-[1.2] tracking-widest text-[#666666] font-medium select-none text-outline">
         <span id="stHours" class="text-mono-300 font-semibold">08</span>
         <span id="stMinutes" class="text-mono-400">05</span>
         <span id="stPeriod" class="text-[8px] text-mono-500 font-bold">PM</span>
@@ -258,15 +264,15 @@
 
     <div id="mainDisplay" class="flex flex-col items-center justify-center w-full h-full z-10">
 
-      <h1 id="heroTitle" class="font-electro text-3xl sm:text-5xl md:text-7xl font-bold tracking-[0.18em] text-white uppercase text-center drop-shadow-[0_0_30px_rgba(255,255,255,0.25)] leading-none mb-3">
+      <h1 id="heroTitle" class="font-electro text-3xl sm:text-5xl md:text-7xl font-bold tracking-[0.18em] text-white uppercase text-center drop-shadow-[0_0_30px_rgba(255,255,255,0.25)] leading-none mb-3 text-outline">
         THURSDAY
       </h1>
 
-      <div id="heroDate" class="text-sm sm:text-lg md:text-xl tracking-[0.25em] text-mono-300 uppercase mb-2 font-semibold">
+      <div id="heroDate" class="text-sm sm:text-lg md:text-xl tracking-[0.25em] text-mono-300 uppercase mb-2 font-semibold text-outline">
         OCTOBER 1, 2026
       </div>
 
-      <p id="welcomeSubtitle" class="font-electro text-[10px] sm:text-xs font-semibold tracking-[0.35em] text-mono-400 uppercase">
+      <p id="welcomeSubtitle" class="font-electro text-[10px] sm:text-xs font-semibold tracking-[0.35em] text-mono-400 uppercase text-outline">
         WELCOME TO FRUITIGER
       </p>
 
@@ -278,10 +284,10 @@
 
   <!-- Application JavaScript Logic -->
   <script>
-    const CURRENT_NEWS_KEY = 'v1.8_wallpaper_loop_fix'; 
+    const CURRENT_NEWS_KEY = 'v1.9_text_outline_fix'; 
     const SAVED_NEWS_KEY = localStorage.getItem('fruitiger_news_key') || '';
     const SAVED_WALLPAPER = localStorage.getItem('fruitiger_wallpaper') || '';
-    const SAVED_LOOP_SETTING = localStorage.getItem('fruitiger_video_loop') !== 'false'; // default true
+    const SAVED_LOOP_SETTING = localStorage.getItem('fruitiger_video_loop') !== 'false';
     const SAVED_TITLE = localStorage.getItem('fruitiger_tab_title') || 'fruti';
     const SAVED_FAVICON = localStorage.getItem('fruitiger_tab_favicon') || 'https://img.icons8.com/?size=100&id=1iF9PyJ2Thzo&format=png&color=FFFFFF';
 
@@ -423,7 +429,7 @@
         vid.addEventListener('ended', () => {
           if (!loopEnabled) {
             vid.pause();
-            vid.currentTime = vid.duration; // stop at last frame
+            vid.currentTime = vid.duration;
           }
         });
         layer.appendChild(vid);
@@ -785,7 +791,6 @@
           localStorage.setItem('fruitiger_video_loop', newState);
           loopBtn.textContent = newState ? 'ENABLED' : 'DISABLED';
 
-          // Re-apply current active wallpaper if video
           let currentWall = localStorage.getItem('fruitiger_wallpaper');
           if (currentWall && currentWall.toLowerCase().endsWith('.mp4')) {
             applyWallpaper(currentWall, true, newState);
