@@ -110,28 +110,27 @@
 </head>
 <body class="h-screen w-screen bg-[#050505] text-mono-100 flex items-center justify-start overflow-hidden relative">
 
-  <!-- GLOBAL PERSISTENT AUDIO ELEMENT -->
-  <audio id="globalAudio" preload="auto" loop></audio>
+  <!-- GLOBAL PERSISTENT SINGLE AUDIO SOURCE -->
+  <audio id="globalAudio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto" loop></audio>
 
   <!-- Dynamic Background Container -->
   <div id="bgContainer" class="fixed inset-0 pointer-events-none z-0 w-full h-full">
     <canvas id="bgCanvas" class="w-full h-full"></canvas>
-    <div id="wallpaperLayer" class="absolute inset-0 bg-cover bg-center hidden"></div>
+    <div id="wallpaperLayer" class="absolute inset-0 hidden overflow-hidden"></div>
   </div>
 
-  <!-- NEWS MODAL (With light blur and vertical straight-up lines next to headings) -->
+  <!-- NEWS MODAL (Using smooth rounded small boxes) -->
   <div id="newsModal" class="fixed inset-0 bg-black/40 backdrop-blur-[1px] z-[100] flex items-center justify-center hidden">
     <div class="w-full max-w-md bg-[#121212] border border-[#2a2a2a] rounded-2xl p-6 shadow-2xl flex flex-col relative text-left">
-      <!-- Close Button with Smooth Rounded Corners -->
       <button id="closeNewsBtn" class="absolute top-4 right-4 w-7 h-7 bg-[#1a1a1a] hover:bg-[#252525] border border-[#333333] rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors cursor-pointer">
         ✕
       </button>
       <div class="text-xs font-bold tracking-[0.2em] text-mono-300 uppercase mb-4 flex items-center gap-2">
-        <span class="w-[2px] h-3 bg-white inline-block"></span> UPDATES
+        <span class="w-2.5 h-2.5 rounded-sm bg-white inline-block"></span> UPDATES
       </div>
       <div id="newsContentList" class="text-xs text-mono-300 space-y-4 max-h-60 overflow-y-auto pr-2 font-sans">
         <div>
-          <span class="text-white font-bold mb-1 flex items-center gap-2"><span class="w-[2px] h-3 bg-white inline-block"></span> Games Added:</span>
+          <span class="text-white font-bold mb-1 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-white inline-block"></span> Games Added:</span>
           <ul class="list-disc list-inside space-y-1 text-mono-400 pl-4">
             <li>exam test 1</li>
             <li>exam test 2</li>
@@ -143,11 +142,11 @@
           </ul>
         </div>
         <div>
-          <span class="text-white font-bold mb-1 flex items-center gap-2"><span class="w-[2px] h-3 bg-white inline-block"></span> App Added:</span>
+          <span class="text-white font-bold mb-1 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-white inline-block"></span> App Added:</span>
           <p class="text-mono-400 pl-4">none</p>
         </div>
         <div>
-          <span class="text-white font-bold mb-1 flex items-center gap-2"><span class="w-[2px] h-3 bg-white inline-block"></span> Bugs That Have Been Fixed:</span>
+          <span class="text-white font-bold mb-1 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-white inline-block"></span> Bugs That Have Been Fixed:</span>
           <p class="text-mono-400 pl-4">none</p>
         </div>
       </div>
@@ -279,9 +278,10 @@
 
   <!-- Application JavaScript Logic -->
   <script>
-    const CURRENT_NEWS_KEY = 'v1.6_exam_test'; 
+    const CURRENT_NEWS_KEY = 'v1.8_wallpaper_loop_fix'; 
     const SAVED_NEWS_KEY = localStorage.getItem('fruitiger_news_key') || '';
     const SAVED_WALLPAPER = localStorage.getItem('fruitiger_wallpaper') || '';
+    const SAVED_LOOP_SETTING = localStorage.getItem('fruitiger_video_loop') !== 'false'; // default true
     const SAVED_TITLE = localStorage.getItem('fruitiger_tab_title') || 'fruti';
     const SAVED_FAVICON = localStorage.getItem('fruitiger_tab_favicon') || 'https://img.icons8.com/?size=100&id=1iF9PyJ2Thzo&format=png&color=FFFFFF';
 
@@ -395,6 +395,47 @@
       requestAnimationFrame(animateCanvas);
     }
 
+    function applyWallpaper(url, isVideo, loopEnabled) {
+      const canvasEl = document.getElementById('bgCanvas');
+      const layer = document.getElementById('wallpaperLayer');
+      if (!canvasEl || !layer) return;
+
+      if (!url) {
+        canvasEl.classList.remove('hidden');
+        layer.classList.add('hidden');
+        layer.innerHTML = '';
+        localStorage.removeItem('fruitiger_wallpaper');
+        return;
+      }
+
+      canvasEl.classList.add('hidden');
+      layer.classList.remove('hidden');
+      layer.innerHTML = '';
+
+      if (isVideo) {
+        const vid = document.createElement('video');
+        vid.src = url;
+        vid.className = 'w-full h-full object-cover';
+        vid.autoplay = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.loop = loopEnabled;
+        vid.addEventListener('ended', () => {
+          if (!loopEnabled) {
+            vid.pause();
+            vid.currentTime = vid.duration; // stop at last frame
+          }
+        });
+        layer.appendChild(vid);
+      } else {
+        const img = document.createElement('div');
+        img.className = 'w-full h-full bg-cover bg-center bg-no-repeat';
+        img.style.backgroundImage = `url('${url}')`;
+        layer.appendChild(img);
+      }
+      localStorage.setItem('fruitiger_wallpaper', url);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       initCanvas();
 
@@ -416,13 +457,8 @@
       });
 
       if (SAVED_WALLPAPER) {
-        const canvasEl = document.getElementById('bgCanvas');
-        const layer = document.getElementById('wallpaperLayer');
-        if (canvasEl && layer) {
-          canvasEl.classList.add('hidden');
-          layer.classList.remove('hidden');
-          layer.style.backgroundImage = `url('${SAVED_WALLPAPER}')`;
-        }
+        const isVideo = SAVED_WALLPAPER.toLowerCase().endsWith('.mp4');
+        applyWallpaper(SAVED_WALLPAPER, isVideo, SAVED_LOOP_SETTING);
       }
 
       const sidebar = document.getElementById('sidebar');
@@ -449,6 +485,8 @@
 
       let musicActivated = false;
       let musicHideTimeout = null;
+
+      globalAudio.pause();
 
       window.addEventListener('message', (event) => {
         const data = event.data;
@@ -679,6 +717,7 @@
       function renderSettingsView() {
         const currentTitle = document.title;
         const currentFavicon = document.getElementById('dynamicFavicon')?.href || '';
+        let currentLoop = localStorage.getItem('fruitiger_video_loop') !== 'false';
 
         sectionContent.innerHTML = `
           <div class="w-full flex flex-col items-center text-center space-y-6 text-xs tracking-wider pb-12">
@@ -718,6 +757,14 @@
               WALLPAPERS (GITHUB: school-rgb/frutiger-pr0xy-wallpapers)
             </div>
 
+            <!-- Video Loop Toggle Setting -->
+            <div class="flex items-center justify-between w-full max-w-md px-2 py-2 bg-[#121212] border border-[#2a2a2a] rounded-md">
+              <span class="text-[10px] text-mono-300 font-semibold uppercase">VIDEO LOOPING</span>
+              <button id="loopToggleBtn" class="px-3 py-1 bg-[#1a1a1a] hover:bg-[#252525] border border-[#333] rounded text-[10px] font-bold text-white transition-colors cursor-pointer">
+                ${currentLoop ? 'ENABLED' : 'DISABLED'}
+              </button>
+            </div>
+
             <!-- Background Selector Section -->
             <div class="flex flex-col items-center gap-3 w-full max-w-md">
               <button id="bgDefaultBtn" class="w-full py-2 bg-[#121212] hover:bg-[#1a1a1a] border border-[#2a2a2a] rounded-md text-white font-bold cursor-pointer">
@@ -731,12 +778,22 @@
           </div>
         `;
 
+        const loopBtn = document.getElementById('loopToggleBtn');
+        loopBtn.addEventListener('click', () => {
+          let loopState = localStorage.getItem('fruitiger_video_loop') !== 'false';
+          let newState = !loopState;
+          localStorage.setItem('fruitiger_video_loop', newState);
+          loopBtn.textContent = newState ? 'ENABLED' : 'DISABLED';
+
+          // Re-apply current active wallpaper if video
+          let currentWall = localStorage.getItem('fruitiger_wallpaper');
+          if (currentWall && currentWall.toLowerCase().endsWith('.mp4')) {
+            applyWallpaper(currentWall, true, newState);
+          }
+        });
+
         document.getElementById('bgDefaultBtn').addEventListener('click', () => {
-          document.getElementById('bgCanvas').classList.remove('hidden');
-          const layer = document.getElementById('wallpaperLayer');
-          layer.classList.add('hidden');
-          layer.style.backgroundImage = '';
-          localStorage.removeItem('fruitiger_wallpaper');
+          applyWallpaper('', false, true);
         });
 
         fetch('https://api.github.com/repos/school-rgb/frutiger-pr0xy-wallpapers/contents')
@@ -773,12 +830,8 @@
               }
 
               thumbDiv.addEventListener('click', () => {
-                const canvas = document.getElementById('bgCanvas');
-                const layer = document.getElementById('wallpaperLayer');
-                canvas.classList.add('hidden');
-                layer.classList.remove('hidden');
-                layer.style.backgroundImage = `url('${fileUrl}')`;
-                localStorage.setItem('fruitiger_wallpaper', fileUrl);
+                let loopState = localStorage.getItem('fruitiger_video_loop') !== 'false';
+                applyWallpaper(fileUrl, isVideo, loopState);
               });
 
               grid.appendChild(thumbDiv);
