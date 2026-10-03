@@ -47,7 +47,6 @@
     </header>
 
     <main class="flex-1 w-full px-0 py-2">
-        
         <!-- Welcome state view -->
         <div id="welcome-state" class="text-center py-28 px-4 w-full">
             <div class="w-20 h-20 bg-[#121212] border border-[#262626] rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#a3a3a3] shadow-lg">
@@ -78,9 +77,9 @@
                 <!-- Dynamically injected full-width song rows -->
             </div>
         </div>
-
     </main>
 
+    <!-- Unified Player Bar -->
     <div class="fixed bottom-0 left-0 right-0 z-50 bg-[#0d0d0d]/95 backdrop-blur border-t border-[#1f1f1f] w-full px-4 py-4 shadow-2xl">
         <div class="w-full flex flex-col md:flex-row items-center justify-between gap-4">
             
@@ -98,17 +97,29 @@
             <!-- Playback Controls, Repeat & Timeline -->
             <div class="flex flex-col items-center w-full md:w-1/3 space-y-2">
                 <div class="flex items-center space-x-5">
-                    <button id="repeat-btn" onclick="toggleRepeat()" class="text-[#737373] transition active:scale-95 p-1" title="Loop Forever">
+                    <!-- Loop / Repeat Button -->
+                    <button id="btnLoop" class="text-[#737373] transition active:scale-95 p-1" title="Loop Forever">
                         <i data-lucide="repeat" class="w-4 h-4"></i>
                     </button>
-                    <button onclick="previousTrack()" class="text-[#737373] hover:text-[#ffffff] transition active:scale-95"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
-                    <button id="play-pause-btn" onclick="togglePlayPause()" class="w-11 h-11 rounded-2xl bg-[#ffffff] hover:bg-[#e5e5e5] text-[#000000] flex items-center justify-center transition shadow-lg active:scale-95"><i data-lucide="play" class="w-4 h-4 ml-0.5"></i></button>
-                    <button onclick="nextTrack()" class="text-[#737373] hover:text-[#ffffff] transition active:scale-95"><i data-lucide="skip-forward" class="w-4 h-4"></i></button>
+                    <!-- Rewind Button -->
+                    <button id="btnRewind" onclick="previousTrack()" class="text-[#737373] hover:text-[#ffffff] transition active:scale-95">
+                        <i data-lucide="skip-back" class="w-4 h-4"></i>
+                    </button>
+                    <!-- Play / Pause Button with Icon Swap -->
+                    <button id="btnPlayPause" onclick="togglePlayPause()" class="w-11 h-11 rounded-2xl bg-[#ffffff] hover:bg-[#e5e5e5] text-[#000000] flex items-center justify-center transition shadow-lg active:scale-95">
+                        <svg id="playIcon" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    <!-- Forward Button -->
+                    <button id="btnForward" onclick="nextTrack()" class="text-[#737373] hover:text-[#ffffff] transition active:scale-95">
+                        <i data-lucide="skip-forward" class="w-4 h-4"></i>
+                    </button>
                 </div>
                 <div class="w-full flex items-center space-x-3 text-xs text-[#737373]">
-                    <span id="current-time">0:00</span>
-                    <input type="range" id="progress-bar" value="0" max="100" class="w-full h-1 bg-[#262626] rounded-full appearance-none cursor-pointer accent-[#ffffff]" oninput="seekAudio(this.value)">
-                    <span id="total-duration">0:00</span>
+                    <span id="currentTime">0:00</span>
+                    <input type="range" id="progressBar" value="0" max="100" class="w-full h-1 bg-[#262626] rounded-full appearance-none cursor-pointer accent-[#ffffff]" oninput="seekAudio(this.value)">
+                    <span id="duration">0:00</span>
                 </div>
             </div>
 
@@ -123,7 +134,10 @@
     <script>
         let currentTracksList = [];
         let currentIndex = -1;
+        let isPlaying = false;
         let isLooping = false;
+        const audioElement = new Audio();
+        audioElement.volume = 0.8;
         
         const CACHE_KEY = 'monochrome_music_backup_cache';
         const FALLBACK_ICON = 'https://img.icons8.com/?size=100&id=cpC9tCaQDyxh&format=png&color=FFFFFF';
@@ -138,80 +152,29 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            setupAudioListeners();
             initializeLocalStorageCache();
 
-            // Create or select audio element dynamically if not present
-            let audio = document.getElementById('musicAudio');
-            if (!audio) {
-                audio = document.createElement('audio');
-                audio.id = 'musicAudio';
-                audio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; 
-                audio.loop = true;
-                document.body.appendChild(audio);
+            // UI Elements hook-up based on snippet
+            const playBtn = document.getElementById('btnPlayPause');
+            const playIcon = document.getElementById('playIcon');
+            const rewindBtn = document.getElementById('btnRewind');
+            const forwardBtn = document.getElementById('btnForward');
+            const loopBtn = document.getElementById('btnLoop');
+            const progressBar = document.getElementById('progressBar');
+            const currentTimeEl = document.getElementById('currentTime');
+            const durationEl = document.getElementById('duration');
+
+            if (durationEl) durationEl.textContent = '0:00';
+            if (currentTimeEl) currentTimeEl.textContent = '0:00';
+
+            if (loopBtn) {
+                loopBtn.addEventListener('click', () => {
+                    isLooping = !isLooping;
+                    loopBtn.classList.toggle('text-white', isLooping);
+                    loopBtn.classList.toggle('border-white', isLooping);
+                });
             }
-            audio.volume = 0.8;
-
-            // Setup audio event listeners for time updates
-            audio.addEventListener('timeupdate', () => {
-                if (audio.duration) {
-                    const progressPercent = (audio.currentTime / audio.duration) * 100;
-                    document.getElementById('progress-bar').value = progressPercent;
-                    document.getElementById('current-time').textContent = formatTime(audio.currentTime);
-                    document.getElementById('total-duration').textContent = formatTime(audio.duration);
-                }
-            });
-
-            audio.addEventListener('ended', () => {
-                if (isLooping) {
-                    audio.currentTime = 0;
-                    audio.play();
-                } else {
-                    if (currentIndex < currentTracksList.length - 1 && currentTracksList.length > 0) {
-                        nextTrack();
-                    } else {
-                        updatePlayPauseButton(false);
-                    }
-                }
-            });
-
-            // Broadcast track info and thumbnail back to main sidebar upon load
-            const trackData = {
-                title: 'Lo-Fi Chill Stream',
-                artist: 'Frutiger Audio',
-                coverUrl: FALLBACK_ICON
-            };
-
-            try {
-                window.parent.postMessage({ type: 'trackUpdate', ...trackData }, '*');
-            } catch (e) {}
-
-            // Listen for control commands sent from the main sidebar UI
-            window.addEventListener('message', (event) => {
-                const data = event.data;
-                if (!data || !data.action) return;
-
-                switch (data.action) {
-                    case 'rewind':
-                        audio.currentTime = Math.max(0, audio.currentTime - 5);
-                        break;
-                    case 'playPause':
-                        if (audio.paused) {
-                            audio.play().catch(err => console.log("Playback prevented:", err));
-                            updatePlayPauseButton(true);
-                        } else {
-                            audio.pause();
-                            updatePlayPauseButton(false);
-                        }
-                        break;
-                    case 'forward':
-                        audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5);
-                        break;
-                    case 'loop':
-                        audio.loop = !audio.loop;
-                        isLooping = audio.loop;
-                        break;
-                }
-            });
         });
 
         function initializeLocalStorageCache() {
@@ -237,7 +200,6 @@
             let tracks = [];
             const encodedQuery = encodeURIComponent(query);
 
-            // 1. Primary API: Meting API
             try {
                 const res1 = await fetch(`https://api.qijieya.cn/meting/?type=search&name=${encodedQuery}`, { mode: 'cors' });
                 if (res1.ok) {
@@ -254,7 +216,6 @@
                 }
             } catch (err) {}
 
-            // 2. First Backup API: KW API
             if (tracks.length === 0) {
                 try {
                     const res2 = await fetch(`https://kw-api.cenguigui.cn?msg=${encodedQuery}`, { mode: 'cors' });
@@ -274,7 +235,6 @@
                 } catch (err) {}
             }
 
-            // 3. Second Backup API: GDStudio API
             if (tracks.length === 0) {
                 try {
                     const res3 = await fetch(`https://music-api.gdstudio.xyz/api.php?types=search&count=30&source=netease&name=${encodedQuery}`, { mode: 'cors' });
@@ -294,7 +254,6 @@
                 } catch (err) {}
             }
 
-            // 4. Final Backup API: Apple Music iTunes API
             if (tracks.length === 0) {
                 try {
                     const res4 = await fetch(`https://itunes.apple.com/search?entity=song&term=${encodedQuery}`, { mode: 'cors' });
@@ -313,7 +272,6 @@
                 } catch (err) {}
             }
 
-            // 5. Ultimate Fallback: LocalStorage Result Caching
             if (tracks.length === 0) {
                 try {
                     const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
@@ -399,7 +357,6 @@
             let streamUrl = track.url;
             const cleanRid = track.id;
 
-            // Audio Stream Resolution Backup Chain
             if (!streamUrl && cleanRid) {
                 try {
                     const res1 = await fetch(`https://music-api.gdstudio.xyz/api.php?types=url&id=${cleanRid}&source=netease`);
@@ -430,73 +387,81 @@
                 } catch (e) {}
             }
 
-            const audio = document.getElementById('musicAudio') || document.createElement('audio');
-            audio.src = streamUrl || track.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-            
+            audioElement.src = streamUrl || track.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
             try {
-                await audio.play();
-                updatePlayPauseButton(true);
+                await audioElement.play();
+                isPlaying = true;
+                updatePlayPauseState(true);
             } catch (err) {
-                updatePlayPauseButton(false);
+                isPlaying = false;
+                updatePlayPauseState(false);
             }
-
-            // Post track update back to parent window
-            try {
-                window.parent.postMessage({
-                    type: 'trackUpdate',
-                    title: track.name,
-                    artist: track.artist,
-                    coverUrl: activeCover
-                }, '*');
-            } catch (e) {}
         }
 
         function togglePlayPause() {
-            const audio = document.getElementById('musicAudio');
-            if (!audio) return;
-
             if (currentIndex === -1 && currentTracksList.length > 0) {
                 playTrackIndex(0);
                 return;
             }
-            if (audio.paused) {
-                audio.play();
-                updatePlayPauseButton(true);
+            if (audioElement.paused) {
+                audioElement.play();
+                isPlaying = true;
+                updatePlayPauseState(true);
             } else {
-                audio.pause();
-                updatePlayPauseButton(false);
+                audioElement.pause();
+                isPlaying = false;
+                updatePlayPauseState(false);
             }
         }
 
-        function updatePlayPauseButton(isPlaying) {
-            const btn = document.getElementById('play-pause-btn');
-            btn.innerHTML = isPlaying ? '<i data-lucide="pause" class="w-4 h-4"></i>' : '<i data-lucide="play" class="w-4 h-4 ml-0.5"></i>';
-            lucide.createIcons();
+        function updatePlayPauseState(playing) {
+            const playIcon = document.getElementById('playIcon');
+            if (playIcon) {
+                if (playing) {
+                    playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+                } else {
+                    playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+                }
+            }
         }
 
-        function toggleRepeat() {
-            isLooping = !isLooping;
-            const audio = document.getElementById('musicAudio');
-            if (audio) audio.loop = isLooping;
-
-            const btn = document.getElementById('repeat-btn');
-            if (isLooping) {
-                btn.className = "text-[#ffffff] transition active:scale-95 p-1";
-            } else {
-                btn.className = "text-[#737373] transition active:scale-95 p-1";
-            }
+        function setupAudioListeners() {
+            audioElement.addEventListener('timeupdate', () => {
+                if (audioElement.duration) {
+                    const progressPercent = (audioElement.currentTime / audioElement.duration) * 100;
+                    const progressBar = document.getElementById('progressBar');
+                    if (progressBar) progressBar.value = progressPercent;
+                    
+                    const currentTimeEl = document.getElementById('currentTime');
+                    const durationEl = document.getElementById('duration');
+                    if (currentTimeEl) currentTimeEl.textContent = formatTime(audioElement.currentTime);
+                    if (durationEl) durationEl.textContent = formatTime(audioElement.duration);
+                }
+            });
+            
+            audioElement.addEventListener('ended', () => {
+                if (isLooping) {
+                    audioElement.currentTime = 0;
+                    audioElement.play();
+                } else {
+                    if (currentIndex < currentTracksList.length - 1) {
+                        nextTrack();
+                    } else {
+                        isPlaying = false;
+                        updatePlayPauseState(false);
+                    }
+                }
+            });
         }
 
         function seekAudio(value) {
-            const audio = document.getElementById('musicAudio');
-            if (audio && audio.duration) {
-                audio.currentTime = (value / 100) * audio.duration;
+            if (audioElement.duration) {
+                audioElement.currentTime = (value / 100) * audioElement.duration;
             }
         }
 
         function setVolume(val) {
-            const audio = document.getElementById('musicAudio');
-            if (audio) audio.volume = val;
+            audioElement.volume = val;
         }
 
         function nextTrack() {
